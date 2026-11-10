@@ -34,6 +34,7 @@ import '../../widgets/detail_row.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/store_scoped_content.dart';
 import '../auth/change_password_sheet.dart';
@@ -114,8 +115,8 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
     final tenant = widget.tenant;
     final planAsync = ref.watch(plansProvider);
     final storesAsync = ref.watch(storesProvider(tenant.id));
@@ -165,16 +166,15 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w400,
-                      ),
                     ),
                   ),
               ],
-              labelStyle: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-              unselectedLabelStyle: theme.textTheme.labelSmall?.copyWith(
+              // Aba ativa em tinta (não laranja): 12px em laranja falha AA
+              // no claro — a seleção já é reforçada pelo indicador.
+              labelColor: scheme.onSurface,
+              unselectedLabelColor: scheme.onSurfaceVariant,
+              labelStyle: AppTypography.labelMedium,
+              unselectedLabelStyle: AppTypography.labelMedium.copyWith(
                 fontWeight: FontWeight.w400,
               ),
             ),
@@ -235,12 +235,12 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
         return ListView.separated(
           padding: EdgeInsets.fromLTRB(
             AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-            12,
+            AppSpacing.xs,
             AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-            96,
+            AppSpacing.fabBottomClearance,
           ),
           itemCount: stores.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
           itemBuilder: (context, index) {
             final store = stores[index];
             final scheme = Theme.of(context).colorScheme;
@@ -271,7 +271,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.sm),
                       // Nome fino + endereço compacto.
                       Expanded(
                         child: Column(
@@ -281,16 +281,19 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                               store.name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall,
+                              style: AppTypography.labelLarge.copyWith(
+                                color: scheme.onSurface,
+                              ),
                             ),
                             if (store.address.isNotEmpty) ...[
-                              const SizedBox(height: 1),
+                              const SizedBox(height: AppSpacing.micro),
                               Text(
                                 store.address,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(color: scheme.onSurfaceVariant),
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
                               ),
                             ],
                           ],
@@ -298,7 +301,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                       ),
                       Icon(
                         Icons.chevron_right,
-                        size: 18,
+                        size: AppSizes.iconMd,
                         color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                       ),
                     ],
@@ -340,12 +343,12 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
         return ListView.separated(
           padding: EdgeInsets.fromLTRB(
             AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-            12,
+            AppSpacing.xs,
             AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-            96,
+            AppSpacing.fabBottomClearance,
           ),
           itemCount: employees.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
           itemBuilder: (context, index) {
             final employee = employees[index];
             final scheme = Theme.of(context).colorScheme;
@@ -376,14 +379,16 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.sm),
                       // Nome fino — sem bold, sem chips.
                       Expanded(
                         child: Text(
                           employee.fullName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: AppTypography.labelLarge.copyWith(
+                            color: scheme.onSurface,
+                          ),
                         ),
                       ),
                       // Indicador de estado discreto + chevron.
@@ -399,7 +404,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                         ),
                       Icon(
                         Icons.chevron_right,
-                        size: 18,
+                        size: AppSizes.iconMd,
                         color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                       ),
                     ],
@@ -533,12 +538,12 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
         return ListView.separated(
           padding: EdgeInsets.fromLTRB(
             AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-            12,
+            AppSpacing.xs,
             AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-            96,
+            AppSpacing.fabBottomClearance,
           ),
           itemCount: requests.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
           itemBuilder: (context, index) {
             final request = requests[index];
             final scheme = Theme.of(context).colorScheme;
@@ -546,26 +551,37 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
               // Pendente = "a aguardar acção" → warning (âmbar), a mesma
               // semântica do resto do app (fiado a receber, vence hoje).
               PlanRequestStatus.pending => (theme.warning, l10n.statusPending),
-              PlanRequestStatus.approved => (
-                scheme.primary,
-                l10n.statusApproved,
+              // Aprovado = sucesso e rejeitado = erro — verdes/vermelhos de
+              // ALERTA (não laranja de marca: 12px laranja falha AA no claro).
+              PlanRequestStatus.approved => (theme.income, l10n.statusApproved),
+              PlanRequestStatus.rejected => (
+                theme.expense,
+                l10n.statusRejected,
               ),
-              PlanRequestStatus.rejected => (scheme.error, l10n.statusRejected),
             };
             return AppCard(
               borderRadius: BorderRadius.circular(AppRadius.lg),
               padding: EdgeInsets.zero,
               child: ListTile(
-                leading: Icon(Icons.swap_horiz, size: 20, color: color),
+                leading: Icon(
+                  Icons.swap_horiz,
+                  size: AppSizes.iconMd,
+                  color: color,
+                ),
                 title: Text(
                   '${planName(request.currentPlanId)} → '
                   '${planName(request.requestedPlanId)}',
-                  style: Theme.of(context).textTheme.titleSmall,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
                 ),
                 subtitle: Text(
                   l10n.upgradesRequestedOn(
                     '${request.createdAt.day}/${request.createdAt.month}/'
                     '${request.createdAt.year}',
+                  ),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
                 trailing: StatusChip(label: label, color: color),

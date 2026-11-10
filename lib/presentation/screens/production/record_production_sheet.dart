@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../domain/entities/product.dart';
@@ -13,7 +15,7 @@ import '../../controllers/products_providers.dart';
 import '../../controllers/production_providers.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
-import '../../widgets/product_type_badge.dart';
+import '../../widgets/product_type_badge.dart' show productTypeLabel;
 
 /// Sheet de execução de uma ORDEM de produção a partir de uma ficha técnica
 /// (Fase 2): escolhe quantas BASES produzir, mostra o que será consumido e o
@@ -85,6 +87,7 @@ class _RecordProductionSheetState extends ConsumerState<RecordProductionSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final products = ref.watch(productsProvider).value ?? const <Product>[];
     final productsById = {for (final product in products) product.id: product};
     final finished = productsById[widget.recipe.productId];
@@ -109,7 +112,9 @@ class _RecordProductionSheetState extends ConsumerState<RecordProductionSheet> {
               Expanded(
                 child: Text(
                   component?.name ?? item.productId,
-                  style: theme.textTheme.bodySmall,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurface,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -118,10 +123,8 @@ class _RecordProductionSheetState extends ConsumerState<RecordProductionSheet> {
                 '${Quantity.format(consumed, unitLabel: component?.unitLabel, language: Formatters.currentLanguage)}'
                 ' / '
                 '${Quantity.format(component?.stockQuantity ?? 0, unitLabel: component?.unitLabel, language: Formatters.currentLanguage)}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: insufficient
-                      ? theme.colorScheme.error
-                      : theme.colorScheme.onSurfaceVariant,
+                style: AppTypography.bodySmall.copyWith(
+                  color: insufficient ? theme.expense : scheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -146,18 +149,16 @@ class _RecordProductionSheetState extends ConsumerState<RecordProductionSheet> {
           child: ListView(
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
               AppSpacing.md,
-              AppSpacing.md,
-              AppSpacing.md,
+              AppSpacing.xl,
               AppSpacing.xl,
             ),
             children: [
               if (_error != null) ...[
                 Text(
                   _error!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
+                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
                 ),
                 const SizedBox(height: AppSpacing.sm),
               ],
@@ -171,10 +172,18 @@ class _RecordProductionSheetState extends ConsumerState<RecordProductionSheet> {
                         Expanded(
                           child: Text(
                             finished.name,
-                            style: theme.textTheme.bodyMedium,
+                            style: AppTypography.labelLarge.copyWith(
+                              color: scheme.onSurface,
+                            ),
                           ),
                         ),
-                        ProductTypeBadge(type: finished.type),
+                        const SizedBox(width: AppSpacing.xs),
+                        Text(
+                          productTypeLabel(context, finished.type),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -194,13 +203,15 @@ class _RecordProductionSheetState extends ConsumerState<RecordProductionSheet> {
                         language: Formatters.currentLanguage,
                       ),
                     ),
-                    style: theme.textTheme.titleSmall,
+                    style: AppTypography.titleMedium.copyWith(
+                      color: scheme.onSurface,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxs),
                   Text(
                     l10n.productionCostTotal(Formatters.currency(totalCost)),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -213,7 +224,9 @@ class _RecordProductionSheetState extends ConsumerState<RecordProductionSheet> {
                     ? [
                         Text(
                           l10n.productionEmptyTitle,
-                          style: theme.textTheme.bodySmall,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
                         ),
                       ]
                     : rows,

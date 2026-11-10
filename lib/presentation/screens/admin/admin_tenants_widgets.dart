@@ -17,41 +17,53 @@ class _AdminTenantCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
 
     final addOnCountAsync = ref.watch(tenantActiveAddOnIdsProvider(tenant.id));
     final addOnCount = addOnCountAsync.value?.length ?? 0;
 
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       padding: const EdgeInsets.all(AppSpacing.md),
       borderColor: color.withValues(alpha: 0.3),
       onTap: onTap,
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: AppSizes.avatarMd,
+            height: AppSizes.avatarMd,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: AppRadius.smAll,
             ),
-            child: Icon(Icons.business_outlined, size: 20, color: color),
+            child: Icon(
+              Icons.business_outlined,
+              size: AppSizes.iconMd,
+              color: color,
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tenant.businessName, style: theme.textTheme.labelMedium),
+                Text(
+                  tenant.businessName,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 Text(
                   '$planName · ${tenant.createdAt.day}/${tenant.createdAt.month}/${tenant.createdAt.year}',
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -63,10 +75,10 @@ class _AdminTenantCard extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.xs,
-                vertical: 2,
+                vertical: AppSpacing.micro,
               ),
               decoration: BoxDecoration(
-                color: AppColors.accentOrange.withValues(alpha: 0.1),
+                color: AppColors.accentOrange.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppRadius.full),
               ),
               child: Row(
@@ -74,16 +86,14 @@ class _AdminTenantCard extends ConsumerWidget {
                 children: [
                   const Icon(
                     Icons.extension_outlined,
-                    size: 12,
+                    size: AppSizes.iconSm,
                     color: AppColors.accentOrange,
                   ),
-                  const SizedBox(width: 3),
+                  const SizedBox(width: AppSpacing.micro),
                   Text(
                     '$addOnCount',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.accentOrange,
-                      fontWeight: FontWeight.w400,
-                      fontSize: 11,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: scheme.onSurface,
                     ),
                   ),
                 ],
@@ -101,7 +111,11 @@ class _AdminTenantCard extends ConsumerWidget {
                 ),
               );
             },
-            child: Icon(Icons.copy, size: 16, color: scheme.onSurfaceVariant),
+            child: Icon(
+              Icons.copy,
+              size: AppSizes.iconSm,
+              color: scheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -134,8 +148,7 @@ class _PendingTenantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
 
     // Card premium com borda lateral de destaque para ação pendente.
@@ -143,7 +156,7 @@ class _PendingTenantCard extends StatelessWidget {
       onLongPress: onLongPress,
       child: AppCard(
         elevated: true,
-        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+        borderRadius: AppRadius.lgAll,
         borderColor: scheme.tertiary.withValues(alpha: 0.4),
         padding: const EdgeInsets.all(AppSpacing.md),
         onTap: onTap,
@@ -159,12 +172,16 @@ class _PendingTenantCard extends StatelessWidget {
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     visualDensity: VisualDensity.compact,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xxs),
                 ],
                 Expanded(
                   child: Text(
                     tenant.businessName,
-                    style: theme.textTheme.bodySmall,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: scheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 StatusChip(
@@ -172,7 +189,7 @@ class _PendingTenantCard extends StatelessWidget {
                   color: scheme.tertiary,
                   icon: Icons.hourglass_top,
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xxs),
                 GestureDetector(
                   onTap: () {
                     Clipboard.setData(ClipboardData(text: tenant.ownerUserId));
@@ -185,7 +202,7 @@ class _PendingTenantCard extends StatelessWidget {
                   },
                   child: Icon(
                     Icons.copy,
-                    size: 16,
+                    size: AppSizes.iconSm,
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -198,13 +215,13 @@ class _PendingTenantCard extends StatelessWidget {
                   : EdgeInsets.zero,
               child: Text(
                 l10n.adminPlanLabel(planName),
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: AppTypography.bodySmall.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
             ),
             if (!selectionMode) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
                   Expanded(

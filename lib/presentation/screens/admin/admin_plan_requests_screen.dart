@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../domain/entities/plan_request.dart';
 import '../../../domain/entities/tenant.dart';
@@ -67,11 +68,11 @@ class _AdminPlanRequestsScreenState
                 AppSpacing.lg,
                 AppSpacing.sm,
                 AppSpacing.lg,
-                AppSpacing.xl,
+                AppSpacing.fabBottomClearance,
               ),
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: requests.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
               itemBuilder: (context, index) => _RequestCard(
                 request: requests[index],
                 tenantName: tenantName(requests[index].tenantId),
@@ -148,7 +149,7 @@ class _RequestCard extends StatelessWidget {
     // Card premium com borda de destaque para upgrade pendente.
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       borderColor: theme.warning.withValues(alpha: 0.3),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
@@ -157,8 +158,8 @@ class _RequestCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: AppSizes.avatarSm,
+                height: AppSizes.avatarSm,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: theme.warning.withValues(alpha: 0.12),
@@ -166,7 +167,7 @@ class _RequestCard extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.upgrade_outlined,
-                  size: 18,
+                  size: AppSizes.iconMd,
                   color: theme.warning,
                 ),
               ),
@@ -175,16 +176,24 @@ class _RequestCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(tenantName, style: theme.textTheme.bodySmall),
+                    Text(
+                      tenantName,
+                      style: AppTypography.labelLarge.copyWith(
+                        color: scheme.onSurface,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     Text(
                       _timeAgo(),
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(width: AppSpacing.xs),
               StatusChip(
                 label: l10n.statusPending,
                 color: theme.warning,
@@ -192,7 +201,7 @@ class _RequestCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Expanded(
@@ -206,7 +215,7 @@ class _RequestCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                 child: Icon(
                   Icons.arrow_forward,
-                  size: 18,
+                  size: AppSizes.iconMd,
                   color: scheme.onSurfaceVariant,
                 ),
               ),
@@ -219,7 +228,7 @@ class _RequestCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Expanded(
@@ -229,7 +238,7 @@ class _RequestCard extends StatelessWidget {
                   label: l10n.adminApprove,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: AppButton.secondary(
                   onPressed: () => onDecide(false),
@@ -273,24 +282,23 @@ class _PlanBadge extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderRadius: AppRadius.smAll,
       ),
       child: Column(
         children: [
           Text(
             isUpgrade ? l10n.adminPlanRequested : l10n.adminPlanCurrent,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: color),
+            style: AppTypography.labelSmall.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.micro),
           Text(
             label,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w400,
+            style: AppTypography.bodyMedium.copyWith(
+              color: scheme.onSurface,
             ),
           ),
         ],

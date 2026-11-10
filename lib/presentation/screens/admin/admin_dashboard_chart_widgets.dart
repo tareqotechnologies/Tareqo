@@ -22,9 +22,14 @@ class _StatsStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    // Em texto grande as cinco colunas deixam de caber: a strip vira lista
+    // de linhas valor/rótulo (mesma hierarquia, leitura preservada).
+    final stacked =
+        MediaQuery.textScalerOf(context).scale(AppTypography.bodyMediumSize) >=
+        22;
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
@@ -40,17 +45,17 @@ class _StatsStrip extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          width: 32,
-                          height: 20,
+                          width: AppSpacing.xxl,
+                          height: AppSpacing.lg,
                           decoration: BoxDecoration(
                             color: scheme.surfaceContainerHighest,
                             borderRadius: AppRadius.xsAll,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xxs),
                         Container(
-                          width: 48,
-                          height: 10,
+                          width: AppSpacing.huge,
+                          height: AppSpacing.sm,
                           decoration: BoxDecoration(
                             color: scheme.surfaceContainerHighest,
                             borderRadius: AppRadius.xsAll,
@@ -62,15 +67,30 @@ class _StatsStrip extends StatelessWidget {
                 ),
               ),
             )
+          : stacked
+          ? Column(
+              children: [
+                for (var i = 0; i < stats.length; i++) ...[
+                  if (i > 0)
+                    Divider(
+                      height: 1,
+                      color: PremiumDecor.hairline(scheme),
+                    ),
+                  _StatCell(stat: stats[i], inline: true),
+                ],
+              ],
+            )
           : Row(
               children: [
                 for (var i = 0; i < stats.length; i++) ...[
                   if (i > 0)
                     Container(
                       width: 1,
-                      height: 28,
-                      margin: const EdgeInsets.symmetric(horizontal: 2),
-                      color: scheme.outlineVariant.withValues(alpha: 0.4),
+                      height: AppSizes.iconXl,
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.micro,
+                      ),
+                      color: PremiumDecor.hairline(scheme),
                     ),
                   Expanded(child: _StatCell(stat: stats[i])),
                 ],
@@ -81,39 +101,52 @@ class _StatsStrip extends StatelessWidget {
 }
 
 class _StatCell extends StatelessWidget {
-  const _StatCell({required this.stat});
+  const _StatCell({required this.stat, this.inline = false});
 
   final _StatItem stat;
+  final bool inline;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final value = Text(
+      stat.value,
+      style: theme.textTheme.headlineSmall?.copyWith(
+        color: stat.color,
+        fontWeight: FontWeight.w400,
+        letterSpacing: -0.4,
+        fontFeatures: AppTypography.tabularFigures,
+      ),
+    );
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          stat.value,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: stat.color,
-            // Thin: KPI leve (24/w300) — o número respira, a hierarquia
-            // vem do tamanho e da cor de estado.
-            fontSize: 24,
-            fontWeight: FontWeight.w300,
-            letterSpacing: -0.4,
-          ),
+    if (inline) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        child: Row(
+          children: [
+            value,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                stat.label,
+                style: AppTypography.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.end,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 2),
-        Text(
-          stat.label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-        ),
-      ],
+      );
+    }
+
+    return AdminStatValue(
+      value: stat.value,
+      label: stat.label,
+      color: stat.color,
     );
   }
 }
@@ -139,9 +172,9 @@ class _PendingBanner extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(14)),
-      color: scheme.tertiaryContainer.withValues(alpha: 0.5),
-      borderColor: scheme.tertiary.withValues(alpha: 0.3),
+      borderRadius: AppRadius.mdAll,
+      color: scheme.tertiaryContainer,
+      borderColor: AppColors.statusWarning.withValues(alpha: 0.3),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
@@ -151,7 +184,7 @@ class _PendingBanner extends StatelessWidget {
         children: [
           Icon(
             Icons.notifications_active_outlined,
-            size: 18,
+            size: AppSizes.iconMd,
             color: scheme.tertiary,
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -163,7 +196,7 @@ class _PendingBanner extends StatelessWidget {
               ),
             ),
           ),
-          Icon(Icons.chevron_right, size: 18, color: scheme.tertiary),
+          Icon(Icons.chevron_right, size: AppSizes.iconMd, color: scheme.tertiary),
         ],
       ),
     );
@@ -209,14 +242,14 @@ class _GrowthSummary extends StatelessWidget {
     final approvalDiff = approvalsThisWeek - approvalsLastWeek;
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             l10n.adminGrowthTrends,
-            style: theme.textTheme.labelSmall?.copyWith(
+            style: AppTypography.labelSmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
@@ -235,7 +268,7 @@ class _GrowthSummary extends StatelessWidget {
                   l10n: l10n,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: _GrowthKpi(
                   label: l10n.adminGrowthApprovals,
@@ -248,7 +281,7 @@ class _GrowthSummary extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           _GrowthKpi(
             // Título próprio — o mensal usava o mesmo rótulo do semanal
             // e só o sublabel os diferenciava (ambiguidade no ecrã).
@@ -264,7 +297,7 @@ class _GrowthSummary extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             l10n.adminGrowthTrendsLabel,
-            style: theme.textTheme.labelSmall?.copyWith(
+            style: AppTypography.labelSmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
@@ -318,9 +351,9 @@ class _GrowthKpi extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final trendColor = diff > 0
-        ? AppColors.successNeutral
+        ? theme.income
         : diff < 0
-        ? AppColors.errorNeutral
+        ? theme.expense
         : scheme.onSurfaceVariant;
     final trendIcon = diff > 0
         ? Icons.trending_up
@@ -337,22 +370,22 @@ class _GrowthKpi extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderRadius: AppRadius.mdAll,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(trendIcon, size: 14, color: trendColor),
-              const SizedBox(width: 4),
+              Icon(trendIcon, size: AppSizes.iconSm, color: trendColor),
+              const SizedBox(width: AppSpacing.xxs),
               // Pílula de tendência NO PADRÃO do StatusChip: fundo tingido
               // 12% + texto na cor de estado — branco sobre o verde/âmbar
               // do tema não atinge AA (texto pequeno exige 4.5:1).
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.xs,
-                  vertical: 1,
+                  vertical: AppSpacing.micro,
                 ),
                 decoration: BoxDecoration(
                   color: trendColor.withValues(alpha: 0.12),
@@ -360,28 +393,23 @@ class _GrowthKpi extends StatelessWidget {
                 ),
                 child: Text(
                   trendLabel,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontSize: 12,
-                    color: trendColor,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTypography.labelMedium.copyWith(color: trendColor),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             label,
-            style: theme.textTheme.labelSmall?.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
-              fontSize: 12,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.micro),
           Text(
             sublabel,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+            style: AppTypography.bodySmall.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -446,8 +474,7 @@ class _TrendChart extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w300,
+                style: AppTypography.bodySmall.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
                 maxLines: 1,
@@ -456,19 +483,19 @@ class _TrendChart extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.xs),
         if (total == 0)
           Container(
-            height: 48,
+            height: AppSpacing.huge,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(AppRadius.xs),
+              borderRadius: AppRadius.xsAll,
             ),
             child: Text(
               l10n.adminGrowthNoData,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+              style: AppTypography.bodySmall.copyWith(
+                color: scheme.onSurfaceVariant,
               ),
             ),
           )
@@ -496,10 +523,10 @@ class _TrendChart extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xxs),
               // Week labels
               SizedBox(
-                height: 14,
+                height: AppSpacing.md,
                 child: Row(
                   children: [
                     for (var i = 0; i < weekStarts.length; i++) ...[
@@ -509,10 +536,8 @@ class _TrendChart extends StatelessWidget {
                           i == 0 || i == weekStarts.length - 1
                               ? weekStarts[i]
                               : '',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant.withValues(
-                              alpha: 0.4,
-                            ),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: scheme.onSurfaceVariant,
                           ),
                           textAlign: i == 0 ? TextAlign.left : TextAlign.right,
                           overflow: TextOverflow.ellipsis,
@@ -559,14 +584,12 @@ class _TrendBar extends StatelessWidget {
         // Value label on top
         if (value > 0)
           Padding(
-            padding: const EdgeInsets.only(bottom: 2),
+            padding: const EdgeInsets.only(bottom: AppSpacing.micro),
             child: Text(
               valueLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: isLast ? FontWeight.w700 : FontWeight.w400,
-                color: isLast
-                    ? color
-                    : scheme.onSurfaceVariant.withValues(alpha: 0.5),
+              style: AppTypography.bodySmall.copyWith(
+                fontWeight: isLast ? FontWeight.w500 : FontWeight.w400,
+                color: isLast ? color : scheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -576,7 +599,7 @@ class _TrendBar extends StatelessWidget {
           decoration: BoxDecoration(
             color: barColor,
             borderRadius: BorderRadius.vertical(
-              top: Radius.circular(value > 0 ? 3 : 0),
+              top: Radius.circular(value > 0 ? AppRadius.microRadius : 0),
             ),
           ),
         ),
@@ -617,11 +640,11 @@ class _DistributionCard extends StatelessWidget {
 
     if (isLoading) {
       return AppCard(
-        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+        borderRadius: AppRadius.lgAll,
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Container(
           width: double.infinity,
-          height: 64,
+          height: AppSpacing.gigantic,
           decoration: BoxDecoration(
             color: scheme.surfaceContainerHighest,
             borderRadius: AppRadius.smAll,
@@ -646,10 +669,10 @@ class _DistributionCard extends StatelessWidget {
         ? (activeTenants / totalTenants * 100).round()
         : 0;
     final rateColor = approvalRate >= 70
-        ? AppColors.successNeutral
+        ? theme.income
         : approvalRate >= 40
-        ? AppColors.accentOrange
-        : AppColors.errorNeutral;
+        ? scheme.tertiary
+        : theme.expense;
 
     // Plan distribution
     final planCounts = <String, int>{};
@@ -669,7 +692,7 @@ class _DistributionCard extends StatelessWidget {
     ];
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -714,7 +737,7 @@ class _DistributionCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xs,
-                    vertical: 2,
+                    vertical: AppSpacing.micro,
                   ),
                   decoration: BoxDecoration(
                     color: rateColor.withValues(alpha: 0.12),
@@ -722,7 +745,7 @@ class _DistributionCard extends StatelessWidget {
                   ),
                   child: Text(
                     '$approvalRate%',
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: AppTypography.labelMedium.copyWith(
                       color: rateColor,
                     ),
                   ),
@@ -742,13 +765,13 @@ class _DistributionCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Text(
               l10n.adminDashboardPlanDistribution,
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
             for (var i = 0; i < sorted.length; i++) ...[
-              if (i > 0) const SizedBox(height: 4),
+              if (i > 0) const SizedBox(height: AppSpacing.xxs),
               _PlanBarRow(
                 planName:
                     plans
@@ -787,8 +810,13 @@ class _LegendDot extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.full),
           ),
         ),
-        const SizedBox(width: 4),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(width: AppSpacing.xxs),
+        Text(
+          label,
+          style: AppTypography.bodySmall.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
       ],
     );
   }

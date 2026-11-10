@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/invoice.dart';
 import '../../../domain/entities/plan.dart';
 import '../../../domain/entities/tenant.dart';
@@ -50,6 +52,7 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
     final tenants = ref.watch(allTenantsProvider).value ?? const <Tenant>[];
     final plans = ref.watch(allPlansProvider).value ?? const <Plan>[];
     final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
 
     final invoices = _showPendingOnly
         ? (pendingAsync.value ?? const <Invoice>[])
@@ -94,16 +97,13 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(AppSpacing.xs),
                       decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: 0.5),
+                        color: scheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(AppRadius.full),
                       ),
                       child: Icon(
                         Icons.close,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        size: AppSizes.iconSm,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -195,11 +195,11 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
               AppSpacing.lg,
               AppSpacing.sm,
               AppSpacing.lg,
-              AppSpacing.xl,
+              AppSpacing.fabBottomClearance,
             ),
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: filtered.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
             itemBuilder: (context, index) {
               final invoice = filtered[index];
               final tenant = tenants
@@ -281,8 +281,6 @@ class _AdminInvoicesScreenState extends ConsumerState<AdminInvoicesScreen> {
       thinStyle: true,
     );
   }
-
-  ThemeData get theme => Theme.of(context);
 }
 
 /// Card de factura no painel admin.
@@ -310,16 +308,19 @@ class _InvoiceCard extends StatelessWidget {
 
     final (statusColor, statusLabel) = switch (invoice.status) {
       InvoiceStatus.pending => (scheme.tertiary, l10n.invoiceStatusPending),
-      InvoiceStatus.paid => (scheme.primary, l10n.invoiceStatusPaid),
-      InvoiceStatus.expired => (scheme.error, l10n.invoiceStatusExpired),
-      InvoiceStatus.cancelled => (scheme.outline, l10n.invoiceStatusCancelled),
+      InvoiceStatus.paid => (theme.income, l10n.invoiceStatusPaid),
+      InvoiceStatus.expired => (theme.expense, l10n.invoiceStatusExpired),
+      InvoiceStatus.cancelled => (
+        scheme.onSurfaceVariant,
+        l10n.invoiceStatusCancelled,
+      ),
     };
 
     final amount = (invoice.amountCents / 100).toStringAsFixed(2);
 
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       borderColor: statusColor.withValues(alpha: 0.3),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
@@ -328,8 +329,8 @@ class _InvoiceCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: AppSizes.avatarSm,
+                height: AppSizes.avatarSm,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.12),
@@ -337,7 +338,7 @@ class _InvoiceCard extends StatelessWidget {
                 ),
                 child: Icon(
                   Icons.receipt_long_outlined,
-                  size: 18,
+                  size: AppSizes.iconMd,
                   color: statusColor,
                 ),
               ),
@@ -348,13 +349,13 @@ class _InvoiceCard extends StatelessWidget {
                   children: [
                     Text(
                       tenantName,
-                      style: theme.textTheme.bodySmall,
+                      style: AppTypography.labelLarge,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
                     Text(
                       '${invoice.period} · $planName',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -366,9 +367,9 @@ class _InvoiceCard extends StatelessWidget {
               StatusChip(label: statusLabel, color: statusColor),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           Wrap(
-            spacing: 8,
+            spacing: AppSpacing.xs,
             runSpacing: AppSpacing.xs,
             children: [
               _InfoPill(
@@ -385,29 +386,29 @@ class _InvoiceCard extends StatelessWidget {
                   icon: Icons.check_circle_outline,
                   label:
                       '${l10n.adminInvoicePaidAt} ${dateFormat.format(invoice.paidAt!)}',
-                  color: scheme.primary,
+                  color: theme.income,
                 ),
             ],
           ),
           if (invoice.status == InvoiceStatus.pending) ...[
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
-              runSpacing: 8,
+              runSpacing: AppSpacing.xs,
               children: [
                 SizedBox(
-                  width: 160,
+                  width: AppSpacing.xxxl * 4,
                   child: AppButton.primary(
                     onPressed: onMarkAsPaid,
-                    icon: const Icon(Icons.check, size: 16),
+                    icon: const Icon(Icons.check, size: AppSizes.iconSm),
                     label: l10n.adminInvoiceMarkPaid,
                   ),
                 ),
                 SizedBox(
-                  width: 160,
+                  width: AppSpacing.xxxl * 4,
                   child: AppButton.secondary(
                     onPressed: onCancel,
-                    icon: const Icon(Icons.close, size: 16),
+                    icon: const Icon(Icons.close, size: AppSizes.iconSm),
                     label: l10n.adminInvoiceCancel,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: scheme.error,
@@ -443,19 +444,17 @@ class _InfoPill extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: effectiveColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderRadius: AppRadius.smAll,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: effectiveColor),
-          const SizedBox(width: 4),
+          Icon(icon, size: AppSizes.iconSm, color: effectiveColor),
+          const SizedBox(width: AppSpacing.xxs),
           Flexible(
             child: Text(
               label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: effectiveColor),
+              style: AppTypography.bodySmall.copyWith(color: scheme.onSurface),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),

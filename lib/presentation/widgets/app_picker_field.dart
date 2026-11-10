@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_tokens.dart';
+
 /// Campo de seleção do design system — wrapper minimalista e REAL sobre
 /// [DropdownButtonFormField], para todos os pickers de formulário.
 ///
 /// Padrão:
-///  - texto do campo e dos itens em `bodySmall` (13) — a voz do corpo,
+///  - texto do campo e dos itens em `bodySmall` — a voz do corpo,
 ///    sem a escala exagerada do padrão M3 (14/w500);
-///  - seta M3 pesada substituída pelo chevron fino (18px,
+///  - seta M3 pesada substituída pelo chevron fino (`AppSizes.iconMd`,
 ///    `onSurfaceVariant`) usado nas pílulas de período da Home;
 ///  - menu segue o `popupMenuTheme` global (raio 12, itens 44px,
 ///    overlay chapado);
@@ -50,7 +52,7 @@ class AppPickerField<T> extends StatelessWidget {
       // M3 com fundo cinza.
       icon: Icon(
         Icons.keyboard_arrow_down_rounded,
-        size: 18,
+        size: AppSizes.iconMd,
         color: scheme.onSurfaceVariant,
       ),
       style: theme.textTheme.bodySmall?.copyWith(

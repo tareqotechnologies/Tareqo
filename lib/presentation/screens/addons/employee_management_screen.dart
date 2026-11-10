@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/employee_management.dart';
 import '../../../domain/entities/store.dart';
@@ -20,6 +21,8 @@ import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
+import '../../widgets/premium_decor.dart';
+import '../../widgets/section_label.dart';
 
 /// Ecra de gestão de funcionários — ponto, comissões e metas.
 ///
@@ -75,15 +78,14 @@ class _EmployeeManagementScreenState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
     final storeId = _activeStoreId();
 
     return AppPage(
       title: l10n.employeeMgmtTitle,
-      // Título 3 (20/w600) — rótulo longo ('Gestão de Funcionários')
-      // truncava em titleLarge (22) no AppBar de 56px.
-      titleStyle: theme.textTheme.titleMedium,
+      // Rótulo longo ('Gestão de Funcionários') — titleMedium mantém o
+      // título inteiro no AppBar de 56px.
+      titleStyle: AppTypography.titleMedium,
       useSafeArea: false,
       body: Column(
         children: [
@@ -95,10 +97,8 @@ class _EmployeeManagementScreenState
               Tab(text: l10n.employeeMgmtTabCommissions),
               Tab(text: l10n.employeeMgmtTabTargets),
             ],
-            labelStyle: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-            unselectedLabelStyle: theme.textTheme.labelSmall?.copyWith(
+            labelStyle: AppTypography.labelMedium,
+            unselectedLabelStyle: AppTypography.labelMedium.copyWith(
               fontWeight: FontWeight.w400,
             ),
           ),
@@ -197,7 +197,7 @@ class _AttendanceTab extends ConsumerWidget {
               child: _MiniStat(
                 label: l10n.employeePresentCount,
                 value: '${openByUser.length}',
-                color: AppColors.accentOrange,
+                color: theme.income,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -205,7 +205,7 @@ class _AttendanceTab extends ConsumerWidget {
               child: _MiniStat(
                 label: l10n.employeeAbsentCount,
                 value: '${storeEmployees.length - openByUser.length}',
-                color: AppColors.errorNeutral,
+                color: theme.expense,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -213,7 +213,7 @@ class _AttendanceTab extends ConsumerWidget {
               child: _MiniStat(
                 label: l10n.commonTotal,
                 value: '${storeEmployees.length}',
-                color: ModuleColors.reports,
+                color: scheme.onSurface,
               ),
             ),
           ],
@@ -221,12 +221,7 @@ class _AttendanceTab extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
 
         // ─── Botões de ponto rápido ───
-        Text(
-          l10n.employeeAttendanceSection,
-          style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        SectionLabel(text: l10n.employeeAttendanceSection),
         const SizedBox(height: AppSpacing.sm),
         ...storeEmployees.map((employee) {
           final record = openByUser[employee.userId];
@@ -234,7 +229,6 @@ class _AttendanceTab extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: AppSpacing.xs),
             child: AppCard(
               elevated: true,
-              borderRadius: const BorderRadius.all(Radius.circular(14)),
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
@@ -242,12 +236,12 @@ class _AttendanceTab extends ConsumerWidget {
               child: Row(
                 children: [
                   Container(
-                    width: 32,
-                    height: 32,
+                    width: AppSizes.avatarSm,
+                    height: AppSizes.avatarSm,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: record != null
-                          ? IconTone.darkBackground(AppColors.accentOrange)
+                          ? scheme.primaryContainer
                           : scheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
@@ -255,9 +249,9 @@ class _AttendanceTab extends ConsumerWidget {
                       record != null
                           ? Icons.login_rounded
                           : Icons.logout_rounded,
-                      size: 16,
+                      size: AppSizes.iconMd,
                       color: record != null
-                          ? IconTone.lightForeground(AppColors.accentOrange)
+                          ? scheme.primary
                           : scheme.onSurfaceVariant,
                     ),
                   ),
@@ -268,13 +262,13 @@ class _AttendanceTab extends ConsumerWidget {
                       children: [
                         Text(
                           employee.fullName,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+                          style: AppTypography.labelLarge.copyWith(
+                            color: scheme.onSurface,
                           ),
                         ),
                         Text(
                           _roleLabel(employee.role, context.l10n),
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: AppTypography.bodySmall.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -287,11 +281,14 @@ class _AttendanceTab extends ConsumerWidget {
                       onPressed: () =>
                           _clockOut(context, ref, employee, workDate),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.errorNeutral,
+                        foregroundColor: theme.expense,
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.sm,
                         ),
-                        minimumSize: const Size(0, 32),
+                        minimumSize: const Size(
+                          0,
+                          AppSizes.controlHeightCompact,
+                        ),
                       ),
                     )
                   else
@@ -312,17 +309,11 @@ class _AttendanceTab extends ConsumerWidget {
         if (records.isNotEmpty) ...[
           Row(
             children: [
-              Text(
-                l10n.employeeRecordsSection,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
+              Expanded(child: SectionLabel(text: l10n.employeeRecordsSection)),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.xs,
-                  vertical: 2,
+                  vertical: AppSpacing.micro,
                 ),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
@@ -330,9 +321,8 @@ class _AttendanceTab extends ConsumerWidget {
                 ),
                 child: Text(
                   '${records.length}',
-                  style: theme.textTheme.labelSmall?.copyWith(
+                  style: AppTypography.labelSmall.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -344,7 +334,6 @@ class _AttendanceTab extends ConsumerWidget {
               padding: const EdgeInsets.only(bottom: AppSpacing.xs),
               child: AppCard(
                 elevated: false,
-                borderRadius: AppRadius.mdAll,
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
                   vertical: AppSpacing.sm,
@@ -352,13 +341,13 @@ class _AttendanceTab extends ConsumerWidget {
                 child: Row(
                   children: [
                     Container(
-                      width: 8,
-                      height: 8,
+                      width: AppSpacing.xs,
+                      height: AppSpacing.xs,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: record.clockOut == null
-                            ? AppColors.accentOrange
-                            : AppColors.errorNeutral,
+                            ? theme.income
+                            : scheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
@@ -366,15 +355,15 @@ class _AttendanceTab extends ConsumerWidget {
                       child: Text(
                         _employeeName(storeEmployees, record.userId) ??
                             record.userId,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        style: AppTypography.labelLarge.copyWith(
+                          color: scheme.onSurface,
                         ),
                       ),
                     ),
                     Text(
                       '${_time(record.clockIn)} — '
                       '${record.clockOut == null ? l10n.employeeClockOutInProgress : _time(record.clockOut!)}',
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      style: AppTypography.labelSmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
@@ -518,7 +507,7 @@ class _CommissionsTab extends ConsumerWidget {
         // ─── Resumo do mês ───
         AppCard(
           elevated: true,
-          borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+          borderRadius: AppRadius.lgAll,
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
@@ -528,16 +517,15 @@ class _CommissionsTab extends ConsumerWidget {
                   children: [
                     Text(
                       l10n.employeeSalesMonth,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.micro),
                     Text(
                       Formatters.currency(totalSales),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.3,
+                      style: AppTypography.titleMedium.copyWith(
+                        color: scheme.onSurface,
                       ),
                     ),
                   ],
@@ -545,8 +533,8 @@ class _CommissionsTab extends ConsumerWidget {
               ),
               Container(
                 width: 1,
-                height: 36,
-                color: scheme.outlineVariant.withValues(alpha: 0.4),
+                height: AppSizes.avatarSm,
+                color: PremiumDecor.hairline(scheme),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -555,17 +543,15 @@ class _CommissionsTab extends ConsumerWidget {
                   children: [
                     Text(
                       l10n.employeeCommissionTitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.micro),
                     Text(
                       Formatters.currency(totalCommission),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.accentOrange,
-                        letterSpacing: -0.3,
+                      style: AppTypography.titleMedium.copyWith(
+                        color: theme.income,
                       ),
                     ),
                   ],
@@ -577,34 +563,28 @@ class _CommissionsTab extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
 
         // ─── Lista por funcionário ───
-        Text(
-          l10n.employeeCommissionPerEmployee,
-          style: theme.textTheme.labelMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        SectionLabel(text: l10n.employeeCommissionPerEmployee),
         const SizedBox(height: AppSpacing.sm),
         for (final employee in storeEmployees) ...[
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.xs),
             child: AppCard(
               elevated: true,
-              borderRadius: const BorderRadius.all(Radius.circular(14)),
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Row(
                 children: [
                   Container(
-                    width: 32,
-                    height: 32,
+                    width: AppSizes.avatarSm,
+                    height: AppSizes.avatarSm,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: IconTone.darkBackground(ModuleColors.reports),
+                      color: scheme.primaryContainer,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.person_outlined,
-                      size: 16,
-                      color: IconTone.lightForeground(ModuleColors.reports),
+                      size: AppSizes.iconMd,
+                      color: scheme.primary,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -614,13 +594,13 @@ class _CommissionsTab extends ConsumerWidget {
                       children: [
                         Text(
                           employee.fullName,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+                          style: AppTypography.labelLarge.copyWith(
+                            color: scheme.onSurface,
                           ),
                         ),
                         Text(
                           _commissionSubtitle(entries, employee, l10n),
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: AppTypography.bodySmall.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -680,10 +660,10 @@ class _CommissionsTab extends ConsumerWidget {
       useSafeArea: true,
       builder: (sheetContext) => Padding(
         padding: EdgeInsets.fromLTRB(
-          24,
+          AppSpacing.xl,
           0,
-          24,
-          MediaQuery.viewInsetsOf(sheetContext).bottom + 24,
+          AppSpacing.xl,
+          MediaQuery.viewInsetsOf(sheetContext).bottom + AppSpacing.xl,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -691,16 +671,18 @@ class _CommissionsTab extends ConsumerWidget {
           children: [
             Text(
               l10n.employeeCommissionSetRate,
-              style: Theme.of(sheetContext).textTheme.titleMedium,
+              style: AppTypography.titleMedium.copyWith(
+                color: Theme.of(sheetContext).colorScheme.onSurface,
+              ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xxs),
             Text(
               employee.fullName,
-              style: Theme.of(sheetContext).textTheme.bodySmall?.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: Theme.of(sheetContext).colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             AppTextField(
               controller: controller,
               label: l10n.employeeCommissionRateLabel,
@@ -708,7 +690,7 @@ class _CommissionsTab extends ConsumerWidget {
                 decimal: true,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             AppButton.primary(
               label: l10n.commonConfirm,
               onPressed: () async {
@@ -824,7 +806,7 @@ class _TargetsTab extends ConsumerWidget {
               child: _MiniStat(
                 label: l10n.employeeTargetsActive,
                 value: '${monthTargets.length}',
-                color: ModuleColors.credit,
+                color: scheme.onSurface,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -832,7 +814,7 @@ class _TargetsTab extends ConsumerWidget {
               child: _MiniStat(
                 label: l10n.employeeTargetsReached,
                 value: '$reached',
-                color: AppColors.accentOrange,
+                color: theme.income,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -840,7 +822,7 @@ class _TargetsTab extends ConsumerWidget {
               child: _MiniStat(
                 label: l10n.employeeTargetsPending,
                 value: '${monthTargets.length - reached}',
-                color: IconTone.amber,
+                color: scheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -857,17 +839,11 @@ class _TargetsTab extends ConsumerWidget {
         else ...[
           Row(
             children: [
-              Text(
-                l10n.employeeTargetsMonth,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const Spacer(),
+              Expanded(child: SectionLabel(text: l10n.employeeTargetsMonth)),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.xs,
-                  vertical: 2,
+                  vertical: AppSpacing.micro,
                 ),
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest,
@@ -875,9 +851,8 @@ class _TargetsTab extends ConsumerWidget {
                 ),
                 child: Text(
                   month,
-                  style: theme.textTheme.labelSmall?.copyWith(
+                  style: AppTypography.labelSmall.copyWith(
                     color: scheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
@@ -975,10 +950,10 @@ class _TargetsTab extends ConsumerWidget {
       useSafeArea: true,
       builder: (sheetContext) => Padding(
         padding: EdgeInsets.fromLTRB(
-          24,
+          AppSpacing.xl,
           0,
-          24,
-          MediaQuery.viewInsetsOf(sheetContext).bottom + 24,
+          AppSpacing.xl,
+          MediaQuery.viewInsetsOf(sheetContext).bottom + AppSpacing.xl,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -986,9 +961,11 @@ class _TargetsTab extends ConsumerWidget {
           children: [
             Text(
               l10n.employeeTargetNewTitle,
-              style: Theme.of(sheetContext).textTheme.titleMedium,
+              style: AppTypography.titleMedium.copyWith(
+                color: Theme.of(sheetContext).colorScheme.onSurface,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             AppPickerField<String>(
               value: selectedUserId,
               label: l10n.employeeTargetEmployee,
@@ -1001,13 +978,13 @@ class _TargetsTab extends ConsumerWidget {
               ],
               onChanged: (value) => selectedUserId = value,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             AppTextField(
               controller: amountController,
               label: l10n.employeeTargetMonthly,
               keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             AppButton.primary(
               label: l10n.employeeTargetSave,
               onPressed: () async {
@@ -1074,7 +1051,7 @@ class _TargetCard extends StatelessWidget {
 
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(14)),
+      borderRadius: AppRadius.mdAll,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1084,42 +1061,41 @@ class _TargetCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   employeeName,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
                   ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, size: 18),
+                icon: const Icon(Icons.close, size: AppSizes.iconMd),
                 color: scheme.onSurfaceVariant,
                 tooltip: l10n.commonDelete,
                 onPressed: onRemove,
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             l10n.employeeTargetMeta(Formatters.currency(target.targetCents)),
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.full),
             child: LinearProgressIndicator(
               value: progress,
-              minHeight: 6,
+              minHeight: AppSpacing.xs,
               backgroundColor: scheme.surfaceContainerHighest,
-              color: reached ? AppColors.accentOrange : scheme.primary,
+              color: reached ? theme.income : scheme.primary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             l10n.employeeTargetProgress((progress * 100).round()),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: reached ? AppColors.accentOrange : scheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+            style: AppTypography.labelSmall.copyWith(
+              color: reached ? theme.income : scheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -1145,10 +1121,10 @@ class _MiniStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return AppCard(
       elevated: false,
-      borderRadius: const BorderRadius.all(Radius.circular(14)),
+      borderRadius: AppRadius.mdAll,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.sm,
@@ -1159,19 +1135,12 @@ class _MiniStat extends StatelessWidget {
           Text(
             // Rótulo COMPLETO — quebra quando necessário (nada de truncar).
             label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              height: 1.1,
+            style: AppTypography.labelSmall.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
+          const SizedBox(height: AppSpacing.xxs),
+          Text(value, style: AppTypography.titleMedium.copyWith(color: color)),
         ],
       ),
     );

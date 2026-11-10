@@ -7,6 +7,7 @@ import 'package:pdf/pdf.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/store.dart';
 import '../../controllers/account_providers.dart';
@@ -18,6 +19,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/color_palette.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/section_label.dart';
 import 'custom_invoice_preview.dart';
 
@@ -242,15 +244,13 @@ class _DocumentFormSheetState extends ConsumerState<DocumentFormSheet> {
           children: [
             Text(
               l10n.customInvoiceNew,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTypography.titleLarge.copyWith(color: scheme.onSurface),
             ),
             const SizedBox(height: AppSpacing.lg),
 
             // ─── Cliente ──
             SectionLabel(text: l10n.customInvoiceClientSection),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             if (customers.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedCustomerId,
@@ -303,12 +303,12 @@ class _DocumentFormSheetState extends ConsumerState<DocumentFormSheet> {
               ),
             ],
             const SizedBox(height: AppSpacing.md),
-            const Divider(),
+            Divider(height: 1, color: PremiumDecor.hairline(scheme)),
             const SizedBox(height: AppSpacing.sm),
 
             // ─── Produto ──
             SectionLabel(text: l10n.customInvoiceProductSection),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             if (activeProducts.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedProductId,
@@ -340,10 +340,8 @@ class _DocumentFormSheetState extends ConsumerState<DocumentFormSheet> {
                               p.unitLabel,
                               Formatters.currency(p.salePriceCents),
                             ),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant.withValues(
-                                alpha: 0.6,
-                              ),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: scheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -363,7 +361,10 @@ class _DocumentFormSheetState extends ConsumerState<DocumentFormSheet> {
               InputDecorator(
                 decoration: InputDecoration(
                   hintText: l10n.customInvoiceProductPlaceholder,
-                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                  prefixIcon: const Icon(
+                    Icons.inventory_2_outlined,
+                    size: AppSizes.iconMd,
+                  ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
@@ -418,29 +419,33 @@ class _DocumentFormSheetState extends ConsumerState<DocumentFormSheet> {
                       if (!_isInvoice) ...[
                         Icon(
                           Icons.check_circle_outline,
-                          size: 16,
+                          size: AppSizes.iconSm,
                           color: scheme.primary,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.xs),
                       ],
                       Expanded(
                         child: Text(
                           '${entry.value.name} x${entry.value.qty}',
-                          style: theme.textTheme.bodyMedium,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: scheme.onSurface,
+                          ),
                         ),
                       ),
                       Text(
                         Formatters.currency(
                           entry.value.unitPriceCents * entry.value.qty,
                         ),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: AppTypography.amountInRow(scheme.onSurface),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.xs),
                       InkWell(
                         onTap: () => setState(() => _items.removeAt(entry.key)),
-                        child: Icon(Icons.close, size: 16, color: scheme.error),
+                        child: Icon(
+                          Icons.close,
+                          size: AppSizes.iconSm,
+                          color: scheme.error,
+                        ),
                       ),
                     ],
                   ),
@@ -473,9 +478,8 @@ class _DocumentFormSheetState extends ConsumerState<DocumentFormSheet> {
                 l10n.customInvoiceBillTotal(
                   Formatters.currency(displayTotalCents),
                 ),
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.3,
+                style: AppTypography.titleMedium.copyWith(
+                  color: scheme.onSurface,
                 ),
                 textAlign: TextAlign.end,
               ),
@@ -649,9 +653,7 @@ class _DocumentTemplateSettingsSheetState
               _isInvoice
                   ? l10n.customInvoiceTemplateTitle
                   : l10n.quotationTemplateTitle,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTypography.titleLarge.copyWith(color: scheme.onSurface),
             ),
             const SizedBox(height: AppSpacing.md),
 
@@ -663,10 +665,10 @@ class _DocumentTemplateSettingsSheetState
               child: Container(
                 height: 100,
                 decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  color: scheme.surfaceContainerHighest,
                   borderRadius: AppRadius.lgAll,
                   border: Border.all(
-                    color: scheme.outlineVariant,
+                    color: PremiumDecor.hairline(scheme),
                     style: _logoBytes == null
                         ? BorderStyle.solid
                         : BorderStyle.none,
@@ -694,7 +696,7 @@ class _DocumentTemplateSettingsSheetState
                                 ),
                                 child: Icon(
                                   Icons.close,
-                                  size: 14,
+                                  size: AppSizes.iconSm,
                                   color: scheme.onError,
                                 ),
                               ),
@@ -707,15 +709,15 @@ class _DocumentTemplateSettingsSheetState
                         children: [
                           Icon(
                             Icons.add_a_photo_outlined,
-                            size: 28,
+                            size: AppSizes.iconXl,
                             color: scheme.onSurfaceVariant.withValues(
                               alpha: 0.5,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSpacing.xs),
                           Text(
                             l10n.customInvoiceTemplateLogoHint,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            style: AppTypography.bodySmall.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
@@ -739,17 +741,24 @@ class _DocumentTemplateSettingsSheetState
                   child: GestureDetector(
                     onTap: () => setState(() => _selectedColor = entry.value),
                     child: Container(
-                      width: 48,
-                      height: 48,
+                      width: AppSizes.avatarLg,
+                      height: AppSizes.avatarLg,
                       decoration: BoxDecoration(
                         color: entry.value,
                         shape: BoxShape.circle,
                         border: isSelected
-                            ? Border.all(color: scheme.onSurface, width: 3)
+                            ? Border.all(
+                                color: scheme.onSurface,
+                                width: AppSizes.focusRingWidth,
+                              )
                             : null,
                       ),
                       child: isSelected
-                          ? Icon(Icons.check, size: 18, color: scheme.surface)
+                          ? Icon(
+                              Icons.check,
+                              size: AppSizes.iconMd,
+                              color: scheme.surface,
+                            )
                           : null,
                     ),
                   ),
@@ -861,8 +870,8 @@ class _DocumentTemplateSettingsSheetState
                 child: Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: AppSizes.avatarMd,
+                      height: AppSizes.avatarMd,
                       decoration: BoxDecoration(
                         color: _selectedColor,
                         borderRadius: AppRadius.smAll,
@@ -877,7 +886,7 @@ class _DocumentTemplateSettingsSheetState
                             )
                           : Icon(
                               Icons.request_quote,
-                              size: 20,
+                              size: AppSizes.iconMd,
                               color: scheme.surface,
                             ),
                     ),
@@ -890,13 +899,13 @@ class _DocumentTemplateSettingsSheetState
                             _nameController.text.isNotEmpty
                                 ? _nameController.text
                                 : l10n.customInvoicePreviewCompanyFallback,
-                            style: theme.textTheme.labelMedium?.copyWith(
+                            style: AppTypography.labelMedium.copyWith(
                               color: scheme.onSurface,
                             ),
                           ),
                           Text(
                             l10n.quotationTemplatePreview,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            style: AppTypography.bodySmall.copyWith(
                               color: scheme.onSurfaceVariant,
                             ),
                           ),
@@ -914,7 +923,7 @@ class _DocumentTemplateSettingsSheetState
                       ),
                       child: Text(
                         l10n.quotationTemplatePreviewBadge,
-                        style: theme.textTheme.labelSmall?.copyWith(
+                        style: AppTypography.labelMedium.copyWith(
                           color: _selectedColor,
                         ),
                       ),
@@ -967,9 +976,7 @@ class _DocumentStyleChip extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Material(
-      color: isSelected
-          ? scheme.primaryContainer.withValues(alpha: 0.3)
-          : scheme.surfaceContainerLow,
+      color: isSelected ? scheme.primaryContainer : scheme.surfaceContainerLow,
       borderRadius: AppRadius.lgAll,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -981,15 +988,17 @@ class _DocumentStyleChip extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 20,
+                size: AppSizes.iconMd,
                 color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xxs),
               Text(
                 name,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: isSelected ? scheme.primary : scheme.onSurfaceVariant,
-                  fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                textAlign: TextAlign.center,
+                style: AppTypography.labelMedium.copyWith(
+                  color: isSelected
+                      ? scheme.onPrimaryContainer
+                      : scheme.onSurfaceVariant,
                 ),
               ),
             ],

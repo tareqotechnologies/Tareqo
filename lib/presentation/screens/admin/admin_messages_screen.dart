@@ -4,14 +4,17 @@ import 'package:intl/intl.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/admin_message.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../controllers/admin_message_providers.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_picker_field.dart';
+import '../../widgets/premium_decor.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_tokens.dart';
+import 'admin_thin_theme.dart';
 
 /// Templates profissionais para cada tipo de mensagem admin→tenant.
 ///
@@ -190,8 +193,8 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ── Selecionar tenant ──
-              _SectionLabel(label: l10n.adminMessagesTenantLabel),
-              const SizedBox(height: 8),
+              AdminSectionLabel(label: l10n.adminMessagesTenantLabel),
+              const SizedBox(height: AppSpacing.xs),
               AppPickerField<Tenant>(
                 value: _selectedTenant,
                 isExpanded: true,
@@ -204,10 +207,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                         tenant.businessName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        // Thin: item do dropdown leve (w300) — herda a
-                        // voz do painel admin.
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w300,
+                        style: AppTypography.bodySmall.copyWith(
                           color: scheme.onSurface,
                         ),
                       ),
@@ -231,22 +231,22 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
 
               // ── Info do tenant seleccionado ──
               if (_selectedTenant != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 _TenantInfoChip(tenant: _selectedTenant!, planName: _planName),
               ],
 
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
 
               // ── Tipo de mensagem (templates) ──
-              _SectionLabel(label: l10n.adminMessagesTypeLabel),
-              const SizedBox(height: 4),
+              AdminSectionLabel(label: l10n.adminMessagesTypeLabel),
+              const SizedBox(height: AppSpacing.xxs),
               Text(
                 'Selecionar um tipo preenche automaticamente os campos',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                style: AppTypography.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.xs),
               _TemplateGrid(
                 selected: _selectedType,
                 l10n: l10n,
@@ -261,23 +261,20 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                 },
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
 
               // ── Título ──
-              _SectionLabel(label: l10n.adminMessagesTitleLabel),
-              const SizedBox(height: 8),
+              AdminSectionLabel(label: l10n.adminMessagesTitleLabel),
+              const SizedBox(height: AppSpacing.xs),
               TextFormField(
                 controller: _titleController,
-                style: theme.textTheme.bodySmall,
+                style: AppTypography.bodyMedium,
                 decoration: InputDecoration(
                   hintText: context.l10n.adminMessagesTitleExample,
-                  hintStyle: TextStyle(
-                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    fontSize: 12,
+                  hintStyle: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
+                  border: OutlineInputBorder(borderRadius: AppRadius.mdAll),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.sm,
@@ -287,25 +284,22 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                     ? l10n.adminMessagesTitleError
                     : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ── Corpo ──
-              _SectionLabel(label: l10n.adminMessagesBodyLabel),
-              const SizedBox(height: 8),
+              AdminSectionLabel(label: l10n.adminMessagesBodyLabel),
+              const SizedBox(height: AppSpacing.xs),
               TextFormField(
                 controller: _bodyController,
                 maxLines: 8,
-                style: theme.textTheme.bodySmall?.copyWith(height: 1.6),
+                style: AppTypography.bodyMedium.copyWith(height: 1.6),
                 decoration: InputDecoration(
                   hintText: context.l10n.adminMessagesBodyHint,
-                  hintStyle: TextStyle(
-                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    fontSize: 12,
+                  hintStyle: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                   alignLabelWithHint: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
+                  border: OutlineInputBorder(borderRadius: AppRadius.mdAll),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
                     vertical: AppSpacing.sm,
@@ -318,22 +312,26 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
 
               // ── Indicador de template aplicado ──
               if (_templateApplied) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Row(
                   children: [
-                    Icon(Icons.auto_awesome, size: 12, color: scheme.primary),
-                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.auto_awesome,
+                      size: AppSizes.iconSm,
+                      color: theme.income,
+                    ),
+                    const SizedBox(width: AppSpacing.xxs),
                     Text(
                       'Template aplicado — edite conforme necessário',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.primary,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: theme.income,
                       ),
                     ),
                   ],
                 ),
               ],
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
 
               // ── Preview ──
               if (_titleController.text.isNotEmpty &&
@@ -342,7 +340,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                   title: _titleController.text,
                   body: _bodyController.text,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.lg),
               ],
 
               // ── Botão enviar ──
@@ -350,7 +348,7 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
                 width: double.infinity,
                 child: AppButton.primary(
                   onPressed: _sendMessage,
-                  icon: const Icon(Icons.send, size: 18),
+                  icon: const Icon(Icons.send, size: AppSizes.iconMd),
                   label: l10n.adminMessagesSubmit,
                 ),
               ),
@@ -403,25 +401,6 @@ class _AdminMessagesScreenState extends ConsumerState<AdminMessagesScreen> {
 
 // ─── Widgets auxiliares ──────────────────────────────────────────────────────
 
-/// Label de secção minimalista — thin: uppercase leve com tracking,
-/// hierarquia sem peso pesado.
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      label.toUpperCase(),
-      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-        fontWeight: FontWeight.w400,
-        letterSpacing: 0.8,
-      ),
-    );
-  }
-}
-
 /// Chip informativo do tenant selecionado.
 class _TenantInfoChip extends StatelessWidget {
   const _TenantInfoChip({required this.tenant, required this.planName});
@@ -440,17 +419,21 @@ class _TenantInfoChip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+        color: scheme.primaryContainer,
+        borderRadius: AppRadius.smAll,
       ),
       child: Row(
         children: [
-          Icon(Icons.business_outlined, size: 14, color: scheme.primary),
-          const SizedBox(width: 8),
+          Icon(
+            Icons.business_outlined,
+            size: AppSizes.iconSm,
+            color: scheme.primary,
+          ),
+          const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
               '${tenant.businessName} · ${planName(tenant.planId)}',
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: scheme.onSurface,
               ),
               maxLines: 1,
@@ -458,16 +441,16 @@ class _TenantInfoChip extends StatelessWidget {
             ),
           ),
           if (tenant.planExpiresAt != null) ...[
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.xs),
             Icon(
               Icons.calendar_today_outlined,
-              size: 12,
+              size: AppSizes.iconSm,
               color: scheme.onSurfaceVariant,
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: AppSpacing.xxs),
             Text(
               DateFormat('dd/MM').format(tenant.planExpiresAt!),
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
@@ -492,34 +475,35 @@ class _TemplateGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final templates = [
       (
         AdminMessageType.billingQuote,
         Icons.request_quote_outlined,
         'Cotação',
         'Valor, período e vencimento',
-        AppColors.accentOrange,
+        scheme.primary,
       ),
       (
         AdminMessageType.planExpiryChange,
         Icons.calendar_month_outlined,
         'Alterar Validade',
         'Nova data de expiração',
-        AppColors.accentOrange,
+        scheme.primary,
       ),
       (
         AdminMessageType.planExpiringSoon,
         Icons.schedule_outlined,
         'Plano a Expirar',
         'Aviso antecipado ao tenant',
-        AppColors.statusWarning,
+        scheme.tertiary,
       ),
       (
         AdminMessageType.general,
         Icons.mail_outline,
         'Mensagem Livre',
         'Texto personalizado',
-        AppColors.accentOrange,
+        scheme.primary,
       ),
     ];
 
@@ -535,7 +519,7 @@ class _TemplateGrid extends StatelessWidget {
             isSelected: selected == t.$1,
             onTap: () => onSelect(t.$1),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
         ],
       ],
     );
@@ -564,8 +548,7 @@ class _TemplateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: onTap,
@@ -575,50 +558,50 @@ class _TemplateCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? color.withValues(alpha: 0.08)
-              : scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(AppRadius.md),
+              : scheme.surfaceContainerHighest,
+          borderRadius: AppRadius.mdAll,
           border: Border.all(
             color: isSelected
                 ? color.withValues(alpha: 0.4)
-                : scheme.outlineVariant.withValues(alpha: 0.3),
+                : PremiumDecor.hairline(scheme),
             width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Row(
           children: [
             Container(
-              width: 36,
-              height: 36,
+              width: AppSizes.avatarSm,
+              height: AppSizes.avatarSm,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: isSelected ? 0.15 : 0.08),
-                borderRadius: BorderRadius.circular(AppRadius.xs),
+                borderRadius: AppRadius.xsAll,
               ),
-              child: Icon(icon, size: 18, color: color),
+              child: Icon(icon, size: AppSizes.iconMd, color: color),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w300,
-                      color: isSelected ? color : scheme.onSurface,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: scheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.micro),
                   Text(
                     subtitle,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: AppTypography.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
-            if (isSelected) Icon(Icons.check_circle, size: 18, color: color),
+            if (isSelected)
+              Icon(Icons.check_circle, size: AppSizes.iconMd, color: color),
           ],
         ),
       ),
@@ -642,9 +625,9 @@ class _MessagePreview extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
+        color: scheme.surfaceContainerHighest,
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(color: PremiumDecor.hairline(scheme)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -653,30 +636,27 @@ class _MessagePreview extends StatelessWidget {
             children: [
               Icon(
                 Icons.visibility_outlined,
-                size: 14,
+                size: AppSizes.iconSm,
                 color: scheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.xs),
               Text(
                 'Preview',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w300,
+                style: AppTypography.bodySmall.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             title,
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w400,
-            ),
+            style: AppTypography.labelLarge,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             body,
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
               height: 1.5,
             ),

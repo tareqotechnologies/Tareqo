@@ -1,4 +1,5 @@
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
@@ -130,12 +131,11 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
             SheetHeader(title: l10n.forgotPasswordTitle),
             Text(
               l10n.forgotPasswordHint,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: AppTypography.bodyMedium.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
-                height: 1.4,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             AppTextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
@@ -152,14 +152,14 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               onPressed: _isSubmitting ? null : _submit,
               label: l10n.forgotPasswordSubmit,
               icon: _isSubmitting
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: AppSizes.iconMd,
+                      width: AppSizes.iconMd,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,

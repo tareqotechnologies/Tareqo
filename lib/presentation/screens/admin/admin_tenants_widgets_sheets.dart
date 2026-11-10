@@ -41,9 +41,7 @@ class _TenantDetailSheet extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppRadius.xl),
-            ),
+            borderRadius: AppRadius.sheetTop,
           ),
           child: ListView(
             controller: scrollController,
@@ -59,7 +57,7 @@ class _TenantDetailSheet extends ConsumerWidget {
                     bottom: AppSpacing.lg,
                   ),
                   decoration: BoxDecoration(
-                    color: scheme.outlineVariant,
+                    color: PremiumDecor.hairline(scheme),
                     borderRadius: AppRadius.microAll,
                   ),
                 ),
@@ -67,6 +65,7 @@ class _TenantDetailSheet extends ConsumerWidget {
 
               // ── Header com nome + ID copiável ──
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Column(
@@ -74,11 +73,13 @@ class _TenantDetailSheet extends ConsumerWidget {
                       children: [
                         Text(
                           tenant.businessName,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w400,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: scheme.onSurface,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: AppSpacing.micro),
                         GestureDetector(
                           onTap: () {
                             Clipboard.setData(ClipboardData(text: tenant.id));
@@ -91,10 +92,12 @@ class _TenantDetailSheet extends ConsumerWidget {
                           },
                           child: Text(
                             tenant.id,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            style: AppTypography.bodySmall.copyWith(
                               color: scheme.onSurfaceVariant,
                               fontFamily: 'monospace',
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -102,7 +105,7 @@ class _TenantDetailSheet extends ConsumerWidget {
                   ),
                   IconButton(
                     tooltip: l10n.appSheetClose,
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, size: AppSizes.iconMd),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -178,7 +181,7 @@ class _TenantDetailSheet extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: scheme.errorContainer.withValues(alpha: 0.5),
+                    color: scheme.errorContainer,
                     borderRadius: AppRadius.smAll,
                   ),
                   child: Column(
@@ -186,14 +189,14 @@ class _TenantDetailSheet extends ConsumerWidget {
                     children: [
                       Text(
                         l10n.adminTenantDetailRejectionReason,
-                        style: theme.textTheme.labelSmall?.copyWith(
+                        style: AppTypography.labelSmall.copyWith(
                           color: scheme.onErrorContainer,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.micro),
                       Text(
                         tenant.rejectionReason!,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: AppTypography.bodySmall.copyWith(
                           color: scheme.onErrorContainer,
                         ),
                       ),
@@ -206,13 +209,7 @@ class _TenantDetailSheet extends ConsumerWidget {
               if (tenant.status == TenantStatus.approved &&
                   tenant.planExpiresAt != null) ...[
                 const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'FACTURAÇÃO',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    letterSpacing: 0.8,
-                  ),
-                ),
+                const AdminSectionLabel(label: 'FACTURAÇÃO'),
                 const SizedBox(height: AppSpacing.sm),
                 _BillingInfoCard(
                   tenant: tenant,
@@ -226,9 +223,8 @@ class _TenantDetailSheet extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   'USO vs LIMITES',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    letterSpacing: 0.8,
+                  style: AppTypography.eyebrow(
+                    scheme.onSurfaceVariant.withValues(alpha: 0.8),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -331,10 +327,13 @@ class _DetailChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: AppRadius.smAll,
@@ -345,12 +344,16 @@ class _DetailChip extends StatelessWidget {
         children: [
           Text(
             label,
-            style: theme.textTheme.labelSmall?.copyWith(color: color),
+            style: AppTypography.labelSmall.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: AppSpacing.micro),
           Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(color: color),
+            style: AppTypography.bodyMedium.copyWith(
+              color: scheme.onSurface,
+            ),
           ),
         ],
       ),
@@ -382,24 +385,39 @@ class _InfoRow extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.xs,
-          horizontal: 4,
+          horizontal: AppSpacing.xxs,
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: scheme.onSurfaceVariant),
+            Icon(icon, size: AppSizes.iconMd, color: scheme.onSurfaceVariant),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 label,
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: AppTypography.bodySmall.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
             ),
-            Text(value, style: theme.textTheme.bodyMedium),
+            const SizedBox(width: AppSpacing.xs),
+            Flexible(
+              child: Text(
+                value,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: scheme.onSurface,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.end,
+              ),
+            ),
             if (onTap != null) ...[
-              const SizedBox(width: 4),
-              Icon(Icons.copy, size: 14, color: scheme.onSurfaceVariant),
+              const SizedBox(width: AppSpacing.xxs),
+              Icon(
+                Icons.copy,
+                size: AppSizes.iconSm,
+                color: scheme.onSurfaceVariant,
+              ),
             ],
           ],
         ),
@@ -432,12 +450,14 @@ class _UsageBar extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 80,
+          width: AppSpacing.gigantic + AppSpacing.md,
           child: Text(
             label,
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -446,10 +466,8 @@ class _UsageBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.full),
             child: LinearProgressIndicator(
               value: ratio,
-              minHeight: 6,
-              backgroundColor: scheme.surfaceContainerHighest.withValues(
-                alpha: 0.5,
-              ),
+              minHeight: AppSpacing.xxs + AppSpacing.micro,
+              backgroundColor: scheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(
                 isFull ? scheme.error : color,
               ),
@@ -459,8 +477,8 @@ class _UsageBar extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Text(
           '$current/$max',
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: isFull ? scheme.error : scheme.onSurfaceVariant,
+          style: AppTypography.labelMedium.copyWith(
+            color: isFull ? theme.expense : scheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -489,21 +507,28 @@ class _SectionHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(icon, size: 18, color: scheme.onSurfaceVariant),
+        Icon(icon, size: AppSizes.iconMd, color: scheme.onSurfaceVariant),
         const SizedBox(width: AppSpacing.xs),
-        Expanded(child: Text(label, style: theme.textTheme.labelMedium)),
+        Expanded(
+          child: Text(
+            label,
+            style: AppTypography.labelLarge.copyWith(color: scheme.onSurface),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         Container(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xs,
             vertical: AppSpacing.micro,
           ),
           decoration: BoxDecoration(
-            color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            color: scheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(AppRadius.full),
           ),
           child: Text(
             countLabel,
-            style: theme.textTheme.labelSmall?.copyWith(
+            style: AppTypography.labelSmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
@@ -532,18 +557,21 @@ class _SectionEmpty extends StatelessWidget {
         vertical: AppSpacing.lg,
       ),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: scheme.surfaceContainerHighest,
         borderRadius: AppRadius.smAll,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 16, color: scheme.outline),
+          Icon(icon, size: AppSizes.iconSm, color: scheme.onSurfaceVariant),
           const SizedBox(width: AppSpacing.xs),
-          Text(
-            message,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
+          Flexible(
+            child: Text(
+              message,
+              style: AppTypography.bodySmall.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
         ],
@@ -562,9 +590,9 @@ class _SectionSkeleton extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: 48,
+      height: AppSizes.touchTarget,
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: scheme.surfaceContainerHighest,
         borderRadius: AppRadius.smAll,
       ),
     );
@@ -587,14 +615,18 @@ class _StoreTile extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: AppSpacing.xxl,
+            height: AppSpacing.xxl,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: scheme.primaryContainer.withValues(alpha: 0.5),
+              color: scheme.primaryContainer,
               borderRadius: AppRadius.xsAll,
             ),
-            child: Icon(Icons.store_outlined, size: 16, color: scheme.primary),
+            child: Icon(
+              Icons.store_outlined,
+              size: AppSizes.iconSm,
+              color: scheme.primary,
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -603,14 +635,16 @@ class _StoreTile extends StatelessWidget {
               children: [
                 Text(
                   store.name,
-                  style: theme.textTheme.bodyMedium,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (store.city.isNotEmpty)
                   Text(
                     store.city,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: AppTypography.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                     maxLines: 1,
@@ -645,17 +679,18 @@ class _EmployeeTile extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            radius: 16,
+            radius: AppSpacing.md,
             backgroundColor: isActive
-                ? scheme.primaryContainer.withValues(alpha: 0.5)
-                : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                ? scheme.primaryContainer
+                : scheme.surfaceContainerHighest,
             child: Text(
               employee.fullName.isNotEmpty
                   ? employee.fullName[0].toUpperCase()
                   : '?',
-              style: TextStyle(
-                fontSize: 12,
-                color: isActive ? scheme.primary : scheme.outline,
+              style: AppTypography.labelMedium.copyWith(
+                color: isActive
+                    ? scheme.onPrimaryContainer
+                    : scheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -666,15 +701,17 @@ class _EmployeeTile extends StatelessWidget {
               children: [
                 Text(
                   employee.fullName,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isActive ? null : scheme.outline,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: isActive
+                        ? scheme.onSurface
+                        : scheme.onSurfaceVariant,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   roleLabel,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -682,7 +719,11 @@ class _EmployeeTile extends StatelessWidget {
             ),
           ),
           if (!isActive)
-            Icon(Icons.block_outlined, size: 16, color: scheme.error),
+            Icon(
+              Icons.block_outlined,
+              size: AppSizes.iconSm,
+              color: theme.expense,
+            ),
         ],
       ),
     );
@@ -710,14 +751,18 @@ class _ActivityTile extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: AppSpacing.xxl,
+            height: AppSpacing.xxl,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
               borderRadius: AppRadius.xsAll,
             ),
-            child: Icon(_actionIcon(entry.action), size: 16, color: color),
+            child: Icon(
+              _actionIcon(entry.action),
+              size: AppSizes.iconSm,
+              color: color,
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -726,33 +771,36 @@ class _ActivityTile extends StatelessWidget {
               children: [
                 Text(
                   entry.actionLabel,
-                  style: theme.textTheme.bodyMedium,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (status != null)
                   Text(
                     status.toUpperCase(),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: color,
+                    style: AppTypography.labelSmall.copyWith(
+                      color: scheme.onSurfaceVariant,
                       letterSpacing: 0.5,
                     ),
                   ),
               ],
             ),
           ),
+          const SizedBox(width: AppSpacing.xs),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 dateFormat.format(entry.createdAt),
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: AppTypography.bodySmall.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
               Text(
                 timeFormat.format(entry.createdAt),
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: AppTypography.bodySmall.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),

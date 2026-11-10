@@ -30,8 +30,8 @@ class ErrorView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 72,
-              height: 72,
+              width: AppSpacing.gigantic,
+              height: AppSpacing.gigantic,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: scheme.errorContainer.withValues(alpha: 0.5),
@@ -40,7 +40,7 @@ class ErrorView extends StatelessWidget {
               ),
               child: Icon(
                 Icons.cloud_off_outlined,
-                size: 32,
+                size: AppSizes.iconXl,
                 color: scheme.error,
               ),
             ),
@@ -48,7 +48,9 @@ class ErrorView extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: AppTypography.titleMedium,
+              style: AppTypography.titleMedium.copyWith(
+                color: scheme.onSurface,
+              ),
             ),
             if (details != null) ...[
               const SizedBox(height: AppSpacing.xs),
@@ -57,13 +59,15 @@ class ErrorView extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.bodySmall,
+                style: AppTypography.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               label: context.l10n.commonRetry,
-              icon: const Icon(Icons.refresh, size: 18),
+              icon: const Icon(Icons.refresh, size: AppSizes.iconSm),
               onPressed: onRetry,
             ),
           ],

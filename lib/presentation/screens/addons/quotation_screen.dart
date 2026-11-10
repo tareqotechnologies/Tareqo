@@ -5,7 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/share/quotation_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../domain/entities/customer.dart';
@@ -58,9 +59,8 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
 
     return AppPage(
       title: l10n.quotationTitle,
-      // Título 3 (20/w600) — rótulo longo ('Cotações / Orçamentos')
-      // truncava em titleLarge (22) no AppBar de 56px.
-      titleStyle: Theme.of(context).textTheme.titleMedium,
+      // Rótulo longo ('Cotações / Orçamentos') cabe em titleMedium (16).
+      titleStyle: AppTypography.titleMedium,
       useSafeArea: false,
       actions: [
         IconButton(
@@ -90,9 +90,9 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
           : ListView.separated(
               padding: EdgeInsets.fromLTRB(
                 horizontal,
-                AppSpacing.lg,
+                AppSpacing.sm,
                 horizontal,
-                AppSpacing.lg,
+                AppSpacing.fabBottomClearance,
               ),
               itemCount: quotations.length,
               separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
@@ -107,7 +107,7 @@ class _QuotationScreenState extends ConsumerState<QuotationScreen> {
         heroTag: 'fab-quotation',
         onPressed: _openNewQuotation,
         tooltip: l10n.quotationNewFab,
-        child: const Icon(Icons.add_rounded, size: 28),
+        child: const Icon(Icons.add_rounded, size: AppSizes.iconXl),
       ),
     );
   }
@@ -256,7 +256,7 @@ class _QuotationCard extends StatelessWidget {
     // valor à direita. O documento é a informação, não a moldura.
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,28 +272,28 @@ class _QuotationCard extends StatelessWidget {
                     // fiado) — nome COMPLETO quebra em linhas quando
                     // necessário (nunca truncar o nome do cliente).
                     Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xxs,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           quotation.customerName,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+                          style: AppTypography.labelLarge.copyWith(
+                            color: scheme.onSurface,
                           ),
                         ),
                         Text(
                           l10n.quotationNumberPrefix(
                             quotation.number.toString().padLeft(5, '0'),
                           ),
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          style: AppTypography.bodySmall.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
                         _StatusChip(status: quotation.status),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xxs),
                     // Metadados em UMA linha discreta: itens · validade ·
                     // telefone.
                     Text(
@@ -301,28 +301,26 @@ class _QuotationCard extends StatelessWidget {
                       '  •  ${l10n.quotationValidity}: '
                       '${l10n.quotationDays(validityDays)}'
                       '${quotation.customerPhone.isNotEmpty ? '  •  ${quotation.customerPhone}' : ''}',
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.xs),
               // Valor à DIREITA em destaque — SmartAmount ENCOLHE para
               // caber (nunca trunca) e alinha dígito a dígito (tabular).
               Flexible(
                 child: SmartAmount(
                   cents: quotation.totalAmountCents,
                   alignment: Alignment.centerRight,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTypography.amountInRow(scheme.onSurface),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           // Ações em UMA linha: fluxo de estado (rótulos — decisão de
           // negócio, precisa ser legível) à esquerda; WhatsApp e PDF como
           // ÍCONES discretos à direita (padrão da Factura Personalizada).
@@ -360,13 +358,19 @@ class _QuotationCard extends StatelessWidget {
                 spacing: AppSpacing.xs,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.share_outlined, size: 18),
+                    icon: const Icon(
+                      Icons.share_outlined,
+                      size: AppSizes.iconMd,
+                    ),
                     color: scheme.onSurfaceVariant,
                     tooltip: l10n.customInvoiceWhatsApp,
                     onPressed: () => _shareWhatsApp(context),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                    icon: const Icon(
+                      Icons.picture_as_pdf_outlined,
+                      size: AppSizes.iconMd,
+                    ),
                     color: scheme.onSurfaceVariant,
                     tooltip: l10n.customInvoicePdf,
                     onPressed: () => _exportPdf(context),
@@ -508,50 +512,48 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    final (label, color) = switch (status) {
+    // O ponto carrega a cor do estado; o rótulo fica em tinta (AA).
+    final (label, tone) = switch (status) {
       QuotationStatus.draft => (
         l10n.quotationStatusDraft,
-        AppColors.statusWarning,
+        AppColors.alertWarning,
       ),
-      QuotationStatus.sent => (
-        l10n.quotationStatusSent,
-        AppColors.accentOrange,
-      ),
-      QuotationStatus.accepted => (
-        l10n.quotationStatusAccepted,
-        AppColors.successNeutral,
-      ),
-      QuotationStatus.rejected => (
-        l10n.quotationStatusRejected,
-        AppColors.statusError,
-      ),
-      QuotationStatus.expired => (
-        l10n.quotationStatusExpired,
-        AppColors.statusError,
-      ),
+      QuotationStatus.sent => (l10n.quotationStatusSent, scheme.primary),
+      QuotationStatus.accepted => (l10n.quotationStatusAccepted, theme.income),
+      QuotationStatus.rejected => (l10n.quotationStatusRejected, theme.expense),
+      QuotationStatus.expired => (l10n.quotationStatusExpired, theme.expense),
       QuotationStatus.converted => (
         l10n.quotationStatusConverted,
-        AppColors.successNeutral,
+        theme.income,
       ),
     };
 
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xs,
-        vertical: 2,
+        vertical: AppSpacing.micro,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppRadius.xs),
+        color: tone.withValues(alpha: 0.12),
+        borderRadius: AppRadius.xsAll,
       ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w500,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: AppSpacing.xs,
+            height: AppSpacing.xs,
+            decoration: BoxDecoration(color: tone, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: AppSpacing.xxs),
+          Text(
+            label,
+            style: AppTypography.labelMedium.copyWith(color: scheme.onSurface),
+          ),
+        ],
       ),
     );
   }

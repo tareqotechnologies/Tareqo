@@ -21,23 +21,26 @@ class ListSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final horizontal = AppSpacing.pagePaddingForWidth(
+      MediaQuery.sizeOf(context).width,
+    );
     return Skeleton(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
+        padding: EdgeInsets.fromLTRB(
+          horizontal,
           AppSpacing.sm,
-          AppSpacing.lg,
+          horizontal,
           AppSpacing.fabBottomClearance,
         ),
         physics: const NeverScrollableScrollPhysics(),
         children: [
           if (showHeader) ...[
-            const SkeletonBlock(height: 96, radius: 20),
-            const SizedBox(height: 16),
+            const SkeletonBlock(height: 96, radius: AppRadius.lg),
+            const SizedBox(height: AppSpacing.md),
           ],
           for (var i = 0; i < items; i++) ...[
-            const SkeletonBlock(height: 72, radius: 20),
-            const SizedBox(height: 8),
+            const SkeletonBlock(height: 72, radius: AppRadius.lg),
+            const SizedBox(height: AppSpacing.xs),
           ],
         ],
       ),

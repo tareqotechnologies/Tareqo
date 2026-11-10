@@ -105,20 +105,20 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
                       ? l10n.addStoreNameError
                       : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _addressController,
                   label: l10n.addStoreAddressLabel,
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _phoneController,
                   label: l10n.addStorePhoneLabel,
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _emailController,
                   label: l10n.addStoreEmailLabel,
@@ -127,7 +127,7 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             SheetSection(
               icon: Icons.receipt_long_outlined,
               title: l10n.storeDetailNuit,
@@ -138,7 +138,7 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
                   keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _cityController,
                   label: l10n.addStoreCityLabel,
@@ -147,15 +147,13 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 _formError!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+                style: AppTypography.bodySmall.copyWith(color: theme.expense),
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             // AppButton (design system ultra-clean): altura 48, cantos 12,
             // cores sólidas — o spinner substitui o ícone durante o envio.
             AppButton.primary(
@@ -163,8 +161,8 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
               label: l10n.addStoreSubmit,
               icon: _isSubmitting
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: AppSizes.iconMd,
+                      width: AppSizes.iconMd,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,
@@ -274,6 +272,7 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
     final storesAsync = ref.watch(storesProvider(widget.tenant.id));
 
@@ -299,7 +298,7 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
                       ? l10n.addEmployeeNameError
                       : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _emailController,
                   label: l10n.addEmployeeEmailLabel,
@@ -313,7 +312,7 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _passwordController,
                   label: l10n.addEmployeePasswordLabel,
@@ -337,7 +336,7 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             // Seção: Vínculo — loja e cargo.
             SheetSection(
               icon: Icons.work_outline,
@@ -348,20 +347,22 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
                       const Center(child: CircularProgressIndicator()),
                   error: (_, _) => Text(
                     l10n.storesLoadError,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: theme.expense,
                     ),
                   ),
                   data: (stores) {
                     if (stores.isEmpty) {
                       return Text(
                         l10n.addEmployeeNoStores,
-                        style: theme.textTheme.bodySmall,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       );
                     }
                     return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xs,
                       children: [
                         for (final store in stores)
                           ChoiceChip(
@@ -374,14 +375,16 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
                     );
                   },
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   l10n.addEmployeeRoleLabel,
-                  style: theme.textTheme.titleSmall,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Wrap(
-                  spacing: 8,
+                  spacing: AppSpacing.xs,
                   children: [
                     ChoiceChip(
                       label: Text(l10n.roleEmployee),
@@ -400,15 +403,13 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 _formError!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+                style: AppTypography.bodySmall.copyWith(color: theme.expense),
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             // AppButton (design system ultra-clean): altura 48, cantos 12,
             // cores sólidas — o spinner substitui o ícone durante o envio.
             AppButton.primary(
@@ -416,8 +417,8 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
               label: l10n.addEmployeeSubmit,
               icon: _isSubmitting
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: AppSizes.iconMd,
+                      width: AppSizes.iconMd,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,
@@ -540,20 +541,20 @@ class _EditStoreSheetState extends ConsumerState<_EditStoreSheet> {
                       ? l10n.addStoreNameError
                       : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _addressController,
                   label: l10n.addStoreAddressLabel,
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _phoneController,
                   label: l10n.addStorePhoneLabel,
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _emailController,
                   label: l10n.addStoreEmailLabel,
@@ -562,7 +563,7 @@ class _EditStoreSheetState extends ConsumerState<_EditStoreSheet> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             SheetSection(
               icon: Icons.receipt_long_outlined,
               title: l10n.storeDetailNuit,
@@ -573,7 +574,7 @@ class _EditStoreSheetState extends ConsumerState<_EditStoreSheet> {
                   keyboardType: TextInputType.number,
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 AppTextField(
                   controller: _cityController,
                   label: l10n.addStoreCityLabel,
@@ -582,22 +583,20 @@ class _EditStoreSheetState extends ConsumerState<_EditStoreSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 _formError!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+                style: AppTypography.bodySmall.copyWith(color: theme.expense),
               ),
             ],
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               onPressed: _isSubmitting ? null : _submit,
               label: l10n.editStoreSubmit,
               icon: _isSubmitting
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: AppSizes.iconMd,
+                      width: AppSizes.iconMd,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,

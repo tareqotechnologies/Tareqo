@@ -316,7 +316,7 @@ class _PurchasesSkeleton extends StatelessWidget {
         ),
         children: [
           // Resumo do dia.
-          const SkeletonBlock(height: 118, radius: 20),
+          const SkeletonBlock(height: 118, radius: AppRadius.xl),
           const SizedBox(height: AppSpacing.md),
           // Busca.
           const SkeletonBlock(height: 52),
@@ -348,7 +348,7 @@ class _PurchasesSkeleton extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           // Cards.
           for (var i = 0; i < 4; i++) ...[
-            const SkeletonBlock(height: 96, radius: 20),
+            const SkeletonBlock(height: 96, radius: AppRadius.xl),
             const SizedBox(height: AppSpacing.xs),
           ],
         ],

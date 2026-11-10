@@ -59,6 +59,7 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
     final plansAsync = ref.watch(plansProvider);
     final candidates = (plansAsync.value ?? const <Plan>[])
@@ -74,24 +75,24 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
           SheetHeader(title: l10n.upgradeTitle),
           Text(
             l10n.upgradeSubtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppTypography.bodyMedium.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           plansAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, _) => Text(
               l10n.onboardingPlansError,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: theme.expense),
             ),
             data: (_) {
               if (candidates.isEmpty) {
                 return Text(
                   l10n.upgradeMaxReached,
-                  style: theme.textTheme.bodyMedium,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 );
               }
               return Column(
@@ -102,33 +103,31 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
                       selected: _selectedPlanId == plan.id,
                       onTap: () => setState(() => _selectedPlanId = plan.id),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
                   ],
                 ],
               );
             },
           ),
           if (_formError != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               _formError!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: theme.expense),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           // AppButton (design system ultra-clean): altura 48, cantos 12,
           // cores sólidas — o spinner substitui o ícone durante o envio.
           AppButton.primary(
             onPressed: _isSubmitting ? null : _submit,
             icon: _isSubmitting
                 ? const SizedBox(
-                    height: 18,
-                    width: 18,
+                    height: AppSizes.iconMd,
+                    width: AppSizes.iconMd,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.send_outlined),
+                : const Icon(Icons.send_outlined, size: AppSizes.iconMd),
             label: l10n.upgradeSubmit,
           ),
         ],
@@ -172,35 +171,35 @@ class _UpgradePlanTile extends StatelessWidget {
               selected
                   ? Icons.radio_button_checked
                   : Icons.radio_button_unchecked,
+              size: AppSizes.iconMd,
               color: selected ? scheme.primary : scheme.outline,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     plan.name,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: scheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.micro),
                   Text(
                     l10n.planDetails(plan.maxStores, plan.maxEmployees),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: AppTypography.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: AppSpacing.xs),
+            // Preço em tinta — a seleção já é comunicada pelo aro/tinte.
             Text(
               Formatters.currency(plan.priceMonthlyCents),
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: scheme.primary,
-              ),
+              style: AppTypography.amountInRow(scheme.onSurface),
             ),
           ],
         ),

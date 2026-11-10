@@ -127,9 +127,9 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.fromLTRB(
             AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-            8,
+            AppSpacing.xs,
             AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-            96,
+            AppSpacing.fabBottomClearance,
           ),
           children: [
             // FittedBox: as abas Pendentes/Quitadas encolhem em telas
@@ -390,14 +390,16 @@ class _SummaryCard extends StatelessWidget {
             statLabel,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.micro),
           Text(
             '$statValue',
-            style: theme.textTheme.headlineSmall?.copyWith(color: statColor),
+            // 20/500 — um degrau abaixo do valor do hero (26): a
+            // estatística secundária nunca compete com o total.
+            style: AppTypography.titleLarge.copyWith(color: statColor),
           ),
         ],
       ),
@@ -429,12 +431,14 @@ class _DebtCard extends StatelessWidget {
 
     final l10n = context.l10n;
     // Tag de vencimento (canvas): Atrasada (vermelho) / Vence hoje
-    // (âmbar) / Em X dias (primary).
+    // (âmbar) / Em X dias (neutro). O chip futuro fica em tinta neutra:
+    // laranja a 12px sobre a superfície não alcança AA em tema claro — o
+    // prazo não é um alerta, a cor ali só decorava.
     final (chipLabel, chipColor) = daysUntilDue > 0
         ? (l10n.debtsLate, theme.expense)
         : daysUntilDue == 0
         ? (l10n.debtsDueToday, theme.warning)
-        : (l10n.debtsDueIn(-daysUntilDue), theme.colorScheme.primary);
+        : (l10n.debtsDueIn(-daysUntilDue), scheme.onSurface);
 
     // Descrição relativa (canvas "venceu 12 ago"): venceu há X dias /
     // vence hoje / vence em X dias.
@@ -470,15 +474,16 @@ class _DebtCard extends StatelessWidget {
               '${Formatters.debtLabel(debt.number)} · $dueDesc',
               Formatters.currency(debt.amountCents),
             ]),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
                       // Nome + tag de vencimento inline (canvas) — Wrap para
                       // não estourar em telas estreitas com escala alta.
-                      Wrap(
+                      child: Wrap(
                         spacing: AppSpacing.xs,
                         runSpacing: AppSpacing.xxs,
                         crossAxisAlignment: WrapCrossAlignment.center,
@@ -487,31 +492,34 @@ class _DebtCard extends StatelessWidget {
                           // quando necessário (nada de truncar nomes).
                           Text(
                             debt.personName,
-                            style: theme.textTheme.titleSmall,
+                            style: AppTypography.labelLarge.copyWith(
+                              color: scheme.onSurface,
+                            ),
                           ),
                           StatusChip(label: chipLabel, color: chipColor),
                         ],
                       ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      // Descrição: número SEQUENCIAL + vencimento relativo
-                      // (ex.: "D-00001 · venceu há 3 dias").
-                      Text(
-                        '${Formatters.debtLabel(debt.number)} · $dueDesc',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    // Valor — SmartAmount (design system ultra-clean): ENCOLHE
+                    // para caber — nunca trunca. Tabular: alinhado na coluna.
+                    Flexible(
+                      child: SmartAmount(
+                        cents: debt.amountCents,
+                        alignment: Alignment.centerRight,
+                        style: AppTypography.amountInRow(scheme.onSurface),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: AppSpacing.xs),
-                // Valor — SmartAmount (design system ultra-clean): ENCOLHE
-                // para caber — nunca trunca. Tabular: alinhado na coluna.
-                Flexible(
-                  child: SmartAmount(
-                    cents: debt.amountCents,
-                    alignment: Alignment.centerRight,
-                    style: AppTypography.amountInRow(scheme.onSurface),
+                const SizedBox(height: AppSpacing.xxs),
+                // Descrição: número SEQUENCIAL + vencimento relativo
+                // (ex.: "D-00001 · venceu há 3 dias"). Largura total para
+                // não partir a frase ao lado do valor.
+                Text(
+                  '${Formatters.debtLabel(debt.number)} · $dueDesc',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -559,21 +567,27 @@ class _SettledDebtCard extends StatelessWidget {
           Formatters.debtLabel(debt.number),
           Formatters.currency(debt.amountCents),
         ]),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
                   // Nome + chip de baixa inline (mesmo padrão do pendente).
-                  Wrap(
+                  child: Wrap(
                     spacing: AppSpacing.xs,
                     runSpacing: AppSpacing.xxs,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       // Nome COMPLETO do cliente — quebra em linhas quando
                       // necessário (nada de truncar nomes no histórico).
-                      Text(debt.personName, style: theme.textTheme.titleSmall),
+                      Text(
+                        debt.personName,
+                        style: AppTypography.labelLarge.copyWith(
+                          color: scheme.onSurface,
+                        ),
+                      ),
                       StatusChip(
                         label: debt.paidAt == null
                             ? l10n.debtsSettledLabel
@@ -585,25 +599,25 @@ class _SettledDebtCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  // Número SEQUENCIAL do fiado (D-00001).
-                  Text(
-                    Formatters.debtLabel(debt.number),
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                // Valor — SmartAmount (design system ultra-clean): ENCOLHE
+                // para caber — nunca trunca; visível no histórico. Tabular.
+                Flexible(
+                  child: SmartAmount(
+                    cents: debt.amountCents,
+                    alignment: Alignment.centerRight,
+                    style: AppTypography.amountInRow(scheme.onSurface),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: AppSpacing.xs),
-            // Valor — SmartAmount (design system ultra-clean): ENCOLHE para
-            // caber — nunca trunca; visível no histórico. Tabular: alinhado.
-            Flexible(
-              child: SmartAmount(
-                cents: debt.amountCents,
-                alignment: Alignment.centerRight,
-                style: AppTypography.amountInRow(scheme.onSurface),
+            const SizedBox(height: AppSpacing.xxs),
+            // Número SEQUENCIAL do fiado (D-00001) — largura total.
+            Text(
+              Formatters.debtLabel(debt.number),
+              style: AppTypography.bodySmall.copyWith(
+                color: scheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -624,11 +638,11 @@ class _DebtsListSkeleton extends StatelessWidget {
     return const Skeleton(
       child: Column(
         children: [
-          SkeletonBlock(height: 64, radius: 16),
+          SkeletonBlock(height: AppSizes.listRowHeight, radius: AppRadius.lg),
           SizedBox(height: AppSpacing.xs),
-          SkeletonBlock(height: 64, radius: 16),
+          SkeletonBlock(height: AppSizes.listRowHeight, radius: AppRadius.lg),
           SizedBox(height: AppSpacing.xs),
-          SkeletonBlock(height: 64, radius: 16),
+          SkeletonBlock(height: AppSizes.listRowHeight, radius: AppRadius.lg),
         ],
       ),
     );

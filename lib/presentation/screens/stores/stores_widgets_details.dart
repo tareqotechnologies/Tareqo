@@ -46,13 +46,15 @@ class _EmployeeDetailSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   employee.fullName,
                   // Nome = título do bloco (16/w500); o w300 anterior saía
                   // da escala de pesos permitida (400/500/600).
-                  style: AppTypography.titleMedium,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: scheme.onSurface,
+                  ),
                 ),
               ),
               if (!employee.isActive)
@@ -66,7 +68,7 @@ class _EmployeeDetailSheet extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
 
           // ── Detalhes ──
           DetailRow(
@@ -88,7 +90,6 @@ class _EmployeeDetailSheet extends StatelessWidget {
             icon: isManager
                 ? Icons.manage_accounts_outlined
                 : Icons.person_outline,
-            valueColor: isManager ? scheme.primary : null,
           ),
           DetailRow(
             labelWidth: 70,
@@ -99,14 +100,15 @@ class _EmployeeDetailSheet extends StatelessWidget {
             icon: employee.isActive
                 ? Icons.check_circle_outline
                 : Icons.cancel_outlined,
-            valueColor: employee.isActive ? scheme.primary : scheme.error,
+            // Activo = sucesso (verde de alerta), inactivo = erro.
+            valueColor: employee.isActive ? theme.income : theme.expense,
           ),
 
           // ── Ações ──
           if (isOwner) ...[
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
+            Divider(height: 1, color: PremiumDecor.hairline(scheme)),
+            const SizedBox(height: AppSpacing.sm),
             if (employee.isActive)
               AppButton.danger(
                 onPressed: () {
@@ -114,7 +116,7 @@ class _EmployeeDetailSheet extends StatelessWidget {
                   onToggle(false);
                 },
                 label: l10n.employeeDeactivateAction,
-                icon: const Icon(Icons.block_outlined, size: 18),
+                icon: const Icon(Icons.block_outlined, size: AppSizes.iconMd),
               )
             else
               AppButton.primary(
@@ -123,10 +125,13 @@ class _EmployeeDetailSheet extends StatelessWidget {
                   onToggle(true);
                 },
                 label: l10n.employeeReactivateAction,
-                icon: const Icon(Icons.check_circle_outlined, size: 18),
+                icon: const Icon(
+                  Icons.check_circle_outlined,
+                  size: AppSizes.iconMd,
+                ),
               ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
         ],
       ),
     );
@@ -147,8 +152,7 @@ class _StoreDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
 
     return Padding(
@@ -172,15 +176,15 @@ class _StoreDetailSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       store.name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: AppTypography.titleMedium.copyWith(
+                        color: scheme.onSurface,
                       ),
                     ),
                   ],
@@ -188,7 +192,7 @@ class _StoreDetailSheet extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.md),
 
           // ── Detalhes ──
           if (store.phone.isNotEmpty)
@@ -228,19 +232,19 @@ class _StoreDetailSheet extends StatelessWidget {
             ),
 
           if (isOwner) ...[
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
+            Divider(height: 1, color: PremiumDecor.hairline(scheme)),
+            const SizedBox(height: AppSpacing.sm),
             AppButton.primary(
               onPressed: () {
                 Navigator.of(context).pop();
                 onEdit();
               },
               label: l10n.editStoreAction,
-              icon: const Icon(Icons.edit_outlined, size: 18),
+              icon: const Icon(Icons.edit_outlined, size: AppSizes.iconMd),
             ),
           ],
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
         ],
       ),
     );

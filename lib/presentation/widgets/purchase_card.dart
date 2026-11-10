@@ -62,7 +62,7 @@ class PurchaseCard extends StatelessWidget {
     final row = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm + 2,
+        vertical: AppSpacing.sm,
       ),
       child: Semantics(
         container: true,
@@ -74,8 +74,12 @@ class PurchaseCard extends StatelessWidget {
               accent: accent,
               icon: purchase.paymentMethod.icon,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.sm),
+            // 3:2 — o texto do fornecedor precisa de mais largura que a
+            // coluna de valores; a divisão a meio partia o nome e o método
+            // de pagamento em telefones de 412.
             Expanded(
+              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -83,34 +87,35 @@ class PurchaseCard extends StatelessWidget {
                   // necessário (nada de truncar).
                   Text(
                     purchase.supplierName,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: scheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.micro),
                   Text(
                     '${Formatters.purchaseLabel(purchase.number)} · '
                     '$itemsLabel · '
                     '${purchase.paymentMethod.labelFor(l10n)}',
-                    style: theme.textTheme.labelSmall?.copyWith(
+                    style: AppTypography.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.micro),
                   Text(
                     // Data inteligente: 'Hoje/Ontem/04/08' + hora.
                     '${Formatters.day(purchase.dateTime)} • '
                     '${Formatters.time(purchase.dateTime)}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: scheme.outline,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.xs),
             // Coluna direita: unidades adicionadas + valor, ancoradas.
             Flexible(
+              flex: 2,
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Column(
@@ -126,10 +131,13 @@ class PurchaseCard extends StatelessWidget {
                       // montante alinha coluna a coluna entre as listas.
                       style: AppTypography.amountInRow(scheme.onSurface),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xxs),
+                    // Unidades adicionadas — metadado neutro: o stock que
+                    // entrou não é um alerta, e laranja a 12px não alcança
+                    // AA no tema claro.
                     StatusChip(
                       label: l10n.purchasesStockAdded(units, l10n.commonUnits),
-                      color: theme.colorScheme.primary,
+                      color: scheme.onSurfaceVariant,
                       icon: Icons.inventory_2_outlined,
                     ),
                   ],

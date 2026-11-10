@@ -4,10 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/addon_catalog.dart';
 import '../../../domain/entities/addon.dart';
 import '../../controllers/admin_providers.dart';
+import '../../widgets/premium_decor.dart';
 
 /// Dashboard de receitas de add-ons para o super admin.
 ///
@@ -54,7 +56,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
                       value: Formatters.currency(totalPotentialRevenue),
                       subtitle: l10n.adminRevenuePotentialSub,
                       icon: Icons.trending_up,
-                      color: AppColors.successNeutral,
+                      color: theme.income,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
@@ -83,7 +85,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
                       value: '${tenants.length}',
                       subtitle: l10n.adminRevenueActiveTenantsSub,
                       icon: Icons.business_outlined,
-                      color: AppColors.accentOrange,
+                      color: scheme.primary,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
@@ -95,7 +97,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
                       ),
                       subtitle: l10n.adminRevenueMaxMonthlySub,
                       icon: Icons.account_balance_wallet_outlined,
-                      color: AppColors.statusWarning,
+                      color: scheme.tertiary,
                     ),
                   ),
                 ],
@@ -110,9 +112,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Text(
                 l10n.adminRevenueByAddOn,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w400,
-                ),
+                style: AppTypography.sectionTitle,
               ),
             ),
           ),
@@ -121,8 +121,12 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
             sliver: SliverList.separated(
               itemCount: addOns.length,
-              separatorBuilder: (_, _) =>
-                  const Divider(height: 1, indent: 40, endIndent: 0),
+              separatorBuilder: (_, _) => Divider(
+                height: 1,
+                indent: AppSpacing.xxxl,
+                endIndent: 0,
+                color: PremiumDecor.hairline(scheme),
+              ),
               itemBuilder: (_, i) => _AddOnRevenueTile(
                 addon: addOns[i],
                 tenantCount: tenants.length,
@@ -137,9 +141,7 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Text(
                 l10n.adminRevenueByCategory,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w400,
-                ),
+                style: AppTypography.sectionTitle,
               ),
             ),
           ),
@@ -167,7 +169,9 @@ class AdminAddOnRevenueScreen extends ConsumerWidget {
           ),
 
           // ── Bottom padding ──
-          const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: AppSpacing.fabBottomClearance),
+          ),
         ],
       ),
     );
@@ -206,12 +210,12 @@ class _KpiCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 16, color: color),
-                const SizedBox(width: 8),
+                Icon(icon, size: AppSizes.iconSm, color: color),
+                const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     label,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: AppTypography.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                     maxLines: 1,
@@ -223,17 +227,15 @@ class _KpiCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text(
               value,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w400,
-                color: color,
+              style: AppTypography.titleMedium.copyWith(
+                color: scheme.onSurface,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.micro),
             Text(
               subtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: AppTypography.labelSmall.copyWith(
                 color: scheme.onSurfaceVariant,
-                fontSize: 11,
               ),
             ),
           ],
@@ -280,14 +282,12 @@ class _AddOnRevenueTile extends StatelessWidget {
               children: [
                 Text(
                   addon.name,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: AppTypography.labelLarge,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   '${Formatters.currency(addon.priceMonthlyCents)}/tenant/mês',
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -303,16 +303,14 @@ class _AddOnRevenueTile extends StatelessWidget {
             children: [
               Text(
                 Formatters.currency(maxRevenue),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.successNeutral,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: theme.income,
                 ),
               ),
               Text(
                 context.l10n.adminRevenuePerMonth,
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: AppTypography.labelSmall.copyWith(
                   color: scheme.onSurfaceVariant,
-                  fontSize: 11,
                 ),
               ),
             ],
@@ -346,16 +344,16 @@ class _CategoryTile extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: AppSizes.avatarSm,
+            height: AppSizes.avatarSm,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: scheme.primaryContainer.withValues(alpha: 0.4),
+              color: scheme.primaryContainer,
               borderRadius: AppRadius.smAll,
             ),
             child: Icon(
               _iconForCategory(category),
-              size: 18,
+              size: AppSizes.iconMd,
               color: scheme.primary,
             ),
           ),
@@ -366,13 +364,11 @@ class _CategoryTile extends StatelessWidget {
               children: [
                 Text(
                   category.label,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: AppTypography.labelLarge,
                 ),
                 Text(
                   context.l10n.adminAddOnsCount(addOnCount),
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -381,10 +377,7 @@ class _CategoryTile extends StatelessWidget {
           ),
           Text(
             Formatters.currency(revenue),
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w400,
-              color: AppColors.successNeutral,
-            ),
+            style: AppTypography.bodyMedium.copyWith(color: theme.income),
           ),
         ],
       ),

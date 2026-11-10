@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 import 'app_button.dart';
 import 'app_card.dart';
 import 'premium_decor.dart';
@@ -58,9 +59,8 @@ class EmptyState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.2,
+              style: AppTypography.titleMedium.copyWith(
+                color: scheme.onSurface,
               ),
             ),
             if (subtitle != null) ...[
@@ -68,29 +68,21 @@ class EmptyState extends StatelessWidget {
               Text(
                 subtitle!,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall,
+                style: AppTypography.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ],
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: AppSpacing.lg),
               if (outlinedAction)
-                OutlinedButton(
-                  onPressed: onAction,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: scheme.primary,
-                    side: BorderSide(color: scheme.outline),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.sm,
-                    ),
-                    shape: const StadiumBorder(),
-                  ),
-                  child: Text(actionLabel!),
-                )
+                // Ação secundária no botão oficial do DS (tinta + contorno);
+                // o laranja fica reservado ao CTA primário.
+                AppButton.secondary(label: actionLabel!, onPressed: onAction)
               else
                 AppButton.primary(
                   label: actionLabel!,
-                  icon: const Icon(Icons.add, size: 18),
+                  icon: const Icon(Icons.add, size: AppSizes.iconSm),
                   onPressed: onAction,
                 ),
             ],
@@ -132,8 +124,8 @@ class _EmptyHalo extends StatelessWidget {
             ),
           ),
           Container(
-            width: 64,
-            height: 64,
+            width: AppSpacing.gigantic,
+            height: AppSpacing.gigantic,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -142,7 +134,11 @@ class _EmptyHalo extends StatelessWidget {
               border: Border.all(color: PremiumDecor.hairline(scheme)),
               boxShadow: PremiumDecor.softShadow(scheme),
             ),
-            child: Icon(icon, size: 28, color: scheme.onSurfaceVariant),
+            child: Icon(
+              icon,
+              size: AppSizes.iconXl,
+              color: scheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -171,7 +167,7 @@ class InlineEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
 
     return AppCard(
       key: ValueKey('inline_empty_$message'),
@@ -180,15 +176,15 @@ class InlineEmpty extends StatelessWidget {
       child: Row(
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 20, color: theme.colorScheme.onSurfaceVariant),
+            Icon(icon, size: AppSizes.iconMd, color: scheme.onSurfaceVariant),
             const SizedBox(width: AppSpacing.sm),
           ],
           Expanded(
             child: Text(
               message,
               textAlign: icon == null ? TextAlign.center : TextAlign.start,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              style: AppTypography.bodyMedium.copyWith(
+                color: scheme.onSurfaceVariant,
               ),
             ),
           ),

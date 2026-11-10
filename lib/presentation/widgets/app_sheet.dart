@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/i18n/l10n_ext.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 import '../widgets/app_button.dart';
 import 'premium_decor.dart';
 
@@ -55,7 +56,7 @@ Future<T?> showAppSheet<T>(
                         top: AppSpacing.sm,
                         bottom: AppSpacing.xxs,
                       ),
-                      child: _SheetHandle(),
+                      child: SheetHandle(),
                     )
                   else
                     const Padding(
@@ -63,7 +64,7 @@ Future<T?> showAppSheet<T>(
                         top: AppSpacing.sm,
                         bottom: AppSpacing.xs,
                       ),
-                      child: _SheetHandle(),
+                      child: SheetHandle(),
                     ),
                   Flexible(
                     child: fullscreen
@@ -112,7 +113,7 @@ class _SheetScaleIn extends StatelessWidget {
 
 /// Seção agrupada dentro de uma sheet — o grupo de campos do formulário.
 ///
-/// Uma única superfície neutra (o tint quente do tema a 45%), cantos 16 e
+/// Uma única superfície neutra (o tint quente do tema a 45%), cantos 18 e
 /// **sem borda**: a hierarquia vem do agrupamento, do espaçamento e do
 /// rótulo — não de uma caixa dentro da caixa. O ícone do rótulo é discreto
 /// (`onSurfaceVariant`); o acento fica reservado para a ação principal da
@@ -134,14 +135,13 @@ class SheetSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
+        borderRadius: AppRadius.lgAll,
       ),
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
@@ -151,15 +151,19 @@ class SheetSection extends StatelessWidget {
             Row(
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 18, color: scheme.onSurfaceVariant),
-                  const SizedBox(width: 8),
+                  Icon(
+                    icon,
+                    size: AppSizes.iconSm,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
                 ],
                 Expanded(
                   child: Text(
                     title!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    style: AppTypography.labelMedium.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -210,8 +214,7 @@ class SheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     final hasAction = onSave != null && actionLabel != null;
 
@@ -225,13 +228,13 @@ class SheetHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         border: Border(
-          bottom: BorderSide(color: scheme.outlineVariant, width: 0.5),
+          bottom: BorderSide(color: PremiumDecor.hairline(scheme)),
         ),
       ),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.close, size: 20),
+            icon: const Icon(Icons.close, size: AppSizes.iconMd),
             color: scheme.onSurfaceVariant,
             onPressed: onClose ?? () => Navigator.of(context).pop(),
             tooltip: l10n.appSheetClose,
@@ -249,11 +252,10 @@ class SheetHeader extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     title,
-                    // Título de sheet no papel "Título 2" (17/w600): a
-                    // sheet é um ecrã, e o título dela lê-se como tal.
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.2,
+                    // Título de sheet no papel "Título 2": a sheet é um
+                    // ecrã, e o título dela lê-se como tal.
+                    style: AppTypography.titleMedium.copyWith(
+                      color: scheme.onSurface,
                     ),
                     textAlign: TextAlign.center,
                     softWrap: false,
@@ -261,10 +263,12 @@ class SheetHeader extends StatelessWidget {
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.micro),
                   Text(
                     subtitle!,
-                    style: theme.textTheme.bodySmall,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -281,22 +285,25 @@ class SheetHeader extends StatelessWidget {
               onPressed: isSaving ? null : onSave,
               icon: isSaving
                   ? const SizedBox(
-                      height: 16,
-                      width: 16,
+                      height: AppSizes.iconSm,
+                      width: AppSizes.iconSm,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,
             )
           else
-            const SizedBox(width: 48),
+            const SizedBox(width: AppSizes.touchTarget),
         ],
       ),
     );
   }
 }
 
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle();
+/// Alça de arraste das sheets — 36×5, discreta. Pública para sheets que
+/// montam o próprio contentor (ex.: detalhe de notificação) herdarem o
+/// mesmo desenho em vez de duplicarem a barra.
+class SheetHandle extends StatelessWidget {
+  const SheetHandle({super.key});
 
   @override
   Widget build(BuildContext context) {

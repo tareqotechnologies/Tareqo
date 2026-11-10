@@ -6,6 +6,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/app_clock.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/audit_entry.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/admin_providers.dart';
@@ -15,6 +16,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/metric_pill.dart';
+import '../../widgets/premium_decor.dart';
 
 /// Registro de auditoria — visual minimalista com detalhes claros.
 class AdminAuditLogScreen extends ConsumerStatefulWidget {
@@ -122,7 +124,7 @@ class _AdminAuditLogScreenState extends ConsumerState<AdminAuditLogScreen> {
 
                 // ── Bottom padding ──
                 const SliverToBoxAdapter(
-                  child: SizedBox(height: AppSpacing.xxl),
+                  child: SizedBox(height: AppSpacing.fabBottomClearance),
                 ),
               ],
             ),
@@ -250,11 +252,11 @@ class _CompactStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
-    return Container(
-      height: 44,
-      margin: const EdgeInsets.fromLTRB(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
         AppSpacing.lg,
@@ -262,38 +264,45 @@ class _CompactStats extends StatelessWidget {
       ),
       child: Row(
         children: [
-          MetricPill(
-            count: stats.total,
-            label: l10n.adminAuditLogAll,
-            color: scheme.onSurface,
+          Expanded(
+            child: Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                MetricPill(
+                  count: stats.total,
+                  label: l10n.adminAuditLogAll,
+                  color: scheme.onSurface,
+                ),
+                MetricPill(
+                  count: stats.approved,
+                  label: l10n.adminAuditLogApproved,
+                  color: theme.income,
+                ),
+                MetricPill(
+                  count: stats.rejected,
+                  label: l10n.adminAuditLogRejected,
+                  color: theme.expense,
+                ),
+              ],
+            ),
           ),
           const SizedBox(width: AppSpacing.xs),
-          MetricPill(
-            count: stats.approved,
-            label: l10n.adminAuditLogApproved,
-            color: AppColors.successNeutral,
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          MetricPill(
-            count: stats.rejected,
-            label: l10n.adminAuditLogRejected,
-            color: AppColors.statusError,
-          ),
-          const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm,
               vertical: AppSpacing.xs,
             ),
             decoration: BoxDecoration(
-              color: _rateColor(stats.rate).withValues(alpha: 0.1),
+              color: _rateColor(theme, scheme).withValues(alpha: 0.12),
               borderRadius: AppRadius.smAll,
             ),
             child: Text(
               '${stats.rate}%',
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: _rateColor(stats.rate)),
+              style: AppTypography.labelMedium.copyWith(
+                color: _rateColor(theme, scheme),
+              ),
             ),
           ),
         ],
@@ -301,10 +310,10 @@ class _CompactStats extends StatelessWidget {
     );
   }
 
-  Color _rateColor(int rate) {
-    if (rate >= 70) return AppColors.successNeutral;
-    if (rate >= 40) return AppColors.statusWarning;
-    return AppColors.statusError;
+  Color _rateColor(ThemeData theme, ColorScheme scheme) {
+    if (stats.rate >= 70) return theme.income;
+    if (stats.rate >= 40) return scheme.tertiary;
+    return theme.expense;
   }
 }
 // ─── Search + Filters ────────────────────────────────────────────────────────
@@ -325,24 +334,23 @@ class _SearchField extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return SizedBox(
-      height: 40,
+      height: AppSizes.controlHeightCompact,
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: Theme.of(context).textTheme.bodyMedium,
+        style: AppTypography.bodyMedium,
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: TextStyle(
-            color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
-            fontSize: 12,
+          hintStyle: AppTypography.bodySmall.copyWith(
+            color: scheme.onSurfaceVariant,
           ),
           prefixIcon: Icon(
             Icons.search,
-            size: 18,
+            size: AppSizes.iconMd,
             color: scheme.onSurfaceVariant,
           ),
           prefixIconConstraints: const BoxConstraints(
-            minWidth: 40,
+            minWidth: AppSpacing.xxxl,
             minHeight: 0,
           ),
           suffixIcon: controller.text.isNotEmpty
@@ -353,17 +361,17 @@ class _SearchField extends StatelessWidget {
                   },
                   child: Icon(
                     Icons.close,
-                    size: 16,
+                    size: AppSizes.iconSm,
                     color: scheme.onSurfaceVariant,
                   ),
                 )
               : null,
           suffixIconConstraints: const BoxConstraints(
-            minWidth: 36,
+            minWidth: AppSizes.avatarSm,
             minHeight: 0,
           ),
           filled: true,
-          fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+          fillColor: scheme.surfaceContainerHighest,
           contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.full),
@@ -407,11 +415,11 @@ class _FilterRow extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: 32,
+      height: AppSpacing.xxl,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: labels.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
         itemBuilder: (_, i) {
           final active = selected == i;
           return GestureDetector(
@@ -420,16 +428,13 @@ class _FilterRow extends StatelessWidget {
               duration: AppDurations.fast,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               decoration: BoxDecoration(
-                color: active
-                    ? scheme.primary
-                    : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: active ? scheme.primary : scheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppRadius.full),
               ),
               alignment: Alignment.center,
               child: Text(
                 labels[i],
-                style: TextStyle(
-                  fontSize: 12,
+                style: AppTypography.labelMedium.copyWith(
                   color: active ? scheme.onPrimary : scheme.onSurfaceVariant,
                 ),
               ),
@@ -450,6 +455,7 @@ class _DateHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -459,10 +465,7 @@ class _DateHeader extends StatelessWidget {
       ),
       child: Text(
         label.toUpperCase(),
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          letterSpacing: 0.8,
-        ),
+        style: AppTypography.eyebrow(scheme.onSurfaceVariant),
       ),
     );
   }
@@ -481,7 +484,7 @@ class _AuditTile extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final status = entry.detail?['status'] as String?;
-    final accent = _accentColor(entry.action, status);
+    final accent = _accentColor(theme, entry.action, status);
 
     return InkWell(
       onTap: () => _showDetail(context),
@@ -511,26 +514,22 @@ class _AuditTile extends StatelessWidget {
                   // Action + entity
                   Text.rich(
                     TextSpan(
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w400,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: scheme.onSurface,
                       ),
                       children: [
                         TextSpan(text: entry.actionLabel),
                         TextSpan(
                           text: '  ${entry.entityTypeLabel}',
-                          style: TextStyle(
+                          style: AppTypography.bodySmall.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontSize: 12,
                           ),
                         ),
                         if (entry.entityId != null)
                           TextSpan(
                             text: '  ${entry.entityId}',
-                            style: TextStyle(
-                              color: scheme.onSurfaceVariant.withValues(
-                                alpha: 0.6,
-                              ),
-                              fontSize: 12,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: scheme.onSurfaceVariant,
                             ),
                           ),
                       ],
@@ -539,7 +538,7 @@ class _AuditTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (status != null) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.micro),
                     _StatusDot(status: status, l10n: context.l10n),
                   ],
                 ],
@@ -551,7 +550,7 @@ class _AuditTile extends StatelessWidget {
             // ── Relative time ──
             Text(
               _relativeTime(entry.createdAt),
-              style: theme.textTheme.labelSmall?.copyWith(
+              style: AppTypography.labelSmall.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
@@ -561,19 +560,20 @@ class _AuditTile extends StatelessWidget {
     );
   }
 
-  Color _accentColor(String action, String? status) {
-    if (status == 'approved') return AppColors.successNeutral;
-    if (status == 'rejected') return AppColors.statusError;
+  Color _accentColor(ThemeData theme, String action, String? status) {
+    final scheme = theme.colorScheme;
+    if (status == 'approved') return theme.income;
+    if (status == 'rejected') return theme.expense;
     switch (action) {
       case 'tenant_decision':
-        return AppColors.accentOrange;
+        return scheme.primary;
       case 'plan_request_decision':
-        return AppColors.statusWarning;
+        return scheme.tertiary;
       case 'plan_change':
-        return AppColors.accentOrange;
+        return scheme.primary;
       default:
         // Neutro semântico (sem papel de cor): cinza oficial.
-        return AppColors.surfaceGray;
+        return scheme.onSurfaceVariant;
     }
   }
 
@@ -595,7 +595,7 @@ class _AuditTile extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: theme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+        borderRadius: AppRadius.sheetTop,
       ),
       // Thin: rotas modais não herdam o Theme local do shell.
       builder: (sheetContext) => adminThinIfNeeded(
@@ -617,21 +617,31 @@ class _StatusDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = AppColors.decisionStatusColor(status);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final color = switch (status) {
+      'approved' || 'aprovado' => theme.income,
+      'rejected' || 'rejeitado' => theme.expense,
+      'pending' || 'pendente' => scheme.tertiary,
+      _ => scheme.onSurfaceVariant,
+    };
     final label = status.toUpperCase();
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 6,
-          height: 6,
+          width: AppSpacing.xxs + AppSpacing.micro,
+          height: AppSpacing.xxs + AppSpacing.micro,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xxs),
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: color, letterSpacing: 0.5),
+          style: AppTypography.labelSmall.copyWith(
+            color: color,
+            letterSpacing: 0.5,
+          ),
         ),
       ],
     );
@@ -671,11 +681,11 @@ class _AuditDetailSheet extends StatelessWidget {
             // ── Handle ──
             Center(
               child: Container(
-                width: AppSpacing.huge,
+                width: AppSizes.avatarSm,
                 height: AppSpacing.xxs,
                 margin: const EdgeInsets.only(bottom: AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.3),
+                  color: PremiumDecor.hairline(scheme),
                   borderRadius: AppRadius.microAll,
                 ),
               ),
@@ -684,14 +694,12 @@ class _AuditDetailSheet extends StatelessWidget {
             // ── Header ──
             Text(
               entry.actionLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w400,
-              ),
+              style: theme.textTheme.titleMedium,
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppSpacing.micro),
             Text(
               '${entry.entityTypeLabel}  ${entry.entityId ?? '—'}',
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
@@ -700,7 +708,7 @@ class _AuditDetailSheet extends StatelessWidget {
               _StatusDot(status: status, l10n: context.l10n),
             ],
             const SizedBox(height: AppSpacing.lg),
-            const Divider(height: 1),
+            Divider(height: 1, color: PremiumDecor.hairline(scheme)),
             const SizedBox(height: AppSpacing.md),
 
             // ── Fields ──
@@ -740,13 +748,11 @@ class _AuditDetailSheet extends StatelessWidget {
             // ── Detail JSON ──
             if (entry.detail != null && entry.detail!.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
-              const Divider(height: 1),
+              Divider(height: 1, color: PremiumDecor.hairline(scheme)),
               const SizedBox(height: AppSpacing.md),
               Text(
                 'Detail',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
+                style: AppTypography.eyebrow(scheme.onSurfaceVariant),
               ),
               const SizedBox(height: AppSpacing.xs),
               ...entry.detail!.entries.map(
@@ -757,14 +763,14 @@ class _AuditDetailSheet extends StatelessWidget {
                     children: [
                       Text(
                         '${e.key}: ',
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: AppTypography.bodySmall.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
                       ),
                       Expanded(
                         child: Text(
                           '${e.value}',
-                          style: theme.textTheme.bodySmall,
+                          style: AppTypography.bodySmall,
                         ),
                       ),
                     ],

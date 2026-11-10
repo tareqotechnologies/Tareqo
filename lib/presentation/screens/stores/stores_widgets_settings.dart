@@ -114,6 +114,7 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
     // Loja ativa: a escolha migrou do banner do topo para AQUI (Lojas →
     // Ajustes). Todos os módulos (vendas, estoque, financeiro...) escopam
@@ -128,9 +129,9 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
     return ListView(
       padding: EdgeInsets.fromLTRB(
         AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-        16,
+        AppSpacing.md,
         AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-        96,
+        AppSpacing.fabBottomClearance,
       ),
       children: [
         // SALVAR — botão verde de largura total no TOPO da aba (referência
@@ -140,20 +141,18 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
           onPressed: _isSaving ? null : _save,
           icon: _isSaving
               ? const SizedBox(
-                  height: 18,
-                  width: 18,
+                  height: AppSizes.iconMd,
+                  width: AppSizes.iconMd,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.save_outlined),
+              : const Icon(Icons.save_outlined, size: AppSizes.iconMd),
           label: l10n.settingsSave,
         ),
         if (_formError != null) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             _formError!,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.error,
-            ),
+            style: AppTypography.bodySmall.copyWith(color: theme.expense),
           ),
         ],
         // MFA + FEEDBACK TÁTIL — switches de efeito IMEDIATO (salvam
@@ -167,16 +166,16 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
           onChanged: (v) => unawaited(_toggleMfaEnforced(v)),
           title: Text(
             l10n.settingsMfaEnforceTitle,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
+            style: AppTypography.bodyLarge.copyWith(
+              fontWeight: FontWeight.w500,
             ),
           ),
           subtitle: Text(
             _mfaEnforced
                 ? l10n.settingsMfaEnforceSubOn
                 : l10n.settingsMfaEnforceSubOff,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppTypography.bodySmall.copyWith(
+              color: scheme.onSurfaceVariant,
               height: 1.35,
             ),
           ),
@@ -192,19 +191,19 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
           },
           title: Text(
             l10n.settingsHapticsTitle,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontWeight: FontWeight.w600,
+            style: AppTypography.bodyLarge.copyWith(
+              fontWeight: FontWeight.w500,
             ),
           ),
           subtitle: Text(
             l10n.settingsHapticsSubtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppTypography.bodySmall.copyWith(
+              color: scheme.onSurfaceVariant,
               height: 1.35,
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         // LOJA ATIVA — só com 2+ lojas E usuário logado há o que escolher
         // (com uma única loja não existe seletor, o mesmo critério do
         // banner antigo). O guard `user != null` espelha a linha do
@@ -212,9 +211,9 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
         if (user != null && stores.length > 1) ...[
           Text(
             l10n.storeSelectorSectionTitle,
-            style: theme.textTheme.titleSmall,
+            style: AppTypography.labelLarge.copyWith(color: scheme.onSurface),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -222,7 +221,7 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
               for (final store in stores)
                 ChoiceChip(
                   avatar: store.id == activeStoreId
-                      ? const Icon(Icons.check, size: 16)
+                      ? const Icon(Icons.check, size: AppSizes.iconSm)
                       : null,
                   label: Text(store.name),
                   selected: store.id == activeStoreId,
@@ -232,10 +231,13 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
                 ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
         ],
-        Text(l10n.onboardingLanguageLabel, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        Text(
+          l10n.onboardingLanguageLabel,
+          style: AppTypography.labelLarge.copyWith(color: scheme.onSurface),
+        ),
+        const SizedBox(height: AppSpacing.xs),
         Wrap(
           spacing: 8,
           children: [
@@ -256,9 +258,12 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
-        Text(l10n.onboardingCurrencyLabel, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          l10n.onboardingCurrencyLabel,
+          style: AppTypography.labelLarge.copyWith(color: scheme.onSurface),
+        ),
+        const SizedBox(height: AppSpacing.xs),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -271,12 +276,14 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
               ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.xxl),
         // SEGURANÇA — troca de senha da conta (qualquer utilizador
         // logado; não é uma definição do tenant).
-        const SizedBox(height: 32),
-        Text(l10n.securitySectionTitle, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        Text(
+          l10n.securitySectionTitle,
+          style: AppTypography.labelLarge.copyWith(color: scheme.onSurface),
+        ),
+        const SizedBox(height: AppSpacing.xs),
         _SettingsEntry(
           icon: Icons.lock_reset_outlined,
           title: l10n.securityChangePassword,
@@ -289,9 +296,12 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
         // SUPORTE — acesso à documentação embutida (Ajuda → Guia do
         // Usuário / Troubleshooting). Fica separado do formulário acima
         // (moeda/idioma) por não ser uma definição do tenant.
-        const SizedBox(height: 32),
-        Text(l10n.settingsSupportSection, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.xxl),
+        Text(
+          l10n.settingsSupportSection,
+          style: AppTypography.labelLarge.copyWith(color: scheme.onSurface),
+        ),
+        const SizedBox(height: AppSpacing.xs),
         _SettingsEntry(
           icon: Icons.support_agent_outlined,
           title: l10n.settingsSupportEntry,
@@ -322,8 +332,7 @@ class _SettingsEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
 
     return AppCard(
       onTap: onTap,
@@ -335,8 +344,8 @@ class _SettingsEntry extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: AppSizes.avatarMd,
+            height: AppSizes.avatarMd,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -344,7 +353,7 @@ class _SettingsEntry extends StatelessWidget {
             ),
             child: Icon(
               icon,
-              size: 20,
+              size: AppSizes.iconMd,
               color: IconTone.lightForeground(scheme.primary),
             ),
           ),
@@ -353,11 +362,16 @@ class _SettingsEntry extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.titleSmall),
-                const SizedBox(height: 2),
+                Text(
+                  title,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                     height: 1.35,
                   ),
@@ -366,7 +380,11 @@ class _SettingsEntry extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.xxs),
-          Icon(Icons.chevron_right, size: 18, color: scheme.onSurfaceVariant),
+          Icon(
+            Icons.chevron_right,
+            size: AppSizes.iconMd,
+            color: scheme.onSurfaceVariant,
+          ),
         ],
       ),
     );

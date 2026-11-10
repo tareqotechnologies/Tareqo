@@ -8,6 +8,7 @@ import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/money.dart';
 import '../../../domain/entities/plan.dart';
@@ -24,6 +25,7 @@ import '../../widgets/list_skeleton.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../widgets/admin_thin_bridge.dart';
 import '../../widgets/metric_pill.dart';
+import '../../widgets/premium_decor.dart';
 
 /// Painel do super admin — gestão de planos (criar, editar, ativar/desativar).
 /// Os planos limitam a estrutura de cada tenant (nº de lojas e funcionários).
@@ -75,6 +77,7 @@ class _AdminPlansScreenState extends ConsumerState<AdminPlansScreen> {
   Widget build(BuildContext context) {
     final plansAsync = ref.watch(allPlansProvider);
     final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -122,8 +125,12 @@ class _AdminPlansScreenState extends ConsumerState<AdminPlansScreen> {
                   ),
                   sliver: SliverList.separated(
                     itemCount: plans.length,
-                    separatorBuilder: (_, _) =>
-                        const Divider(height: 1, indent: 40, endIndent: 0),
+                    separatorBuilder: (_, _) => Divider(
+                      height: 1,
+                      indent: AppSpacing.xxxl,
+                      endIndent: 0,
+                      color: PremiumDecor.hairline(scheme),
+                    ),
                     itemBuilder: (_, i) => _PlanTile(
                       plan: plans[i],
                       onTap: () => _showPlanDetail(plans[i]),
@@ -134,7 +141,7 @@ class _AdminPlansScreenState extends ConsumerState<AdminPlansScreen> {
 
                 // ── Bottom padding ──
                 const SliverToBoxAdapter(
-                  child: SizedBox(height: AppSpacing.xxl),
+                  child: SizedBox(height: AppSpacing.fabBottomClearance),
                 ),
               ],
             ),
@@ -160,10 +167,11 @@ class _CompactStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Container(
-      height: 44,
+      height: AppSizes.tableRowHeight,
       margin: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
@@ -181,13 +189,13 @@ class _CompactStats extends StatelessWidget {
           MetricPill(
             count: active,
             label: context.l10n.adminPlansActive,
-            color: AppColors.successNeutral,
+            color: theme.income,
           ),
           const SizedBox(width: AppSpacing.xs),
           MetricPill(
             count: inactive,
             label: context.l10n.adminPlansInactive,
-            color: AppColors.statusError,
+            color: theme.expense,
           ),
         ],
       ),
@@ -248,17 +256,16 @@ class _PlanTile extends ConsumerWidget {
                   // Name + price
                   Text.rich(
                     TextSpan(
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w400,
+                      style: AppTypography.labelLarge.copyWith(
+                        color: scheme.onSurface,
                       ),
                       children: [
                         TextSpan(text: plan.name),
                         TextSpan(
                           text:
                               '  ${Formatters.currency(plan.priceMonthlyCents)}${context.l10n.adminPlanPerMonthSuffix}',
-                          style: TextStyle(
+                          style: AppTypography.bodySmall.copyWith(
                             color: scheme.onSurfaceVariant,
-                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -266,32 +273,34 @@ class _PlanTile extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.micro),
                   // Details + tenant count
                   Row(
                     children: [
                       Expanded(
                         child: Text(
                           '${plan.maxStores} ${l10n.adminPlanMaxStores.toLowerCase()} · ${plan.maxEmployees} ${l10n.adminPlanMaxEmployees.toLowerCase()}',
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: AppTypography.bodySmall.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: AppSpacing.xs),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.xs,
-                          vertical: 2,
+                          vertical: AppSpacing.micro,
                         ),
                         decoration: BoxDecoration(
-                          color: scheme.primaryContainer.withValues(alpha: 0.4),
+                          color: scheme.primaryContainer,
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Text(
                           context.l10n.adminTenantCount(tenantCount),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.primary,
-                            fontSize: 12,
+                          style: AppTypography.labelMedium.copyWith(
+                            color: scheme.onPrimaryContainer,
                           ),
                         ),
                       ),
@@ -311,19 +320,22 @@ class _PlanTile extends ConsumerWidget {
                   vertical: AppSpacing.xxs,
                 ),
                 decoration: BoxDecoration(
-                  color: scheme.errorContainer.withValues(alpha: 0.5),
+                  color: scheme.errorContainer,
                   borderRadius: AppRadius.smAll,
                 ),
                 child: Text(
                   l10n.adminPlanInactive,
-                  style: theme.textTheme.labelSmall?.copyWith(
+                  style: AppTypography.labelMedium.copyWith(
                     color: scheme.onErrorContainer,
-                    fontSize: 12,
                   ),
                 ),
               ),
 
-            Icon(Icons.chevron_right, size: 18, color: scheme.onSurfaceVariant),
+            Icon(
+              Icons.chevron_right,
+              size: AppSizes.iconMd,
+              color: scheme.onSurfaceVariant,
+            ),
           ],
         ),
       ),
@@ -368,9 +380,7 @@ class _PlanDetailSheet extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: scheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppRadius.xl),
-            ),
+            borderRadius: AppRadius.sheetTop,
           ),
           child: ListView(
             controller: scrollController,
@@ -386,7 +396,7 @@ class _PlanDetailSheet extends ConsumerWidget {
                     bottom: AppSpacing.lg,
                   ),
                   decoration: BoxDecoration(
-                    color: scheme.outlineVariant,
+                    color: PremiumDecor.hairline(scheme),
                     borderRadius: AppRadius.microAll,
                   ),
                 ),
@@ -394,6 +404,7 @@ class _PlanDetailSheet extends ConsumerWidget {
 
               // ── Header com nome + ID copiável ──
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Accent bar
                   Container(
@@ -411,10 +422,13 @@ class _PlanDetailSheet extends ConsumerWidget {
                       children: [
                         Text(
                           plan.name,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w400,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: scheme.onSurface,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: AppSpacing.micro),
                         GestureDetector(
                           onTap: () {
                             Clipboard.setData(ClipboardData(text: plan.id));
@@ -427,10 +441,12 @@ class _PlanDetailSheet extends ConsumerWidget {
                           },
                           child: Text(
                             plan.id,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            style: AppTypography.bodySmall.copyWith(
                               color: scheme.onSurfaceVariant,
                               fontFamily: 'monospace',
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -438,7 +454,7 @@ class _PlanDetailSheet extends ConsumerWidget {
                   ),
                   IconButton(
                     tooltip: l10n.appSheetClose,
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, size: AppSizes.iconMd),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -462,15 +478,17 @@ class _PlanDetailSheet extends ConsumerWidget {
                       plan.isActive
                           ? Icons.check_circle_outline
                           : Icons.pause_circle_outline,
-                      size: 16,
+                      size: AppSizes.iconSm,
                       color: accent,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.xs),
                     Text(
                       plan.isActive
                           ? l10n.statusApproved
                           : l10n.adminPlanInactive,
-                      style: theme.textTheme.bodySmall?.copyWith(color: accent),
+                      style: AppTypography.labelMedium.copyWith(
+                        color: scheme.onSurface,
+                      ),
                     ),
                   ],
                 ),
@@ -500,14 +518,12 @@ class _PlanDetailSheet extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest.withValues(
-                      alpha: 0.3,
-                    ),
+                    color: scheme.surfaceContainerHighest,
                     borderRadius: AppRadius.smAll,
                   ),
                   child: Text(
                     plan.description,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: AppTypography.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -520,30 +536,30 @@ class _PlanDetailSheet extends ConsumerWidget {
                 children: [
                   Icon(
                     Icons.business_outlined,
-                    size: 18,
+                    size: AppSizes.iconMd,
                     color: scheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
                       l10n.adminTenantDetailEmployees,
-                      style: theme.textTheme.labelMedium,
+                      style: AppTypography.labelLarge.copyWith(
+                        color: scheme.onSurface,
+                      ),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.xs,
-                      vertical: 2,
+                      vertical: AppSpacing.micro,
                     ),
                     decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest.withValues(
-                        alpha: 0.5,
-                      ),
+                      color: scheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Text(
                       context.l10n.adminTenantCount(planTenants.length),
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      style: AppTypography.labelSmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
@@ -593,7 +609,10 @@ class _PlanDetailSheet extends ConsumerWidget {
                   Expanded(
                     child: AppButton.primary(
                       onPressed: onEdit,
-                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        size: AppSizes.iconMd,
+                      ),
                       label: l10n.commonSave,
                     ),
                   ),
@@ -634,17 +653,28 @@ class _InfoRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: scheme.onSurfaceVariant),
+          Icon(icon, size: AppSizes.iconMd, color: scheme.onSurfaceVariant),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               label,
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
           ),
-          Text(value, style: theme.textTheme.bodySmall?.copyWith()),
+          const SizedBox(width: AppSpacing.xs),
+          Flexible(
+            child: Text(
+              value,
+              style: AppTypography.bodyMedium.copyWith(
+                color: scheme.onSurface,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+            ),
+          ),
         ],
       ),
     );
@@ -664,7 +694,7 @@ class _TenantStatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -677,7 +707,7 @@ class _TenantStatChip extends StatelessWidget {
       ),
       child: Text(
         '$count $label',
-        style: theme.textTheme.labelSmall?.copyWith(color: color),
+        style: AppTypography.labelMedium.copyWith(color: scheme.onSurface),
       ),
     );
   }
@@ -704,14 +734,18 @@ class _TenantMiniTile extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: AppSpacing.xxl,
+            height: AppSpacing.xxl,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
               borderRadius: AppRadius.xsAll,
             ),
-            child: Icon(Icons.business_outlined, size: 16, color: color),
+            child: Icon(
+              Icons.business_outlined,
+              size: AppSizes.iconSm,
+              color: color,
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -720,15 +754,15 @@ class _TenantMiniTile extends StatelessWidget {
               children: [
                 Text(
                   tenant.businessName,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w400,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   tenant.ownerUserId.substring(0, 8),
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                     fontFamily: 'monospace',
                   ),
@@ -739,7 +773,7 @@ class _TenantMiniTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.xs,
-              vertical: 2,
+              vertical: AppSpacing.micro,
             ),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
@@ -747,9 +781,8 @@ class _TenantMiniTile extends StatelessWidget {
             ),
             child: Text(
               statusLabel,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: color,
-                fontSize: 12,
+              style: AppTypography.labelMedium.copyWith(
+                color: scheme.onSurface,
               ),
             ),
           ),
@@ -768,7 +801,6 @@ class _SectionEmpty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final theme = Theme.of(context);
 
     return Container(
       width: double.infinity,
@@ -777,18 +809,21 @@ class _SectionEmpty extends StatelessWidget {
         vertical: AppSpacing.lg,
       ),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: scheme.surfaceContainerHighest,
         borderRadius: AppRadius.smAll,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 16, color: scheme.outline),
+          Icon(icon, size: AppSizes.iconSm, color: scheme.onSurfaceVariant),
           const SizedBox(width: AppSpacing.xs),
-          Text(
-            message,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
+          Flexible(
+            child: Text(
+              message,
+              style: AppTypography.bodySmall.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
         ],
@@ -918,9 +953,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppRadius.xl),
-        ),
+        borderRadius: AppRadius.sheetTop,
       ),
       child: SingleChildScrollView(
         padding: AppSpacing.sheetPadding,
@@ -939,7 +972,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                     bottom: AppSpacing.lg,
                   ),
                   decoration: BoxDecoration(
-                    color: scheme.outlineVariant,
+                    color: PremiumDecor.hairline(scheme),
                     borderRadius: AppRadius.microAll,
                   ),
                 ),
@@ -952,14 +985,14 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                       widget.plan == null
                           ? l10n.adminPlanNewTitle
                           : l10n.adminPlanEditTitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w400,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: scheme.onSurface,
                       ),
                     ),
                   ),
                   IconButton(
                     tooltip: l10n.appSheetClose,
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, size: AppSizes.iconMd),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -1031,9 +1064,7 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   _formError!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.error,
-                  ),
+                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),
@@ -1041,8 +1072,8 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
                 onPressed: _isSubmitting ? null : _submit,
                 icon: _isSubmitting
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
+                        height: AppSizes.iconMd,
+                        width: AppSizes.iconMd,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : null,

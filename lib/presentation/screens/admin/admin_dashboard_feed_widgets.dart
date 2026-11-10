@@ -34,14 +34,14 @@ class _PlanBarRow extends StatelessWidget {
             borderRadius: AppRadius.microAll,
             child: LinearProgressIndicator(
               value: fraction,
-              minHeight: 6,
+              minHeight: AppSpacing.xxs + AppSpacing.micro,
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(color),
             ),
           ),
         ),
         const SizedBox(width: AppSpacing.xs),
-        Text('$count', style: theme.textTheme.bodySmall),
+        Text('$count', style: AppTypography.bodySmall),
       ],
     );
   }
@@ -69,14 +69,14 @@ class _RecentActivityFeed extends StatelessWidget {
 
     if (isLoading) {
       return AppCard(
-        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+        borderRadius: AppRadius.lgAll,
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             for (var i = 0; i < 3; i++) ...[
               Container(
                 width: double.infinity,
-                height: 36,
+                height: AppSizes.avatarSm,
                 decoration: BoxDecoration(
                   color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: AppRadius.xsAll,
@@ -93,20 +93,22 @@ class _RecentActivityFeed extends StatelessWidget {
 
     if (recent.isEmpty) {
       return AppCard(
-        borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+        borderRadius: AppRadius.lgAll,
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(
           children: [
             Icon(
               Icons.history_outlined,
-              size: 16,
+              size: AppSizes.iconMd,
               color: scheme.onSurfaceVariant,
             ),
             const SizedBox(width: AppSpacing.xs),
-            Text(
-              l10n.adminAuditLogEmpty,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
+            Expanded(
+              child: Text(
+                l10n.adminAuditLogEmpty,
+                style: AppTypography.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -115,7 +117,7 @@ class _RecentActivityFeed extends StatelessWidget {
     }
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       padding: EdgeInsets.zero,
       child: Column(
         children: [
@@ -126,7 +128,7 @@ class _RecentActivityFeed extends StatelessWidget {
                 height: 1,
                 indent: AppSpacing.md,
                 endIndent: AppSpacing.md,
-                color: scheme.outlineVariant.withValues(alpha: 0.5),
+                color: PremiumDecor.hairline(scheme),
               ),
           ],
         ],
@@ -157,8 +159,8 @@ class _ActivityRow extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 6,
-            height: 6,
+            width: AppSpacing.xs,
+            height: AppSpacing.xs,
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(AppRadius.full),
@@ -168,14 +170,15 @@ class _ActivityRow extends StatelessWidget {
           Expanded(
             child: Text(
               entry.actionLabel,
-              style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+              style: AppTypography.bodySmall,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             timeFormat.format(entry.createdAt),
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
@@ -212,21 +215,25 @@ class _QuickActionGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final columns = width >= 600 ? 4 : 2;
+    final columns = MediaQuery.sizeOf(context).width >= AppBreakpoints.mediumMin
+        ? 4
+        : 2;
 
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: actions.map((action) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
         final itemWidth =
-            (width - AppSpacing.lg * 2 - AppSpacing.sm * (columns - 1)) /
-            columns;
-        return SizedBox(
-          width: itemWidth,
-          child: _QuickActionCard(action: action),
+            (constraints.maxWidth - AppSpacing.sm * (columns - 1)) / columns;
+        return Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: actions.map((action) {
+            return SizedBox(
+              width: itemWidth,
+              child: _QuickActionCard(action: action),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 }
@@ -241,7 +248,7 @@ class _QuickActionCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return AppCard(
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.md,
@@ -254,25 +261,28 @@ class _QuickActionCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: AppSizes.avatarSm,
+                height: AppSizes.avatarSm,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: action.color.withValues(alpha: 0.14),
                   borderRadius: AppRadius.smAll,
                 ),
-                child: Icon(action.icon, size: 18, color: action.color),
+                child: Icon(
+                  action.icon,
+                  size: AppSizes.iconMd,
+                  color: action.color,
+                ),
               ),
               if (action.badge > 0) ...[
                 const Spacer(),
-                // Contagem em pílula tingida com texto na própria cor do
-                // item — `onTertiary` sobre primary/statusPurple era um
-                // pareamento sem relação com a cor de fundo (contraste
-                // imprevisível nos dois temas).
+                // Contagem em pílula tingida com texto neutro — a cor do
+                // item fica no ícone/fundo; texto pequeno em laranja sobre
+                // o véu não atinge AA no claro.
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xs,
-                    vertical: 2,
+                    vertical: AppSpacing.micro,
                   ),
                   decoration: BoxDecoration(
                     color: action.color.withValues(alpha: 0.14),
@@ -280,10 +290,8 @@ class _QuickActionCard extends StatelessWidget {
                   ),
                   child: Text(
                     '${action.badge}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: action.color,
-                      fontWeight: FontWeight.w600,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -293,7 +301,9 @@ class _QuickActionCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             action.label,
-            style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
+            style: AppTypography.bodySmall.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

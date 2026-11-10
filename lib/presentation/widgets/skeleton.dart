@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_tokens.dart';
+
 /// Skeleton loading — envolve o conteúdo (blocos do mesmo shape dos
 /// elementos reais) com um pulso suave de opacidade. Sem shimmer, evitando
 /// dependência nova. Respeita "reduzir movimento" (acessibilidade).
@@ -38,13 +40,14 @@ class _SkeletonState extends State<Skeleton>
   }
 }
 
-/// Bloco de skeleton — retângulo arredondado na cor de superfície elevada.
+/// Bloco de skeleton — retângulo arredondado num véu neutro de tinta
+/// (`onSurface` com baixa opacidade), visível sobre o canvas nos dois temas.
 class SkeletonBlock extends StatelessWidget {
   const SkeletonBlock({
     super.key,
     required this.height,
     this.width,
-    this.radius = 14,
+    this.radius = AppRadius.md,
   });
 
   final double height;
@@ -53,11 +56,16 @@ class SkeletonBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    // O fundo da app já é `canvas`/`surfaceContainerHighest` nos dois temas:
+    // usar essa cor tornaria o bloco invisível. O véu de tinta é o único
+    // neutro da paleta que contrasta com o fundo em light e dark.
+    final veil = theme.brightness == Brightness.dark ? 0.10 : 0.06;
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: theme.colorScheme.onSurface.withValues(alpha: veil),
         borderRadius: BorderRadius.circular(radius),
       ),
     );

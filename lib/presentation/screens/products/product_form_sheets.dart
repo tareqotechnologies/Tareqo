@@ -8,6 +8,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/money.dart';
@@ -66,14 +68,13 @@ class _ProductPhotoPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     final hasImage = bytes != null || imagePath.isNotEmpty;
 
     final preview = bytes != null
         ? ClipRRect(
-            borderRadius: AppRadius.lgAll,
+            borderRadius: AppRadius.mdAll,
             child: Image.memory(
               bytes!,
               width: 76,
@@ -103,7 +104,7 @@ class _ProductPhotoPicker extends StatelessWidget {
             ),
             child: preview,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           // Labels + botões
           Expanded(
             child: Column(
@@ -112,18 +113,20 @@ class _ProductPhotoPicker extends StatelessWidget {
               children: [
                 Text(
                   hasImage ? l10n.productsPhotoTitle : l10n.productsPhotoAdd,
-                  style: theme.textTheme.titleSmall,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   hasImage
                       ? l10n.productsPhotoChangeHint
                       : l10n.productsPhotoOptionalHint,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -132,14 +135,14 @@ class _ProductPhotoPicker extends StatelessWidget {
                       tooltip: l10n.productsPhotoTake,
                       onTap: onTakePhoto,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.xs),
                     _PhotoActionButton(
                       icon: Icons.photo_library_outlined,
                       tooltip: l10n.productsPhotoGallery,
                       onTap: onPickGallery,
                     ),
                     if (hasImage) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.xs),
                       _PhotoActionButton(
                         icon: Icons.delete_outline,
                         tooltip: l10n.productsPhotoRemove,
@@ -208,7 +211,7 @@ class _PhotoActionButton extends StatelessWidget {
                   : scheme.outlineVariant.withValues(alpha: 0.5),
             ),
           ),
-          child: Icon(icon, size: 18, color: color),
+          child: Icon(icon, size: AppSizes.iconMd, color: color),
         ),
       ),
     );
@@ -223,13 +226,12 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 18, color: scheme.onSurfaceVariant),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.xs),
         Flexible(
           child: FittedBox(
             fit: BoxFit.scaleDown,
@@ -237,7 +239,7 @@ class _SectionLabel extends StatelessWidget {
             child: Text(
               title,
               maxLines: 1,
-              style: theme.textTheme.titleSmall?.copyWith(
+              style: AppTypography.labelLarge.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
             ),
@@ -263,8 +265,7 @@ class _CompactSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -282,11 +283,16 @@ class _CompactSwitch extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(label, style: theme.textTheme.titleSmall),
-                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -518,7 +524,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
             children: [
               SheetHeader(title: l10n.productsAddNew),
               // FOTO — seção própria no topo (preview + câmera/galeria).
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _ProductPhotoPicker(
                 bytes: _imageBytes,
                 imagePath: '',
@@ -526,7 +532,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                 onPickGallery: () => _pickPhoto(ImageSource.gallery),
                 onRemove: () => setState(() => _imageBytes = null),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               // INFORMAÇÕES — identidade do produto.
               // INFORMAÇÕES — identidade do produto (widget compartilhado
               // por Add/Edit; antes era ~100 linhas duplicadas nos dois
@@ -549,20 +555,20 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                   }
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               // PREÇOS — compra e venda lado a lado.
               ProductPricingFields(
                 purchaseController: _purchasePriceController,
                 saleController: _salePriceController,
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               // ESTOQUE — quantidade + validade + venda por peso.
               _SectionLabel(
                 icon: Icons.warehouse_outlined,
                 title: l10n.productsSectionStock,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.xs),
               AppTextField(
                 controller: _stockController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -590,7 +596,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                   return null;
                 },
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xxs),
               // W11: validade opcional — o lote inicial do estoque de
               // abertura nasce com ela; o dashboard alerta (vermelho =
               // vencido; amarelo = vence em < 30 dias) quando expira.
@@ -601,7 +607,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                 onPick: _pickExpiry,
                 onClear: _clearExpiry,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xxs),
               // W11: venda por PESO (fração) — o PDV passa a aceitar
               // quantidades decimais e o código de barras de balança.
               // Material explícito: o SwitchListTile pinta o fundo e o ink no
@@ -620,22 +626,22 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
                     setState(() => _unitLabel = value ?? 'kg'),
               ),
               if (_formError != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 Text(
                   _formError!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
+                  // `theme.expense` = tint AA no escuro (o #C62828 puro
+                  // falha contraste como texto sobre o preto).
+                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
                 ),
               ],
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
               AppButton.primary(
                 label: l10n.productsAddSubmit,
                 onPressed: _isSubmitting ? null : _submit,
                 icon: _isSubmitting
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
+                        height: AppSizes.iconMd,
+                        width: AppSizes.iconMd,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : null,
@@ -878,7 +884,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
             children: [
               SheetHeader(title: l10n.productsEditTitle),
               // FOTO — seção própria no topo (preview + câmera/galeria).
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _ProductPhotoPicker(
                 bytes: _imageBytes,
                 imagePath: _imagePath,
@@ -886,7 +892,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 onPickGallery: () => _pickPhoto(ImageSource.gallery),
                 onRemove: _removePhoto,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               // INFORMAÇÕES — identidade do produto.
               // INFORMAÇÕES — identidade do produto (widget compartilhado
               // por Add/Edit; antes era ~100 linhas duplicadas nos dois
@@ -909,19 +915,19 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                   }
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               // PREÇOS — compra e venda lado a lado.
               ProductPricingFields(
                 purchaseController: _purchasePriceController,
                 saleController: _salePriceController,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               // ESTOQUE — quantidade exata + venda por peso (FIFO).
               _SectionLabel(
                 icon: Icons.warehouse_outlined,
                 title: l10n.productsSectionStock,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.xs),
               AppTextField(
                 controller: _stockController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -949,7 +955,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                   return null;
                 },
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xxs),
               ProductWeightFields(
                 vendaPorFracao: _vendaPorFracao,
                 unitLabel: _unitLabel,
@@ -960,7 +966,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 onUnitChanged: (value) =>
                     setState(() => _unitLabel = value ?? 'kg'),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               // STATUS — ativar/desativar (inativo some do PDV e das
               // compras; o estoque é preservado — a reativação devolve a
               // venda).
@@ -968,7 +974,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 icon: Icons.toggle_on_outlined,
                 title: l10n.productsSectionStatus,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               _CompactSwitch(
                 label: l10n.productsActiveLabel,
                 subtitle: l10n.productsActiveHint,
@@ -976,22 +982,22 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
                 onChanged: (value) => setState(() => _isActive = value),
               ),
               if (_formError != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
                 Text(
                   _formError!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
+                  // `theme.expense` = tint AA no escuro (o #C62828 puro
+                  // falha contraste como texto sobre o preto).
+                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
                 ),
               ],
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
               AppButton.primary(
                 label: l10n.productsEditSubmit,
                 onPressed: _isSubmitting ? null : _submit,
                 icon: _isSubmitting
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
+                        height: AppSizes.iconMd,
+                        width: AppSizes.iconMd,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : null,
@@ -1025,8 +1031,7 @@ class _ExpiryField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     final hasDate = expiryDate != null;
 
@@ -1056,10 +1061,10 @@ class _ExpiryField extends StatelessWidget {
             children: [
               Icon(
                 Icons.event_outlined,
-                size: 20,
+                size: AppSizes.iconMd,
                 color: scheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   hasDate
@@ -1069,14 +1074,21 @@ class _ExpiryField extends StatelessWidget {
                   // Quebra em até 2 linhas — a data nunca é cortada.
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: hasDate ? scheme.onSurface : scheme.onSurfaceVariant,
-                    fontWeight: hasDate ? FontWeight.w600 : null,
-                  ),
+                  // Vazio = convite em corpo; preenchido = valor em
+                  // labelLarge (14/500) — o peso não sai da escala.
+                  style:
+                      (hasDate
+                              ? AppTypography.labelLarge
+                              : AppTypography.bodyMedium)
+                          .copyWith(
+                            color: hasDate
+                                ? scheme.onSurface
+                                : scheme.onSurfaceVariant,
+                          ),
                 ),
               ),
               if (hasDate) ...[
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xxs),
                 IconButton(
                   tooltip: l10n.productsExpiryClear,
                   icon: const Icon(Icons.close, size: 18),
@@ -1133,7 +1145,7 @@ class ProductIdentitySection extends StatelessWidget {
           icon: Icons.inventory_2_outlined,
           title: l10n.productsSectionInfo,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.sm),
         AppTextField(
           controller: nameController,
           textInputAction: TextInputAction.next,
@@ -1178,7 +1190,7 @@ class ProductIdentitySection extends StatelessWidget {
             return null;
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.xs),
         // Código de barras convencional (EAN-13, EAN-8, UPC-A, UPC-E, Code 128)
         // Campo opcional, universal — independente do PLU ou configuração de balança.
         AppTextField(
@@ -1220,7 +1232,7 @@ class ProductIdentitySection extends StatelessWidget {
             return null;
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.xs),
         // Fase 1: tipo estrutural do produto (matéria-prima, revenda,
         // produzido, composto, embalagem). Define o papel na
         // produção/receitas das fases seguintes — o default 'revenda'
@@ -1262,7 +1274,7 @@ class ProductPricingFields extends StatelessWidget {
           icon: Icons.payments_outlined,
           title: l10n.productsSectionPricing,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.xs),
         Row(
           children: [
             Expanded(
@@ -1278,7 +1290,7 @@ class ProductPricingFields extends StatelessWidget {
                     : null,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: AppTextField(
                 controller: saleController,
@@ -1300,7 +1312,7 @@ class ProductPricingFields extends StatelessWidget {
         Row(
           children: [
             Expanded(child: MoneyLivePreview(controller: purchaseController)),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(child: MoneyLivePreview(controller: saleController)),
           ],
         ),

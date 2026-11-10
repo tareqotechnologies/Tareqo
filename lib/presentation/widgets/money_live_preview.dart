@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/money.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Preview AO VIVO do valor que será REGISTADO a partir do texto digitado
 /// num campo de moeda.
@@ -53,9 +54,8 @@ class _MoneyLivePreviewState extends State<MoneyLivePreview> {
         alignment: Alignment.centerRight,
         child: Text(
           '= ${Formatters.currency(cents)}',
-          style: theme.textTheme.bodySmall?.copyWith(
+          style: AppTypography.bodySmall.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
           ),
         ),
       ),

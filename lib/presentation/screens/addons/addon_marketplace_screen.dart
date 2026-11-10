@@ -3,16 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/addon_localization.dart';
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/theme/app_tokens.dart';
 import '../../../core/observability/crash_reporting.dart';
-import '../../widgets/app_page.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/addon.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/addon_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../navigation/app_routes.dart';
+import '../../widgets/app_page.dart';
 
 /// Ecra do marketplace de add-ons — apenas visualização.
 ///
@@ -24,7 +25,7 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     final addOns = ref.watch(addOnCatalogProvider);
     final activeIds = ref.watch(activeAddOnIdsProvider).value ?? {};
@@ -44,7 +45,7 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
 
     return AppPage(
       title: l10n.addonsTitle,
-      titleStyle: theme.textTheme.titleMedium,
+      titleStyle: AppTypography.titleMedium,
       useSafeArea: false,
       body: ListView(
         padding: EdgeInsets.fromLTRB(
@@ -58,8 +59,8 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: AppSpacing.md),
             child: Text(
               l10n.addonsSubtitle,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              style: AppTypography.bodyMedium.copyWith(
+                color: scheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -68,22 +69,22 @@ class AddOnMarketplaceScreen extends ConsumerWidget {
             margin: const EdgeInsets.only(bottom: AppSpacing.md),
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+              color: scheme.primaryContainer,
               borderRadius: AppRadius.smAll,
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.info_outline,
-                  size: 16,
-                  color: theme.colorScheme.tertiary,
+                  size: AppSizes.iconSm,
+                  color: scheme.primary,
                 ),
-                const SizedBox(width: AppSpacing.xs),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     l10n.addonsManagedByAdmin,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.tertiary,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onPrimaryContainer,
                     ),
                   ),
                 ),
@@ -166,9 +167,7 @@ class _AddOnCard extends StatelessWidget {
     final iconData = _iconForName(addon.iconName);
 
     return Material(
-      color: isActive
-          ? scheme.primaryContainer.withValues(alpha: 0.3)
-          : scheme.surfaceContainerLow,
+      color: isActive ? scheme.primaryContainer : scheme.surfaceContainerLow,
       borderRadius: AppRadius.lgAll,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -179,17 +178,20 @@ class _AddOnCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: AppSizes.avatarSm,
+                height: AppSizes.avatarSm,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
+                  // No cartão activo o fundo já é primaryContainer: a caixa
+                  // usa a superfície para o ícone continuar legível.
                   color: isActive
-                      ? scheme.primary.withValues(alpha: 0.12)
+                      ? scheme.surface
                       : scheme.surfaceContainerHighest,
-                  shape: BoxShape.circle,
+                  borderRadius: AppRadius.smAll,
                 ),
                 child: Icon(
                   iconData,
-                  size: 20,
+                  size: AppSizes.iconMd,
                   color: isActive ? scheme.primary : scheme.onSurfaceVariant,
                 ),
               ),
@@ -200,77 +202,46 @@ class _AddOnCard extends StatelessWidget {
                   children: [
                     Text(
                       addonDisplayName(context.l10n, addon),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: AppTypography.labelLarge.copyWith(
+                        color: scheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.micro),
                     // Descrição COMPLETA — nunca truncar: o nome e a
                     // descrição são o que explica o add-on ao dono da loja.
                     Text(
                       addonDescription(context.l10n, addon),
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.xs),
                     // Badges + preço — Wrap: nunca corta o rótulo em ecrãs
                     // estreitos (fluem para a linha seguinte).
                     Wrap(
                       spacing: AppSpacing.xs,
-                      runSpacing: 4,
+                      runSpacing: AppSpacing.xxs,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         if (isIncluded)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xs,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.successNeutral.withValues(
-                                alpha: 0.1,
-                              ),
-                              borderRadius: AppRadius.xsAll,
-                            ),
-                            child: Text(
-                              context.l10n.addonsIncluded,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: AppColors.successNeutral,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                          _AddOnBadge(
+                            label: context.l10n.addonsIncluded,
+                            color: theme.income,
+                            textColor: theme.income,
                           ),
                         if (!isIncluded && isActive)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.xs,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color: scheme.primary.withValues(alpha: 0.1),
-                              borderRadius: AppRadius.xsAll,
-                            ),
-                            child: Text(
-                              context.l10n.addonsActive,
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: scheme.primary,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          _AddOnBadge(
+                            label: context.l10n.addonsActive,
+                            color: scheme.primary,
+                            textColor: scheme.onPrimaryContainer,
+                          ),
+                        if (!isIncluded)
+                          Text(
+                            _formatPrice(addon.priceMonthlyCents, context.l10n),
+                            style: AppTypography.labelMedium.copyWith(
+                              color: scheme.onSurfaceVariant,
                             ),
                           ),
-                        Text(
-                          isIncluded
-                              ? ''
-                              : _formatPrice(
-                                  addon.priceMonthlyCents,
-                                  context.l10n,
-                                ),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
                       ],
                     ),
                   ],
@@ -279,7 +250,7 @@ class _AddOnCard extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Icon(
                 Icons.chevron_right_rounded,
-                size: 20,
+                size: AppSizes.iconMd,
                 color: scheme.onSurfaceVariant,
               ),
             ],
@@ -311,5 +282,36 @@ class _AddOnCard extends StatelessWidget {
       default:
         return Icons.extension_outlined;
     }
+  }
+}
+
+/// Selo compacto do add-on — véu da própria cor com texto de contraste.
+class _AddOnBadge extends StatelessWidget {
+  const _AddOnBadge({
+    required this.label,
+    required this.color,
+    required this.textColor,
+  });
+
+  final String label;
+  final Color color;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: AppSpacing.micro,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: AppRadius.xsAll,
+      ),
+      child: Text(
+        label,
+        style: AppTypography.labelMedium.copyWith(color: textColor),
+      ),
+    );
   }
 }

@@ -12,9 +12,11 @@ import '../../../core/utils/receipt_text.dart';
 import '../../../domain/entities/sale.dart';
 import '../../controllers/sales_providers.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_sheet.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/sale_receipt_view.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 
 /// Bottom sheet de partilha do recibo — o coração da funcionalidade:
 ///
@@ -131,22 +133,15 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Alça de arraste do bottom sheet.
-            Center(
-              child: Container(
-                width: AppSpacing.xxxl,
-                height: AppSpacing.xxs,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant,
-                  borderRadius: AppRadius.microAll,
-                ),
-              ),
-            ),
+            // Alça de arraste padrão das sheets.
+            const Center(child: SheetHandle()),
             const SizedBox(height: AppSpacing.sm),
             Text(
               l10n.saleDetailShareTitle,
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium,
+              style: AppTypography.titleMedium.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             // Pré-visualização do recibo (fundo do sheet cinza claro para o
@@ -160,13 +155,7 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: AppRadius.xsAll,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.brandBlack.withValues(alpha: 0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    boxShadow: PremiumDecor.softShadow(theme.colorScheme),
                   ),
                   child: RepaintBoundary(
                     key: _receiptKey,
@@ -205,8 +194,8 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
               // (o verde brand do WhatsApp é uma cor de terceiros fora da
               // paleta — proibido na interface geral).
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.brandOrange,
-                side: const BorderSide(color: AppColors.brandOrange),
+                foregroundColor: theme.colorScheme.primary,
+                side: BorderSide(color: theme.colorScheme.primary),
               ),
               icon: const Icon(Icons.chat_bubble_outline_rounded),
               label: l10n.saleDetailShareWhatsApp,

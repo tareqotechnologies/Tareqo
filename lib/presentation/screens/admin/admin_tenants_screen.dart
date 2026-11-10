@@ -7,6 +7,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/audit_entry.dart';
 import '../../../domain/entities/store.dart';
 import '../../../domain/entities/plan.dart';
@@ -24,9 +25,11 @@ import '../../widgets/dialogs.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/error_view.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/status_chip.dart';
 import '../../../core/observability/crash_reporting.dart';
+import 'admin_thin_theme.dart';
 part 'admin_tenants_widgets.dart';
 part 'admin_tenants_widgets_sheets.dart'; // _TenantDetailSheet + detail widgets
 part 'admin_tenants_widgets_billing.dart'; // _BillingInfoCard + _SelectionBar
@@ -217,7 +220,7 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
                           ),
                           child: Icon(
                             Icons.close,
-                            size: 16,
+                            size: AppSizes.iconSm,
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -231,13 +234,13 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
                           vertical: AppSpacing.xxs,
                         ),
                         decoration: BoxDecoration(
-                          color: scheme.primaryContainer.withValues(alpha: 0.5),
+                          color: scheme.primaryContainer,
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Text(
                           '$filteredCount',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.primary,
+                          style: AppTypography.labelMedium.copyWith(
+                            color: scheme.onPrimaryContainer,
                           ),
                         ),
                       ),
@@ -258,26 +261,23 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.tertiaryContainer.withValues(alpha: 0.4),
+                    color: scheme.primaryContainer,
                     borderRadius: AppRadius.smAll,
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.info_outline,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.tertiary,
+                        size: AppSizes.iconSm,
+                        color: scheme.primary,
                       ),
                       const SizedBox(width: AppSpacing.xs),
                       Expanded(
                         child: Text(
                           l10n.adminAwaitingCount(pending.length),
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.tertiary,
-                              ),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: scheme.onPrimaryContainer,
+                          ),
                         ),
                       ),
                     ],
@@ -347,11 +347,11 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
               AppSpacing.lg,
               AppSpacing.sm,
               AppSpacing.lg,
-              AppSpacing.xl,
+              AppSpacing.fabBottomClearance,
             ),
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: filtered.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
             itemBuilder: (context, index) {
               final tenant = filtered[index];
               final isSelected = _selectedIds.contains(tenant.id);
@@ -411,10 +411,10 @@ class _AdminTenantsScreenState extends ConsumerState<AdminTenantsScreen> {
             AppSpacing.lg,
             AppSpacing.sm,
             AppSpacing.lg,
-            AppSpacing.xl,
+            AppSpacing.fabBottomClearance,
           ),
           itemCount: filtered.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 8),
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
           itemBuilder: (context, index) {
             final tenant = filtered[index];
             final (color, label) = switch (tenant.status) {

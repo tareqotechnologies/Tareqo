@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/premium_decor.dart';
 
 /// Ecra de reconciliação de pagamentos mobile money — M-Pesa e E-Mola.
 ///
@@ -56,23 +58,25 @@ class _IntegrationBlockedBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final warning = IconTone.amber;
+    final scheme = Theme.of(context).colorScheme;
 
     return AppCard(
-      color: warning.withValues(alpha: 0.08),
-      borderColor: warning.withValues(alpha: 0.30),
+      color: scheme.primaryContainer,
+      borderColor: PremiumDecor.hairline(scheme),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline_rounded, color: warning, size: 20),
+          Icon(
+            Icons.info_outline_rounded,
+            color: scheme.primary,
+            size: AppSizes.iconMd,
+          ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               message,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
+              style: AppTypography.bodyMedium.copyWith(
+                color: scheme.onPrimaryContainer,
               ),
             ),
           ),

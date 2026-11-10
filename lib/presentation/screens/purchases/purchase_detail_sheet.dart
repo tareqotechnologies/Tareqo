@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/i18n/payment_method_l10n.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../domain/entities/purchase.dart';
@@ -12,6 +13,7 @@ import '../../widgets/app_sheet.dart';
 import '../../widgets/detail_row.dart';
 import '../../widgets/payment_filter.dart'
     show PaymentMethodAccent, PaymentMethodIcon;
+import '../../widgets/premium_decor.dart';
 import '../../widgets/product_image.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/smart_amount.dart';
@@ -59,33 +61,29 @@ class _PurchaseDetailSheet extends ConsumerWidget {
           // ── Cabeçalho: número sequencial + data + chip do pagamento ──
           Text(
             Formatters.purchaseLabel(purchase.number),
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.titleLarge.copyWith(color: scheme.onSurface),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             '${Formatters.dateTime(purchase.dateTime)}  ·  $itemsLabel',
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           StatusChip(
             label: purchase.paymentMethod.labelFor(l10n),
             color: accent,
             icon: purchase.paymentMethod.icon,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
 
           // ── Dados da compra ──
           Container(
             decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(
-                color: scheme.outlineVariant.withValues(alpha: 0.4),
-              ),
+              border: Border.all(color: PremiumDecor.hairline(scheme)),
             ),
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
@@ -111,35 +109,31 @@ class _PurchaseDetailSheet extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
 
           // ── Total ──
           Text(
             l10n.saleDetailTotalLabel,
-            style: theme.textTheme.bodySmall?.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           SmartAmount(
             cents: purchase.totalAmountCents,
             alignment: Alignment.centerLeft,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.headline.copyWith(color: scheme.onSurface),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.lg),
 
           // ── Itens (com validade do lote FIFO de cada item) ──
           SectionHeader(title: l10n.saleDetailItems),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           Container(
             decoration: BoxDecoration(
               color: scheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(
-                color: scheme.outlineVariant.withValues(alpha: 0.5),
-              ),
+              border: Border.all(color: PremiumDecor.hairline(scheme)),
             ),
             clipBehavior: Clip.antiAlias,
             child: Column(
@@ -150,7 +144,7 @@ class _PurchaseDetailSheet extends ConsumerWidget {
                       height: 1,
                       indent: AppSpacing.md,
                       endIndent: AppSpacing.md,
-                      color: scheme.outlineVariant.withValues(alpha: 0.5),
+                      color: PremiumDecor.hairline(scheme),
                     ),
                   _PurchaseItemRow(
                     item: purchase.items[i],
@@ -160,20 +154,24 @@ class _PurchaseDetailSheet extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
 
           // ── Notas: FIFO + snapshot ──
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.inventory_2_outlined, size: 14, color: scheme.outline),
-              const SizedBox(width: 8),
+              Icon(
+                Icons.inventory_2_outlined,
+                size: AppSizes.iconSm,
+                color: scheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: AppSpacing.xs),
               Flexible(
                 child: Text(
                   '${l10n.purchaseDetailStockNote} ${l10n.saleDetailSnapshot}',
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.outline,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -212,8 +210,12 @@ class _PurchaseItemRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          ProductImage(imagePath: imagePath ?? '', size: 40, radius: 10),
-          const SizedBox(width: 12),
+          ProductImage(
+            imagePath: imagePath ?? '',
+            size: AppSizes.avatarMd,
+            radius: AppRadius.sm,
+          ),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,35 +225,35 @@ class _PurchaseItemRow extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   // Nome do produto = 12/w500 (labelMedium).
-                  style: theme.textTheme.labelMedium,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: scheme.onSurface,
+                  ),
                 ),
-                const SizedBox(height: 1),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   '${Quantity.format(item.quantity, language: Formatters.currentLanguage)} × '
                   '${Formatters.currency(item.unitPriceCents)}',
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   '${l10n.purchaseDetailExpiry}: '
                   '${item.expiryDate != null ? Formatters.date(item.expiryDate!) : l10n.purchaseDetailNoExpiry}',
                   // Metadado (validade) = 12 — nunca 11: é informação
                   // operacional, não decoração.
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.outline,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             Formatters.currency(subtotal),
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.amountInRow(scheme.onSurface),
           ),
         ],
       ),

@@ -160,13 +160,17 @@ class _SalesReportTab extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Row(
               children: [
-                Icon(Icons.error_outline, size: 16, color: scheme.error),
-                const SizedBox(width: 8),
+                Icon(
+                  Icons.error_outline,
+                  size: AppSizes.iconSm,
+                  color: theme.expense,
+                ),
+                const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     l10n.reportsLoadError,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.error,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: theme.expense,
                     ),
                   ),
                 ),
@@ -197,7 +201,7 @@ class _SalesReportTab extends ConsumerWidget {
                     ? Formatters.currency(report.totalRevenueCents)
                     : '—',
                 icon: Icons.arrow_downward_rounded,
-                color: AppColors.accentOrange,
+                color: scheme.primary,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -208,7 +212,7 @@ class _SalesReportTab extends ConsumerWidget {
                     ? Formatters.currency(report.totalProfitCents)
                     : '—',
                 icon: Icons.savings_outlined,
-                color: ModuleColors.products,
+                color: theme.income,
               ),
             ),
           ],
@@ -218,7 +222,7 @@ class _SalesReportTab extends ConsumerWidget {
           label: l10n.reportsMargin,
           value: report != null ? '${report.margin.toStringAsFixed(1)}%' : '—',
           icon: Icons.percent_rounded,
-          color: ModuleColors.reports,
+          color: theme.income,
           fullWidth: true,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -227,7 +231,7 @@ class _SalesReportTab extends ConsumerWidget {
         // visual da tela de Relatórios (_BestSellerRow simplificado).
         AppCard(
           elevated: true,
-          borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+          borderRadius: AppRadius.lgAll,
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,25 +239,25 @@ class _SalesReportTab extends ConsumerWidget {
               Row(
                 children: [
                   Container(
-                    width: 28,
-                    height: 28,
+                    width: AppSizes.iconXl,
+                    height: AppSizes.iconXl,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: IconTone.darkBackground(ModuleColors.products),
-                      shape: BoxShape.circle,
+                      color: scheme.primaryContainer,
+                      borderRadius: AppRadius.smAll,
                     ),
                     child: Icon(
                       Icons.leaderboard_outlined,
-                      size: 14,
-                      color: IconTone.lightForeground(ModuleColors.products),
+                      size: AppSizes.iconSm,
+                      color: scheme.primary,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
                       l10n.reportsBestSellers,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: AppTypography.labelLarge.copyWith(
+                        color: scheme.onSurface,
                       ),
                     ),
                   ),
@@ -261,7 +265,7 @@ class _SalesReportTab extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.xs,
-                        vertical: 2,
+                        vertical: AppSpacing.micro,
                       ),
                       decoration: BoxDecoration(
                         color: scheme.surfaceContainerHighest,
@@ -269,9 +273,8 @@ class _SalesReportTab extends ConsumerWidget {
                       ),
                       child: Text(
                         '${report.bestSellers.length}',
-                        style: theme.textTheme.labelSmall?.copyWith(
+                        style: AppTypography.labelSmall.copyWith(
                           color: scheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -283,7 +286,7 @@ class _SalesReportTab extends ConsumerWidget {
               else if (report.bestSellers.isEmpty)
                 Text(
                   l10n.reportsNoSalesData,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 )
@@ -294,8 +297,8 @@ class _SalesReportTab extends ConsumerWidget {
                     child: Row(
                       children: [
                         Container(
-                          width: 22,
-                          height: 22,
+                          width: AppSizes.iconLg,
+                          height: AppSizes.iconLg,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: scheme.primaryContainer,
@@ -303,9 +306,8 @@ class _SalesReportTab extends ConsumerWidget {
                           ),
                           child: Text(
                             '${index + 1}',
-                            style: theme.textTheme.labelSmall?.copyWith(
+                            style: AppTypography.labelSmall.copyWith(
                               color: scheme.onPrimaryContainer,
-                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -314,16 +316,19 @@ class _SalesReportTab extends ConsumerWidget {
                           child: Text(
                             // Nome COMPLETO — quebra quando necessário.
                             best.productName,
-                            style: theme.textTheme.bodySmall,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: scheme.onSurface,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: AppSpacing.xs),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
                               Formatters.currency(best.revenueCents),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                fontWeight: FontWeight.w500,
+                              style: AppTypography.labelMedium.copyWith(
+                                color: scheme.onSurface,
                               ),
                             ),
                             // W11: quantidade em milésimos → unidades.
@@ -332,7 +337,7 @@ class _SalesReportTab extends ConsumerWidget {
                                 best.quantity,
                                 language: Formatters.currentLanguage,
                               ),
-                              style: theme.textTheme.labelSmall?.copyWith(
+                              style: AppTypography.bodySmall.copyWith(
                                 color: scheme.onSurfaceVariant,
                               ),
                             ),
@@ -415,13 +420,17 @@ class _FinancialReportTab extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Row(
               children: [
-                Icon(Icons.error_outline, size: 16, color: scheme.error),
-                const SizedBox(width: 8),
+                Icon(
+                  Icons.error_outline,
+                  size: AppSizes.iconSm,
+                  color: theme.expense,
+                ),
+                const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     l10n.reportsLoadError,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.error,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: theme.expense,
                     ),
                   ),
                 ),
@@ -450,7 +459,7 @@ class _FinancialReportTab extends ConsumerWidget {
                     ? Formatters.currency(cashFlow.incomeCents)
                     : '—',
                 icon: Icons.arrow_downward_rounded,
-                color: AppColors.accentOrange,
+                color: theme.income,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -461,7 +470,7 @@ class _FinancialReportTab extends ConsumerWidget {
                     ? Formatters.currency(cashFlow.expenseCents)
                     : '—',
                 icon: Icons.arrow_upward_rounded,
-                color: AppColors.errorNeutral,
+                color: theme.expense,
               ),
             ),
           ],
@@ -473,7 +482,7 @@ class _FinancialReportTab extends ConsumerWidget {
               ? Formatters.currency(cashFlow.balanceCents)
               : '—',
           icon: Icons.account_balance_wallet_outlined,
-          color: ModuleColors.reports,
+          color: scheme.primary,
           fullWidth: true,
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -481,7 +490,7 @@ class _FinancialReportTab extends ConsumerWidget {
         // Comparativo de fluxo de caixa do período (dados reais).
         AppCard(
           elevated: true,
-          borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+          borderRadius: AppRadius.lgAll,
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,24 +498,24 @@ class _FinancialReportTab extends ConsumerWidget {
               Row(
                 children: [
                   Container(
-                    width: 28,
-                    height: 28,
+                    width: AppSizes.iconXl,
+                    height: AppSizes.iconXl,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: IconTone.darkBackground(ModuleColors.reports),
-                      shape: BoxShape.circle,
+                      color: scheme.primaryContainer,
+                      borderRadius: AppRadius.smAll,
                     ),
                     child: Icon(
                       Icons.show_chart_rounded,
-                      size: 14,
-                      color: IconTone.lightForeground(ModuleColors.reports),
+                      size: AppSizes.iconSm,
+                      color: scheme.primary,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     l10n.reportsCashFlow,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: scheme.onSurface,
                     ),
                   ),
                 ],
@@ -521,13 +530,13 @@ class _FinancialReportTab extends ConsumerWidget {
                     children: [
                       Icon(
                         Icons.show_chart,
-                        size: 32,
+                        size: AppSpacing.xxl,
                         color: scheme.onSurfaceVariant.withValues(alpha: 0.25),
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         l10n.reportsCashFlowChart,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: AppTypography.bodySmall.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
                       ),
@@ -624,7 +633,7 @@ class _StockReportTab extends ConsumerWidget {
                 label: l10n.reportsKpiProducts,
                 value: '$totalProducts',
                 icon: Icons.inventory_2_outlined,
-                color: ModuleColors.products,
+                color: scheme.primary,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -633,7 +642,7 @@ class _StockReportTab extends ConsumerWidget {
                 label: l10n.reportsKpiLowStock,
                 value: '$lowStock',
                 icon: Icons.warning_amber_rounded,
-                color: ModuleColors.credit,
+                color: theme.expense,
               ),
             ),
           ],
@@ -646,7 +655,7 @@ class _StockReportTab extends ConsumerWidget {
                 label: l10n.reportsKpiStockValue,
                 value: Formatters.currency(totalStockValueCents),
                 icon: Icons.attach_money,
-                color: ModuleColors.purchases,
+                color: scheme.primary,
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
@@ -655,7 +664,7 @@ class _StockReportTab extends ConsumerWidget {
                 label: l10n.reportsKpiStockOut,
                 value: '$outOfStock',
                 icon: Icons.inventory_2,
-                color: AppColors.errorNeutral,
+                color: theme.expense,
               ),
             ),
           ],
@@ -665,7 +674,7 @@ class _StockReportTab extends ConsumerWidget {
         // Lista de estoque baixo
         AppCard(
           elevated: true,
-          borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+          borderRadius: AppRadius.lgAll,
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -673,25 +682,25 @@ class _StockReportTab extends ConsumerWidget {
               Row(
                 children: [
                   Container(
-                    width: 28,
-                    height: 28,
+                    width: AppSizes.iconXl,
+                    height: AppSizes.iconXl,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: IconTone.darkBackground(ModuleColors.credit),
-                      shape: BoxShape.circle,
+                      color: theme.expense.withValues(alpha: 0.12),
+                      borderRadius: AppRadius.smAll,
                     ),
                     child: Icon(
                       Icons.warning_amber_rounded,
-                      size: 14,
-                      color: IconTone.lightForeground(ModuleColors.credit),
+                      size: AppSizes.iconSm,
+                      color: theme.expense,
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
                       l10n.reportsKpiLowStock,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: AppTypography.labelLarge.copyWith(
+                        color: scheme.onSurface,
                       ),
                     ),
                   ),
@@ -699,17 +708,16 @@ class _StockReportTab extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.xs,
-                        vertical: 2,
+                        vertical: AppSpacing.micro,
                       ),
                       decoration: BoxDecoration(
-                        color: ModuleColors.credit.withValues(alpha: 0.12),
+                        color: theme.expense.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(AppRadius.full),
                       ),
                       child: Text(
                         '$lowStock',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: ModuleColors.credit,
-                          fontWeight: FontWeight.w500,
+                        style: AppTypography.labelMedium.copyWith(
+                          color: theme.expense,
                         ),
                       ),
                     ),
@@ -719,7 +727,7 @@ class _StockReportTab extends ConsumerWidget {
               if (lowStock == 0)
                 Text(
                   l10n.reportsStockHealthy,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 )
@@ -732,24 +740,26 @@ class _StockReportTab extends ConsumerWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.xs),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.circle,
-                          size: 6,
-                          color: ModuleColors.credit,
+                          size: AppSpacing.xs,
+                          color: theme.expense,
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
                             // Nome COMPLETO — quebra quando necessário.
                             p.name,
-                            style: theme.textTheme.bodySmall,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: scheme.onSurface,
+                            ),
                           ),
                         ),
+                        const SizedBox(width: AppSpacing.xs),
                         Text(
                           '${p.stockQuantity ~/ 1000} ${p.unitLabel}',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: ModuleColors.credit,
-                            fontWeight: FontWeight.w500,
+                          style: AppTypography.labelMedium.copyWith(
+                            color: theme.expense,
                           ),
                         ),
                       ],
@@ -789,7 +799,7 @@ class _StockReportTab extends ConsumerWidget {
 
 // ─── Componentes compartilhados ─────────────────────────────────────────
 
-/// KPI tile compacto — ícone tingido (IconTone) + label + valor.
+/// KPI tile compacto — ícone tingido + label + valor.
 ///
 /// Segue o padrão do dashboard: fundo `surfaceContainerHighest`,
 /// ícone em container circular escuro, label em `bodySmall`,
@@ -815,7 +825,7 @@ class _KpiTile extends StatelessWidget {
     final scheme = theme.colorScheme;
 
     return Material(
-      color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      color: scheme.surfaceContainerHighest,
       borderRadius: AppRadius.lgAll,
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -825,18 +835,14 @@ class _KpiTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 28,
-              height: 28,
+              width: AppSizes.iconXl,
+              height: AppSizes.iconXl,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: IconTone.darkBackground(color),
-                shape: BoxShape.circle,
+                color: color.withValues(alpha: 0.12),
+                borderRadius: AppRadius.smAll,
               ),
-              child: Icon(
-                icon,
-                size: 14,
-                color: IconTone.lightForeground(color),
-              ),
+              child: Icon(icon, size: AppSizes.iconSm, color: color),
             ),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -846,11 +852,11 @@ class _KpiTile extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: AppTypography.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: 1),
+                  const SizedBox(height: AppSpacing.micro),
                   // Valor COMPLETO — FittedBox encolhe em vez de truncar
                   // (mesmo padrão dos KPIs do dashboard).
                   FittedBox(
@@ -858,10 +864,8 @@ class _KpiTile extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       value,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: color,
-                        letterSpacing: -0.2,
+                      style: AppTypography.labelMedium.copyWith(
+                        color: scheme.onSurface,
                       ),
                     ),
                   ),
@@ -961,20 +965,20 @@ class _CashFlowBars extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
               ),
               Text(
                 Formatters.currency(cents),
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                style: AppTypography.labelMedium.copyWith(
+                  color: scheme.onSurface,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
           ClipRRect(
             borderRadius: AppRadius.xsAll,
             child: SizedBox(
@@ -997,13 +1001,13 @@ class _CashFlowBars extends StatelessWidget {
         bar(
           label: l10n.reportsKpiRevenue,
           cents: cashFlow.incomeCents,
-          color: AppColors.accentOrange,
+          color: scheme.primary,
         ),
         const SizedBox(height: AppSpacing.md),
         bar(
           label: l10n.reportsKpiExpenses,
           cents: cashFlow.expenseCents,
-          color: AppColors.errorNeutral,
+          color: theme.expense,
         ),
       ],
     );

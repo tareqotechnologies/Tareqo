@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/share/invoice_pdf_exporter.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../domain/entities/custom_invoice.dart';
@@ -57,9 +58,8 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
 
     return AppPage(
       title: l10n.customInvoiceTitle,
-      // Título 3 (20/w600) — rótulo longo ('Factura Personalizada')
-      // truncava em titleLarge (22) no AppBar de 56px.
-      titleStyle: Theme.of(context).textTheme.titleMedium,
+      // Rótulo longo ('Factura Personalizada') cabe em titleMedium (16).
+      titleStyle: AppTypography.titleMedium,
       useSafeArea: false,
       actions: [
         IconButton(
@@ -89,9 +89,9 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
           : ListView.separated(
               padding: EdgeInsets.fromLTRB(
                 horizontal,
-                AppSpacing.lg,
+                AppSpacing.sm,
                 horizontal,
-                AppSpacing.lg,
+                AppSpacing.fabBottomClearance,
               ),
               itemCount: invoices.length,
               separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
@@ -105,7 +105,7 @@ class _CustomInvoiceScreenState extends ConsumerState<CustomInvoiceScreen> {
         heroTag: 'fab-invoice',
         onPressed: _openNewInvoice,
         tooltip: l10n.customInvoiceNewFab,
-        child: const Icon(Icons.add_rounded, size: 28),
+        child: const Icon(Icons.add_rounded, size: AppSizes.iconXl),
       ),
     );
   }
@@ -211,7 +211,7 @@ class _InvoiceCard extends StatelessWidget {
     // a moldura.
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,63 +227,64 @@ class _InvoiceCard extends StatelessWidget {
                     // nome COMPLETO quebra em linhas quando necessário
                     // (nunca truncar o nome do cliente).
                     Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xxs,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           invoice.clientName,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+                          style: AppTypography.labelLarge.copyWith(
+                            color: scheme.onSurface,
                           ),
                         ),
                         Text(
                           l10n.customInvoiceNumberPrefix(
                             invoice.number.toString().padLeft(5, '0'),
                           ),
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          style: AppTypography.bodySmall.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    // Metadados em UMA linha discreta: itens · total.
+                    const SizedBox(height: AppSpacing.xxs),
+                    // Metadados em UMA linha discreta: itens · telefone.
                     Text(
                       '${l10n.customInvoiceItemsCount(invoice.items.length)}'
                       '${invoice.clientPhone.isNotEmpty ? '  •  ${invoice.clientPhone}' : ''}',
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.xs),
               // Valor à DIREITA em destaque (padrão dos cards do app).
               Text(
                 Formatters.currency(invoice.totalAmountCents),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTypography.amountInRow(scheme.onSurface),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           // Acções como ÍCONES discretos no canto (padrão das linhas de
           // itens da sheet): WhatsApp e PDF — rótulos ficam nos tooltips.
           Row(
             children: [
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.share_outlined, size: 18),
+                icon: const Icon(Icons.share_outlined, size: AppSizes.iconMd),
                 color: scheme.onSurfaceVariant,
                 tooltip: l10n.customInvoiceWhatsApp,
                 onPressed: () => _shareWhatsApp(context),
               ),
               const SizedBox(width: AppSpacing.xs),
               IconButton(
-                icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                icon: const Icon(
+                  Icons.picture_as_pdf_outlined,
+                  size: AppSizes.iconMd,
+                ),
                 color: scheme.onSurfaceVariant,
                 tooltip: l10n.customInvoicePdf,
                 onPressed: () => _exportPdf(context),

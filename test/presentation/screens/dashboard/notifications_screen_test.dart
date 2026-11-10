@@ -205,8 +205,8 @@ void main() {
     // Badge do header = não lidas (1 mensagem + 1 notificação). A pílula
     // do filtro "Não lidas" mostra a mesma contagem → 2 instâncias.
     expect(find.text('2'), findsNWidgets(2));
-    // Botão "marcar todas" visível com não lidas.
-    expect(find.text('Marcar todas como lidas'), findsOneWidget);
+    // Acção "marcar todas" visível com não lidas (ícone com tooltip).
+    expect(find.byTooltip('Marcar todas como lidas'), findsOneWidget);
   });
 
   testWidgets('filtro "Não lidas" esconde as lidas; "Todas" restaura', (
@@ -311,7 +311,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Marcar todas como lidas'));
+    await tester.tap(find.byTooltip('Marcar todas como lidas'));
     await tester.pumpAndSettle();
 
     expect(notificationRepo.markAllCalls, 1);

@@ -258,11 +258,11 @@ class TransactionDetailSheet extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: AppSizes.avatarLg,
+                height: AppSizes.avatarLg,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  borderRadius: AppRadius.mdAll,
                   color: color.withValues(alpha: 0.1),
                 ),
                 child: Icon(
@@ -278,8 +278,7 @@ class TransactionDetailSheet extends StatelessWidget {
                   children: [
                     Text(
                       transaction.category,
-                      style: AppTypography.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: AppTypography.labelLarge.copyWith(
                         color: scheme.onSurface,
                       ),
                     ),
@@ -301,10 +300,7 @@ class TransactionDetailSheet extends StatelessWidget {
             children: [
               Text(
                 l10n.financialAmountLabel,
-                style: AppTypography.labelSmall.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  letterSpacing: 1,
-                ),
+                style: AppTypography.eyebrow(scheme.onSurfaceVariant),
               ),
               const SizedBox(height: AppSpacing.xxs),
               FittedBox(
@@ -357,7 +353,7 @@ class TransactionDetailSheet extends StatelessWidget {
                 onReceive?.call();
               },
               label: l10n.financialReceive,
-              icon: const Icon(Icons.done_all, size: 18),
+              icon: const Icon(Icons.done_all, size: AppSizes.iconSm),
             ),
           ],
           if (pending && !isIncome && onPay != null) ...[
@@ -369,7 +365,7 @@ class TransactionDetailSheet extends StatelessWidget {
                 onPay?.call();
               },
               label: l10n.financialPay,
-              icon: const Icon(Icons.payments_outlined, size: 18),
+              icon: const Icon(Icons.payments_outlined, size: AppSizes.iconSm),
             ),
           ],
           const SizedBox(height: AppSpacing.xs),

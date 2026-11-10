@@ -25,6 +25,7 @@ import '../../widgets/error_view.dart';
 import '../../widgets/list_skeleton.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/product_type_badge.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/semantics_composed.dart';
 import 'product_form_sheets.dart';
 
@@ -285,7 +286,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                           horizontal: AppSpacing.xs,
                         ),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        textStyle: theme.textTheme.labelLarge,
+                        textStyle: AppTypography.labelLarge,
                       ),
                     ),
                   ),
@@ -323,8 +324,10 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                             separatorBuilder: (_, _) => Divider(
                               height: 1,
                               thickness: 0.8,
-                              color: theme.colorScheme.outlineVariant
-                                  .withValues(alpha: 0.6),
+                              // Recuo alinhado ao texto (thumb 52 + 12):
+                              // o divisor separa linhas, não a thumbnail.
+                              indent: AppSpacing.gigantic,
+                              color: PremiumDecor.hairline(theme.colorScheme),
                             ),
                             itemBuilder: (context, index) {
                               final product = filtered[index];
@@ -504,12 +507,11 @@ class _CompactFilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: AppDurations.fast,
         curve: Curves.easeOut,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
@@ -536,16 +538,15 @@ class _CompactFilterChip extends StatelessWidget {
                 size: 13,
                 color: isSelected ? color : scheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xxs),
             ],
             Text(
               label,
               // Filtro = labelMedium (12/w500). O ativo mantém o rótulo em
               // tinta: laranja em texto pequeno não atinge AA no claro — a
               // seleção lê-se pelo tint, aro e ícone.
-              style: theme.textTheme.labelMedium?.copyWith(
+              style: AppTypography.labelMedium.copyWith(
                 color: isSelected ? scheme.onSurface : scheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -666,7 +667,10 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
                       hintText: l10n.productsSearchHint,
-                      prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        size: AppSizes.iconMd,
+                      ),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.md,
@@ -674,7 +678,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.lg),
                   SheetSection(
                     icon: Icons.inventory_2_outlined,
                     title: l10n.productsSectionStatus,
@@ -694,7 +698,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   SheetSection(
                     icon: Icons.scale_outlined,
                     title: l10n.productsFilterStockType,
@@ -720,7 +724,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   // Fase 1: filtro por TIPO estrutural do produto.
                   SheetSection(
                     icon: Icons.category_outlined,
@@ -746,7 +750,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   SheetSection(
                     icon: Icons.warehouse_outlined,
                     title: l10n.productsFilterAvailability,
@@ -777,7 +781,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                   SheetSection(
                     icon: Icons.payments_outlined,
                     title: l10n.productsFilterPriceRange,
@@ -796,7 +800,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                               suffixText: Formatters.currencySymbol,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: AppTextField(
                               controller: _maxPriceController,
@@ -839,8 +843,7 @@ class _ProductSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final radius = BorderRadius.circular(AppRadius.full);
 
     return TextField(
@@ -849,7 +852,7 @@ class _ProductSearchField extends StatelessWidget {
       autofocus: true,
       onChanged: onChanged,
       textInputAction: TextInputAction.search,
-      style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+      style: AppTypography.bodyMedium.copyWith(color: scheme.onSurface),
       decoration: InputDecoration(
         hintText: context.l10n.productsSearchHint,
         prefixIcon: Icon(
@@ -969,15 +972,16 @@ class _ProductRow extends StatelessWidget {
                         product.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w500,
+                        // Rótulo de linha em 14/500: a hierarquia vem da
+                        // cor, não do peso.
+                        style: AppTypography.labelLarge.copyWith(
                           color: inactive
                               ? scheme.onSurfaceVariant
                               : scheme.onSurface,
                         ),
                       ),
                       if (inactive || meta.isNotEmpty) ...[
-                        const SizedBox(height: 2),
+                        const SizedBox(height: AppSpacing.micro),
                         Row(
                           children: [
                             if (inactive) ...[
@@ -995,7 +999,7 @@ class _ProductRow extends StatelessWidget {
                                   meta,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodySmall?.copyWith(
+                                  style: AppTypography.bodySmall.copyWith(
                                     color: scheme.onSurfaceVariant,
                                   ),
                                 ),
@@ -1028,7 +1032,7 @@ class _ProductRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.micro),
                       FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: Alignment.centerRight,
@@ -1048,11 +1052,10 @@ class _ProductRow extends StatelessWidget {
                             Text(
                               stockText,
                               maxLines: 1,
-                              style: theme.textTheme.labelSmall?.copyWith(
+                              style: AppTypography.labelSmall.copyWith(
                                 color: lowStock
                                     ? theme.expense
                                     : scheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],

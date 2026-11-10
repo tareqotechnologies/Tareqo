@@ -32,13 +32,15 @@ class _BillingInfoCard extends StatelessWidget {
     final isExpiringSoon = daysLeft <= 7 && daysLeft >= 0;
     final isExpired = daysLeft < 0;
 
+    // Texto pequeno sobre o véu do cartão: vermelho/âmbar/verde do tema têm
+    // contraste AA nos dois modos; o laranja puro fica só no ícone.
     final statusColor = isExpired
-        ? scheme.error
+        ? theme.expense
         : isExpiringSoon
         ? scheme.tertiary
         : isTrial
-        ? scheme.primary
-        : scheme.primary;
+        ? scheme.onSurface
+        : theme.income;
 
     final statusText = isExpired
         ? context.l10n.adminTenantCycleExpired
@@ -64,15 +66,17 @@ class _BillingInfoCard extends StatelessWidget {
             children: [
               Icon(
                 isTrial ? Icons.science_outlined : Icons.autorenew,
-                size: 16,
+                size: AppSizes.iconSm,
                 color: statusColor,
               ),
               const SizedBox(width: AppSpacing.xs),
-              Text(
-                statusText,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: statusColor,
-                  fontWeight: FontWeight.w400,
+              Expanded(
+                child: Text(
+                  statusText,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ),
             ],
@@ -144,19 +148,15 @@ class _SelectionBar extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer.withValues(alpha: 0.3),
-        border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.5),
-          ),
-        ),
+        color: scheme.primaryContainer,
+        border: Border(bottom: BorderSide(color: PremiumDecor.hairline(scheme))),
       ),
       child: Row(
         children: [
           // Cancel
           IconButton(
             tooltip: l10n.commonCancel,
-            icon: const Icon(Icons.close, size: 20),
+            icon: const Icon(Icons.close, size: AppSizes.iconMd),
             onPressed: onCancel,
           ),
           const SizedBox(width: AppSpacing.xs),

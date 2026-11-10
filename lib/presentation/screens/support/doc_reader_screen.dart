@@ -4,10 +4,12 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../navigation/app_routes.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/premium_decor.dart';
 
 /// Documentos de suporte embutidos no app (assets) — os MESMOS markdowns de
 /// `docs/`, empacotados para leitura OFFLINE no ecrã Ajuda. O asset é
@@ -91,8 +93,8 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                 child: Text(
                   l10n.supportReadingError,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.error,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: theme.expense,
                   ),
                 ),
               ),
@@ -200,18 +202,24 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                 color: scheme.onSurfaceVariant,
               ),
 
-              tableBorder: TableBorder.all(color: scheme.outlineVariant),
-              // Hiperlinks — cor da marca, sublinhado suave, peso médio.
+              tableBorder: TableBorder.all(
+                color: PremiumDecor.hairline(scheme),
+              ),
+              // Hiperlinks — tinta sublinhada: laranja a 14px não passa AA
+              // no claro (o acento fica na decoração/ícones).
               a: AppTypography.bodyMedium.copyWith(
-                color: scheme.primary,
-                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+                fontWeight: FontWeight.w500,
                 decoration: TextDecoration.underline,
-                decorationColor: scheme.primary.withValues(alpha: 0.55),
+                decorationColor: scheme.onSurface.withValues(alpha: 0.55),
                 decorationThickness: 1.2,
               ),
               horizontalRuleDecoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: scheme.outlineVariant, width: 1),
+                  bottom: BorderSide(
+                    color: PremiumDecor.hairline(scheme),
+                    width: 1,
+                  ),
                 ),
               ),
             ),

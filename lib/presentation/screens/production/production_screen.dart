@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../domain/entities/product.dart';
@@ -20,7 +20,8 @@ import '../../widgets/app_sheet.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
-import '../../widgets/product_type_badge.dart';
+import '../../widgets/product_type_badge.dart' show productTypeLabel;
+import '../../widgets/section_header.dart';
 import '../../widgets/skeleton.dart';
 import '../../widgets/store_scoped_content.dart';
 import 'recipe_form_sheet.dart';
@@ -97,9 +98,9 @@ class ProductionScreen extends ConsumerWidget {
               padding: EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 children: [
-                  SkeletonBlock(height: 96, radius: 20),
-                  SizedBox(height: 12),
-                  SkeletonBlock(height: 96, radius: 20),
+                  SkeletonBlock(height: 96, radius: AppRadius.lg),
+                  SizedBox(height: AppSpacing.sm),
+                  SkeletonBlock(height: 96, radius: AppRadius.lg),
                 ],
               ),
             ),
@@ -116,17 +117,18 @@ class ProductionScreen extends ConsumerWidget {
             },
             child: ListView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.md,
-                AppSpacing.md,
-                AppSpacing.md,
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.pagePaddingForWidth(
+                  MediaQuery.sizeOf(context).width,
+                ),
+                AppSpacing.xs,
+                AppSpacing.pagePaddingForWidth(
+                  MediaQuery.sizeOf(context).width,
+                ),
                 AppSpacing.fabBottomClearance,
               ),
               children: [
-                Text(
-                  l10n.productionRecipesSection,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
+                SectionHeader(title: l10n.productionRecipesSection),
                 const SizedBox(height: AppSpacing.sm),
                 if (recipes.isEmpty)
                   EmptyState(
@@ -153,10 +155,7 @@ class ProductionScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                   ],
                 const SizedBox(height: AppSpacing.lg),
-                Text(
-                  l10n.productionHistorySection,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
+                SectionHeader(title: l10n.productionHistorySection),
                 const SizedBox(height: AppSpacing.sm),
                 if (orders.isEmpty)
                   EmptyState(
@@ -196,7 +195,7 @@ class _RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return AppCard(
       onTap: onEdit,
       child: Column(
@@ -207,14 +206,26 @@ class _RecipeCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   finished?.name ?? recipe.productId,
-                  style: theme.textTheme.titleSmall,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (finished != null) ProductTypeBadge(type: finished!.type),
+              // Papel do produto como TEXTO — mesma linguagem de Produtos,
+              // PDV e Compras (o selo colorido antigo saiu).
+              if (finished != null) ...[
+                const SizedBox(width: AppSpacing.xs),
+                Text(
+                  productTypeLabel(context, finished!.type),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
               IconButton(
-                icon: const Icon(Icons.delete_outline, size: 18),
+                icon: const Icon(Icons.delete_outline, size: AppSizes.iconMd),
                 tooltip: l10n.commonDelete,
                 onPressed: onDelete,
               ),
@@ -225,8 +236,8 @@ class _RecipeCard extends StatelessWidget {
             '${l10n.productionYieldLabel}: '
             '${Quantity.format(recipe.yieldQuantity, language: Formatters.currentLanguage)}'
             ' · ${l10n.productionItemCount(recipe.items.length)}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppTypography.bodySmall.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -234,7 +245,7 @@ class _RecipeCard extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: AppButton.secondary(
               label: l10n.productionProduce,
-              icon: const Icon(Icons.play_arrow_rounded, size: 18),
+              icon: const Icon(Icons.play_arrow_rounded, size: AppSizes.iconMd),
               onPressed: onProduce,
             ),
           ),
@@ -251,7 +262,7 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     return AppCard(
       child: Row(
         children: [
@@ -261,15 +272,17 @@ class _OrderCard extends StatelessWidget {
               children: [
                 Text(
                   order.productName,
-                  style: theme.textTheme.titleSmall,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
                   Formatters.day(order.dateTime),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -278,16 +291,16 @@ class _OrderCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              // Quantidade produzida em tinta: o "+" já diz a direção;
+              // verde é reservado a dinheiro recebido, não a stock.
               Text(
                 '+${Quantity.format(order.quantity, language: Formatters.currentLanguage)}',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: theme.income,
-                ),
+                style: AppTypography.amountInRow(scheme.onSurface),
               ),
               Text(
                 Formatters.currency(order.totalCostCents),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                style: AppTypography.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
                 ),
               ),
             ],

@@ -5,6 +5,7 @@ import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../domain/entities/customer.dart';
@@ -322,14 +323,22 @@ class _CustomerTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: theme.colorScheme.surface,
+              // Avatar neutro: o preenchimento do card é o mesmo canvas —
+              // o aro de cabelo é o que dá a forma ao círculo nos dois temas.
+              Container(
+                width: AppSizes.avatarMd,
+                height: AppSizes.avatarMd,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: PremiumDecor.hairline(theme.colorScheme),
+                  ),
+                ),
                 child: Text(
                   _initials(customer.name),
-                  style: theme.textTheme.labelMedium?.copyWith(
+                  style: AppTypography.labelMedium.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -342,15 +351,15 @@ class _CustomerTile extends StatelessWidget {
                     // necessário (nada de truncar nomes).
                     Text(
                       customer.name,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: AppTypography.labelLarge.copyWith(
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     if (contacts.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.micro),
                       Text(
                         contacts,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: AppTypography.bodySmall.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -382,7 +391,7 @@ class _CustomerTile extends StatelessWidget {
                 PopupMenuButton<String>(
                   icon: Icon(
                     Icons.more_vert,
-                    size: 20,
+                    size: AppSizes.iconMd,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   onSelected: (value) {
@@ -395,18 +404,18 @@ class _CustomerTile extends StatelessWidget {
                   itemBuilder: (ctx) => [
                     PopupMenuItem(
                       value: 'edit',
-                      height: 44,
+                      height: AppSizes.tableRowHeight,
                       child: Row(
                         children: [
                           Icon(
                             Icons.edit_outlined,
-                            size: 18,
+                            size: AppSizes.iconMd,
                             color: theme.colorScheme.onSurface,
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Text(
                             l10n.customersEditTitle,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            style: AppTypography.bodyMedium.copyWith(
                               color: theme.colorScheme.onSurface,
                             ),
                           ),
@@ -415,19 +424,21 @@ class _CustomerTile extends StatelessWidget {
                     ),
                     PopupMenuItem(
                       value: 'delete',
-                      height: 44,
+                      height: AppSizes.tableRowHeight,
                       child: Row(
                         children: [
                           Icon(
                             Icons.delete_outline,
-                            size: 18,
-                            color: theme.colorScheme.error,
+                            size: AppSizes.iconMd,
+                            // `expense` = tint AA no escuro; o #C62828 puro
+                            // falha contraste como texto sobre o preto.
+                            color: theme.expense,
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Text(
                             l10n.commonDelete,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: theme.expense,
                             ),
                           ),
                         ],
@@ -531,6 +542,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SheetHeader(title: l10n.customersAddNew),
+            const SizedBox(height: AppSpacing.md),
             // Seção: Dados do cliente — nome, telefone e email.
             SheetSection(
               icon: Icons.person_outline,
@@ -576,9 +588,7 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
               const SizedBox(height: AppSpacing.md),
               Text(
                 _formError!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+                style: AppTypography.bodySmall.copyWith(color: theme.expense),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
@@ -589,8 +599,8 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
               label: l10n.customersAddSubmit,
               icon: _isSubmitting
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: AppSizes.iconMd,
+                      width: AppSizes.iconMd,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,
@@ -690,6 +700,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SheetHeader(title: l10n.customersEditTitle),
+            const SizedBox(height: AppSpacing.md),
             SheetSection(
               icon: Icons.person_outline,
               title: l10n.customersEditTitle,
@@ -732,9 +743,7 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
               const SizedBox(height: AppSpacing.md),
               Text(
                 _formError!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+                style: AppTypography.bodySmall.copyWith(color: theme.expense),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
@@ -743,8 +752,8 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
               label: l10n.customersEditSubmit,
               icon: _isSubmitting
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: AppSizes.iconMd,
+                      width: AppSizes.iconMd,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,

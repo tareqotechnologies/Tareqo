@@ -7,12 +7,16 @@ import 'package:intl/intl.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/audit_entry.dart';
 import '../../../domain/entities/tenant.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/error_view.dart';
+import '../../widgets/premium_decor.dart';
+
+import 'admin_thin_theme.dart';
 
 part 'admin_dashboard_chart_widgets.dart';
 part 'admin_dashboard_feed_widgets.dart';
@@ -240,7 +244,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           l10n.adminDashboardRecentActivity,
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          style: AppTypography.labelSmall.copyWith(
                             color: scheme.onSurfaceVariant,
                           ),
                         ),
@@ -264,7 +268,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.xl),
                     Text(
                       l10n.dashboardQuickActions,
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      style: AppTypography.labelSmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),

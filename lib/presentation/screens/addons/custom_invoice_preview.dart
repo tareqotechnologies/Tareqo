@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
+import '../../widgets/premium_decor.dart';
 
 /// Preview estático (amostra) da factura personalizada — o mesmo desenho
 /// do PDF exportado, renderizado na tela de template.
@@ -15,10 +17,11 @@ import '../../../core/utils/formatters.dart';
 /// apenas os dados do negócio e a cor primária do template.
 ///
 /// **Exceção de documento (U-12):** esta miniatura espelha um documento
-/// impresso em escala reduzida — os tamanhos 10/11 px e os pesos 400/600
-/// seguem a escala do tema (bodySmall/labelSmall) sem `copyWith` de
-/// tamanho; o texto branco sobre `primaryColor` é a cor do template
-/// escolhido pelo utilizador (identidade do documento, não do app).
+/// impresso em escala reduzida — os tamanhos seguem a escala do tema
+/// (bodySmall/labelSmall) e os pesos ficam em 400/500. O papel é claro
+/// (como o PDF) em ambos os temas, com tinta preta da marca; o texto
+/// sobre `primaryColor` usa a cor do template escolhido pelo utilizador
+/// (identidade do documento, não do app).
 class CustomInvoicePreview extends StatelessWidget {
   const CustomInvoicePreview({
     super.key,
@@ -46,32 +49,30 @@ class CustomInvoicePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     final displayName = businessName.isNotEmpty
         ? businessName
         : l10n.customInvoicePreviewCompanyFallback;
 
-    // Texto da pré-visualização: preto da marca, sem escurecer em HSL
-    // (isso saía da paleta do anexo).
-    const primaryDark = AppColors.brandBlack;
+    // Miniatura de DOCUMENTO: o papel é claro como o PDF exportado, em
+    // ambos os temas — antes usava `scheme.surface` (preto no escuro) com
+    // tinta preta, e o conteúdo desaparecia. A cor primária continua a ser
+    // a identidade escolhida pelo utilizador para o documento.
+    const paper = AppColors.softWhite;
+    const ink = AppColors.brandBlack;
+    final inkSecondary = AppColors.brandBlack.withValues(alpha: 0.66);
+    final hairline = AppColors.brandBlack.withValues(alpha: 0.12);
     final onPrimaryFill = primaryColor.computeLuminance() > 0.22
         ? AppColors.brandBlack
         : AppColors.softWhite;
 
     return Container(
       decoration: BoxDecoration(
-        color: scheme.surface,
+        color: paper,
         borderRadius: AppRadius.lgAll,
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.brandBlack.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: hairline),
+        boxShadow: PremiumDecor.softShadow(scheme),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -116,9 +117,9 @@ class CustomInvoicePreview extends StatelessWidget {
                               children: [
                                 Text(
                                   displayName,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: primaryDark,
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: ink,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 if (businessAddress.isNotEmpty)
@@ -126,22 +127,22 @@ class CustomInvoicePreview extends StatelessWidget {
                                     // Endereço COMPLETO — quebra em linhas
                                     // (nunca truncar os dados do negócio).
                                     businessAddress,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: inkSecondary,
                                     ),
                                   ),
                                 if (businessPhone.isNotEmpty)
                                   Text(
                                     businessPhone,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: inkSecondary,
                                     ),
                                   ),
                                 if (businessTaxId.isNotEmpty)
                                   Text(
                                     l10n.pdfNifLine(businessTaxId),
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: inkSecondary,
                                     ),
                                   ),
                               ],
@@ -163,9 +164,9 @@ class CustomInvoicePreview extends StatelessWidget {
                       ),
                       child: Text(
                         l10n.pdfInvoiceDocWord,
-                        style: theme.textTheme.labelSmall?.copyWith(
+                        style: AppTypography.labelSmall.copyWith(
                           color: onPrimaryFill,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -178,39 +179,35 @@ class CustomInvoicePreview extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: Text(
                     '${l10n.customInvoiceNumberPrefix('00001')}  •  ${Formatters.date(DateTime.now())}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: inkSecondary,
                     ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 // Divisor
-                Divider(
-                  height: 1,
-                  color: scheme.outlineVariant.withValues(alpha: 0.4),
-                ),
+                Divider(height: 1, color: hairline),
                 const SizedBox(height: AppSpacing.xs),
                 // ─── Cliente ──
                 Text(
                   l10n.pdfClientHeading,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: scheme.onSurfaceVariant,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: inkSecondary,
+                    fontWeight: FontWeight.w500,
                     letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.micro),
                 Text(
                   l10n.customInvoicePreviewSampleClient,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: ink,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   l10n.pdfPhoneLine('84 123 4567'),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+                  style: AppTypography.bodySmall.copyWith(color: inkSecondary),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 // ─── Tabela de itens (miniatura) ──
@@ -231,9 +228,9 @@ class CustomInvoicePreview extends StatelessWidget {
                       Expanded(
                         child: Text(
                           l10n.pdfItemHeader,
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: AppTypography.bodySmall.copyWith(
                             color: onPrimaryFill,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -242,9 +239,9 @@ class CustomInvoicePreview extends StatelessWidget {
                         child: Text(
                           l10n.customInvoiceQty,
                           textAlign: TextAlign.center,
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: AppTypography.bodySmall.copyWith(
                             color: onPrimaryFill,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -253,9 +250,9 @@ class CustomInvoicePreview extends StatelessWidget {
                         child: Text(
                           l10n.pdfUnitPriceHeader,
                           textAlign: TextAlign.right,
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: AppTypography.bodySmall.copyWith(
                             color: onPrimaryFill,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -293,25 +290,22 @@ class CustomInvoicePreview extends StatelessWidget {
                     ),
                     child: Text(
                       l10n.customInvoicePreviewTotal('550,00 $currencySymbol'),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: primaryDark,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: ink,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 // Rodapé
-                Divider(
-                  height: 1,
-                  color: scheme.outlineVariant.withValues(alpha: 0.4),
-                ),
+                Divider(height: 1, color: hairline),
                 const SizedBox(height: AppSpacing.xs),
                 Center(
                   child: Text(
                     l10n.customInvoicePreviewFooter,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: inkSecondary,
                     ),
                   ),
                 ),
@@ -344,8 +338,7 @@ class _PreviewRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    const ink = AppColors.brandBlack;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -353,9 +346,8 @@ class _PreviewRow extends StatelessWidget {
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: last
-            ? null
-            : scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        // Papel do documento — o zebrado é cinza de superfície oficial.
+        color: last ? null : AppColors.surfaceGray.withValues(alpha: 0.6),
         borderRadius: last
             ? const BorderRadius.vertical(bottom: Radius.circular(AppRadius.xs))
             : null,
@@ -365,7 +357,7 @@ class _PreviewRow extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: theme.textTheme.bodySmall,
+              style: AppTypography.bodySmall.copyWith(color: ink),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -375,7 +367,7 @@ class _PreviewRow extends StatelessWidget {
             child: Text(
               qty,
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall,
+              style: AppTypography.bodySmall.copyWith(color: ink),
             ),
           ),
           SizedBox(
@@ -383,8 +375,9 @@ class _PreviewRow extends StatelessWidget {
             child: Text(
               '$price $currencySymbol',
               textAlign: TextAlign.right,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
+              style: AppTypography.bodySmall.copyWith(
+                color: ink,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

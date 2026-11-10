@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
@@ -176,6 +178,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SheetHeader(title: l10n.debtsAddDebt),
+            const SizedBox(height: AppSpacing.md),
             // Seção: Cliente — seletor opcional vinculado ao módulo de clientes.
             customersAsync.when(
               loading: () => const SizedBox.shrink(),
@@ -189,8 +192,8 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
                         title: l10n.debtsCustomerLinkLabel,
                         children: [
                           Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                            spacing: AppSpacing.xs,
+                            runSpacing: AppSpacing.xs,
                             children: [
                               ChoiceChip(
                                 label: Text(l10n.debtsNoCustomer),
@@ -244,7 +247,7 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
                 // A2: mostra ao vivo o valor que será registado — "1390"
                 // aparece como 1.390,00 ANTES de salvar.
                 MoneyLivePreview(controller: _amountController),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 InkWell(
                   borderRadius: AppRadius.mdAll,
                   onTap: _pickDate,
@@ -258,9 +261,14 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
                       children: [
                         Text(
                           Formatters.date(_dueDate),
-                          style: theme.textTheme.bodyMedium,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: theme.colorScheme.onSurface,
+                          ),
                         ),
-                        const Icon(Icons.calendar_today_outlined, size: 18),
+                        const Icon(
+                          Icons.calendar_today_outlined,
+                          size: AppSizes.iconMd,
+                        ),
                       ],
                     ),
                   ),
@@ -268,15 +276,13 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
               ],
             ),
             if (_formError != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 _formError!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+                style: AppTypography.bodySmall.copyWith(color: theme.expense),
               ),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             // AppButton (design system ultra-clean): altura 48, cantos 12,
             // cores sólidas — o spinner substitui o ícone durante o envio.
             AppButton.primary(
@@ -284,8 +290,8 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
               label: l10n.debtsAddDebt,
               icon: _isSubmitting
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: AppSizes.iconMd,
+                      width: AppSizes.iconMd,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,

@@ -7,6 +7,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/share/report_exporter.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../domain/entities/store.dart';
@@ -23,6 +24,7 @@ import '../../widgets/app_segmented_button.dart';
 import '../../widgets/skeleton.dart';
 import '../../widgets/inline_error_card.dart';
 import '../../widgets/kpi_card.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/store_scoped_content.dart';
@@ -40,6 +42,7 @@ class ReportsScreen extends ConsumerWidget {
 
     final report = reportAsync.value;
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     // Nome da loja ativa — vai no cabeçalho do arquivo exportado (CSV/PDF).
     final user = ref.watch(authStateProvider).value;
@@ -67,7 +70,7 @@ class ReportsScreen extends ConsumerWidget {
         if (report != null && !reportAsync.hasError)
           PopupMenuButton<_ExportFormat>(
             tooltip: l10n.reportsExport,
-            icon: const Icon(Icons.ios_share),
+            icon: const Icon(Icons.ios_share, size: AppSizes.iconMd),
             onSelected: (format) => _exportReport(
               context,
               ref,
@@ -80,21 +83,21 @@ class ReportsScreen extends ConsumerWidget {
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: _ExportFormat.csv,
-                height: 44,
+                height: AppSizes.tableRowHeight,
                 child: Text(
                   l10n.reportsExportCsv,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: scheme.onSurface,
                   ),
                 ),
               ),
               PopupMenuItem(
                 value: _ExportFormat.pdf,
-                height: 44,
+                height: AppSizes.tableRowHeight,
                 child: Text(
                   l10n.reportsExportPdf,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: scheme.onSurface,
                   ),
                 ),
               ),
@@ -115,7 +118,7 @@ class ReportsScreen extends ConsumerWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.fromLTRB(
               AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-              AppSpacing.xxs,
+              AppSpacing.xs,
               AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
               AppSpacing.xxl,
             ),
@@ -149,40 +152,32 @@ class ReportsScreen extends ConsumerWidget {
                   onRetry: () => ref.invalidate(salesReportProvider),
                 )
               else
-                Row(
+                _KpiRow(
                   children: [
-                    Expanded(
-                      child: KpiCard(
-                        label: l10n.reportsRevenue,
-                        amountCents: report?.totalRevenueCents ?? 0,
-                        icon: Icons.point_of_sale_outlined,
-                        loading: reportAsync.isLoading,
-                        borderRadius: AppRadius.lgAll,
-                      ),
+                    KpiCard(
+                      label: l10n.reportsRevenue,
+                      amountCents: report?.totalRevenueCents ?? 0,
+                      icon: Icons.point_of_sale_outlined,
+                      loading: reportAsync.isLoading,
+                      borderRadius: AppRadius.lgAll,
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: KpiCard(
-                        label: l10n.reportsProfit,
-                        amountCents: report?.totalProfitCents ?? 0,
-                        icon: Icons.trending_up,
-                        iconBackground: theme.income.withValues(alpha: 0.14),
-                        iconColor: theme.income,
-                        loading: reportAsync.isLoading,
-                        borderRadius: AppRadius.lgAll,
-                      ),
+                    KpiCard(
+                      label: l10n.reportsProfit,
+                      amountCents: report?.totalProfitCents ?? 0,
+                      icon: Icons.trending_up,
+                      iconBackground: theme.income.withValues(alpha: 0.14),
+                      iconColor: theme.income,
+                      loading: reportAsync.isLoading,
+                      borderRadius: AppRadius.lgAll,
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: KpiCard(
-                        label: l10n.reportsMargin,
-                        value: '${(report?.margin ?? 0).toStringAsFixed(1)}%',
-                        icon: Icons.percent,
-                        iconBackground: theme.warning.withValues(alpha: 0.14),
-                        iconColor: theme.warning,
-                        loading: reportAsync.isLoading,
-                        borderRadius: AppRadius.lgAll,
-                      ),
+                    KpiCard(
+                      label: l10n.reportsMargin,
+                      value: '${(report?.margin ?? 0).toStringAsFixed(1)}%',
+                      icon: Icons.percent,
+                      iconBackground: theme.warning.withValues(alpha: 0.14),
+                      iconColor: theme.warning,
+                      loading: reportAsync.isLoading,
+                      borderRadius: AppRadius.lgAll,
                     ),
                   ],
                 ),
@@ -196,7 +191,7 @@ class ReportsScreen extends ConsumerWidget {
                       4,
                       (_) => const Padding(
                         padding: EdgeInsets.only(bottom: AppSpacing.xs),
-                        child: SkeletonBlock(height: 56, radius: 16),
+                        child: SkeletonBlock(height: 56, radius: AppRadius.md),
                       ),
                     ),
                   ),
@@ -245,10 +240,11 @@ class ReportsScreen extends ConsumerWidget {
                       children: [
                         for (var i = 0; i < data.perDay.length; i++) ...[
                           if (i > 0)
-                            const Divider(
+                            Divider(
                               height: 1,
                               indent: AppSpacing.md,
                               endIndent: AppSpacing.md,
+                              color: PremiumDecor.hairline(scheme),
                             ),
                           _DailyRow(
                             day: data.perDay[i].day,
@@ -270,6 +266,39 @@ class ReportsScreen extends ConsumerWidget {
 
 /// Formato de exportação escolhido no menu.
 enum _ExportFormat { csv, pdf }
+
+/// Linha de KPIs responsiva: três cartões lado a lado em escala normal e
+/// empilhados em escalas de texto grandes — em 2.0× o rótulo de meia
+/// largura quebrava no meio da palavra (ex.: "Margem").
+class _KpiRow extends StatelessWidget {
+  const _KpiRow({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final stacked = MediaQuery.textScalerOf(context).scale(14) >= 22;
+    if (stacked) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0) const SizedBox(height: AppSpacing.sm),
+            children[i],
+          ],
+        ],
+      );
+    }
+    return Row(
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0) const SizedBox(width: AppSpacing.sm),
+          Expanded(child: children[i]),
+        ],
+      ],
+    );
+  }
+}
 
 /// Exporta o relatório atual ([report]) em CSV ou PDF via share sheet.
 ///
@@ -359,7 +388,7 @@ class _BestSellerRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
 
     // AppCard premium: raio lg do design system, superfície elevada.
@@ -370,15 +399,14 @@ class _BestSellerRow extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            radius: 16,
-            backgroundColor: theme.colorScheme.primaryContainer,
+            radius: AppSpacing.md,
+            backgroundColor: scheme.primaryContainer,
             child: Text(
               '$rank',
-              style: TextStyle(
-                color: theme.colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.w600,
+              style: AppTypography.labelMedium.copyWith(
+                color: scheme.onPrimaryContainer,
                 // Ranks (1..N) na coluna de posição — alinhados.
-                fontFeatures: [const FontFeature.tabularFigures()],
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -391,15 +419,15 @@ class _BestSellerRow extends StatelessWidget {
                 // necessário (nada de truncar nomes nos cards).
                 Text(
                   name,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.micro),
                 Text(
                   l10n.reportsRevenueLabel(Formatters.currency(revenue)),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -412,7 +440,7 @@ class _BestSellerRow extends StatelessWidget {
             // Texto do chip sobre o próprio tint a 14%: `primary` no escuro
             // (#6B4AB3) rendia 1.97:1 — a quantidade é um dado neutro e usa
             // o tom de texto secundário (AA em claro e escuro).
-            color: theme.colorScheme.onSurfaceVariant,
+            color: scheme.onSurfaceVariant,
             icon: Icons.shopping_bag_outlined,
           ),
         ],
@@ -430,7 +458,7 @@ class _DailyRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     // Dia da semana ajuda a leitura comparativa da série (ex.: "05/09 · Sex")
     // — reusa as chaves weekday* existentes; o modelo não tem contagem de
@@ -454,16 +482,14 @@ class _DailyRow extends StatelessWidget {
           Expanded(
             child: Text(
               '${Formatters.day(day)} · $weekday',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              style: AppTypography.bodySmall.copyWith(
+                color: scheme.onSurfaceVariant,
               ),
             ),
           ),
           Text(
             Formatters.currency(total),
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.amountInRow(scheme.onSurface),
           ),
         ],
       ),

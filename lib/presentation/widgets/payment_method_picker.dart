@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/i18n/l10n_ext.dart';
 import '../../core/i18n/payment_method_l10n.dart';
 import '../../core/theme/app_tokens.dart';
+import '../../core/theme/app_typography.dart';
 import '../../domain/entities/sale.dart';
 import 'payment_filter.dart' show PaymentMethodIcon;
 
@@ -82,7 +83,8 @@ class _PaymentMethodPickerState extends State<PaymentMethodPicker> {
         Row(
           children: [
             for (final method in _primary) ...[
-              if (method != _primary.first) const SizedBox(width: 8),
+              if (method != _primary.first)
+                const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: _PrimaryTab(
                   label: method.labelFor(l10n),
@@ -94,7 +96,7 @@ class _PaymentMethodPickerState extends State<PaymentMethodPicker> {
             ],
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.xs),
         // -------------------------------------------------------------
         // Secundários — lista com radio
         // -------------------------------------------------------------
@@ -105,7 +107,7 @@ class _PaymentMethodPickerState extends State<PaymentMethodPicker> {
             selected: widget.value == method,
             onTap: () => _select(method),
           ),
-          if (method != _secondary.last) const SizedBox(height: 4),
+          if (method != _secondary.last) const SizedBox(height: AppSpacing.xxs),
         ],
       ],
     );
@@ -136,25 +138,29 @@ class _CollapsedSummary extends StatelessWidget {
         borderRadius: AppRadius.mdAll,
         onTap: onTap,
         child: Container(
-          height: 48,
+          height: AppSizes.controlHeight,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           child: Row(
             children: [
-              Icon(icon, size: 18, color: theme.colorScheme.primary),
-              const SizedBox(width: 12),
+              Icon(
+                icon,
+                size: AppSizes.iconMd,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
               Icon(
                 Icons.expand_more,
-                size: 22,
+                size: AppSizes.navIcon,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ],
@@ -195,7 +201,7 @@ class _PrimaryTab extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(
             vertical: AppSpacing.xs,
-            horizontal: AppSpacing.xs,
+            horizontal: AppSpacing.xxs,
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -209,24 +215,26 @@ class _PrimaryTab extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 16,
+                size: AppSizes.iconSm,
                 color: selected
                     ? theme.colorScheme.primary
                     : theme.colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(height: 3),
-              // Quebra em até 2 linhas centralizadas em vez de encolher
+              const SizedBox(height: AppSpacing.xxs),
+              // Quebra em até 3 linhas centralizadas em vez de encolher
               // (FittedBox deixava 'Cartão de débito' ilegível em telas
-              // estreitas) — a aba cresce verticalmente, o texto é completo.
+              // estreitas): a aba cresce verticalmente, o texto é completo
+              // mesmo na escala 2.0.
               Text(
                 label,
                 textAlign: TextAlign.center,
-                maxLines: 2,
+                maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  height: 1.25,
+                style: AppTypography.labelMedium.copyWith(
+                  // Texto da aba selecionada em tinta (AA sobre o tint);
+                  // o laranja fica no ícone e no contorno.
                   color: selected
-                      ? theme.colorScheme.primary
+                      ? theme.colorScheme.onPrimaryContainer
                       : theme.colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -264,8 +272,8 @@ class _SecondaryTile extends StatelessWidget {
         borderRadius: AppRadius.mdAll,
         onTap: onTap,
         child: Container(
-          // Padding vertical 14: linha com ≥ 48dp de altura — alvo de toque
-          // acessível (WCAG/androidTapTargetGuideline). Era 6 (≈37px).
+          // Padding vertical 16: linha com ≥ 48dp de altura — alvo de toque
+          // acessível (WCAG/androidTapTargetGuideline).
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.sm,
             vertical: AppSpacing.md,
@@ -281,18 +289,18 @@ class _SecondaryTile extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 18,
+                size: AppSizes.iconMd,
                 color: selected ? primary : theme.colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   label,
                   // Quebra em até 2 linhas — o nome do método nunca é cortado.
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -301,7 +309,7 @@ class _SecondaryTile extends StatelessWidget {
                 selected
                     ? Icons.radio_button_checked
                     : Icons.radio_button_unchecked,
-                size: 22,
+                size: AppSizes.navIcon,
                 color: selected ? primary : theme.colorScheme.outline,
               ),
             ],

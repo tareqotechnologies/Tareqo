@@ -1,5 +1,6 @@
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +18,7 @@ import '../../widgets/app_segmented_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/money_live_preview.dart';
+import '../../widgets/premium_decor.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Bottom sheet para registrar uma transação financeira
@@ -134,55 +136,28 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
             children: [
               SheetHeader(title: l10n.financialAddTitle),
               // Seção: Tipo — pílulas estilo Apple.
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.3,
-                  ),
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      l10n.financialAddTitle,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
+              SheetSection(
+                children: [
+                  AppSegmentedButton<TransactionType>(
+                    segments: [
+                      ButtonSegment(
+                        value: TransactionType.income,
+                        label: Text(l10n.financialIncomingType),
+                        icon: const Icon(Icons.add_circle_outline),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    AppSegmentedButton<TransactionType>(
-                      segments: [
-                        ButtonSegment(
-                          value: TransactionType.income,
-                          label: Text(l10n.financialIncomingType),
-                          icon: const Icon(Icons.add_circle_outline),
-                        ),
-                        ButtonSegment(
-                          value: TransactionType.expense,
-                          label: Text(l10n.financialOutgoingType),
-                          icon: const Icon(Icons.remove_circle_outline),
-                        ),
-                      ],
-                      selected: {_type},
-                      onSelectionChanged: (selection) =>
-                          setState(() => _type = selection.first),
-                    ),
-                  ],
-                ),
+                      ButtonSegment(
+                        value: TransactionType.expense,
+                        label: Text(l10n.financialOutgoingType),
+                        icon: const Icon(Icons.remove_circle_outline),
+                      ),
+                    ],
+                    selected: {_type},
+                    onSelectionChanged: (selection) =>
+                        setState(() => _type = selection.first),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
-              // Seção: Detalhes ──
-              Text(
-                l10n.financialDescriptionLabel,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.lg),
               AppTextField(
                 controller: _descriptionController,
                 label: l10n.financialDescriptionLabel,
@@ -220,18 +195,16 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
               ),
               // A2: mostra ao vivo o valor que será registado.
               MoneyLivePreview(controller: _amountController),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               // Status Pendente (Fiado/A Pagar)
               Container(
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: _isPending
                         ? theme.warning.withValues(alpha: 0.5)
-                        : theme.colorScheme.outlineVariant.withValues(
-                            alpha: 0.5,
-                          ),
+                        : PremiumDecor.hairline(theme.colorScheme),
                   ),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  borderRadius: AppRadius.mdAll,
                   color: _isPending
                       ? theme.warning.withValues(alpha: 0.05)
                       : null,
@@ -240,18 +213,19 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                   type: MaterialType.transparency,
                   child: SwitchListTile(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      borderRadius: AppRadius.mdAll,
                     ),
                     title: Text(
                       l10n.financialPendingLabel,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: _isPending ? theme.warning : null,
+                      // Título em tinta (AA); o amarelo fica no switch e
+                      // no contorno — semântica de alerta, não de texto.
+                      style: AppTypography.labelLarge.copyWith(
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     subtitle: Text(
                       l10n.financialPendingHint,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -262,15 +236,15 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 ),
               ),
               if (_formError != null) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   _formError!,
-                  style: theme.textTheme.bodySmall?.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: theme.colorScheme.error,
                   ),
                 ),
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
               // AppButton (design system ultra-clean): altura 48, cantos 12,
               // cores sólidas — o spinner substitui o ícone durante o envio.
               AppButton.primary(
@@ -278,8 +252,8 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
                 label: l10n.financialRegister,
                 icon: _isSubmitting
                     ? const SizedBox(
-                        height: 20,
-                        width: 20,
+                        height: AppSizes.iconMd,
+                        width: AppSizes.iconMd,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : null,

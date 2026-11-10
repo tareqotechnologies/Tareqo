@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/invoice_notification.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
@@ -13,7 +14,9 @@ import '../../controllers/notification_providers.dart';
 import '../../controllers/admin_message_providers.dart';
 import '../../../domain/entities/admin_message.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/premium_decor.dart';
 
 /// Tela de notificações do tenant — lista as notificações de facturas
 /// e mensagens do super admin com visual minimalista e detalhes em bottom sheet.
@@ -61,22 +64,15 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       useSafeArea: false,
       actions: [
         if (unreadCount > 0)
-          TextButton(
+          // Acção em ícone: o texto longo não cabe no AppBar a 412px
+          // (cortava) nem em escalas de texto grandes; o tooltip mantém
+          // o rótulo para leitores de ecrã.
+          IconButton(
+            tooltip: l10n.notificationMarkAllRead,
             onPressed: _markAllAsRead,
-            style: TextButton.styleFrom(
-              // A11y: alvo de toque padrão (48dp) — sem shrinkWrap.
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            ),
-            child: Text(
-              l10n.notificationMarkAllRead,
-              // Ação de texto = labelLarge (14/w500), como os demais
-              // TextButton do app.
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: scheme.primary,
-              ),
-            ),
+            icon: const Icon(Icons.done_all, size: AppSizes.iconMd),
           ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.xs),
       ],
       body: Column(
         children: [
@@ -96,7 +92,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   count: totalCount,
                   onTap: () => setState(() => _showUnreadOnly = false),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.xs),
                 _Pill(
                   label: l10n.notificationTabUnread,
                   selected: _showUnreadOnly,
@@ -133,9 +129,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: EdgeInsets.fromLTRB(
                         horizontal,
-                        8,
+                        AppSpacing.xs,
                         horizontal,
-                        24,
+                        AppSpacing.xl,
                       ),
                       itemCount: _buildItemList(
                         filteredAdminMessages,
@@ -295,6 +291,35 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// HELPERS — Cores do tipo no tile e na sheet
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Texto do selo sobre o tint do tipo: laranja → tinta; alertas → as
+/// variantes AA de sucesso/erro do tema.
+Color _typeTextColor(Color base, ThemeData theme) {
+  if (base == AppColors.accentOrange) return theme.colorScheme.onSurface;
+  if (base == AppColors.successNeutral) return theme.income;
+  return theme.expense;
+}
+
+/// Glifo sobre o fundo do ícone, só com as cores do anexo.
+/// Laranja: preto no claro (tint pálido) e suave no escuro (tint escuro).
+/// Alertas: o próprio tom no claro e o tint AA no escuro.
+Color _deriveFg(Color base, Brightness brightness) {
+  final light = brightness == Brightness.light;
+  if (base == AppColors.accentOrange) {
+    return light ? AppColors.brandBlack : AppColors.softWhite;
+  }
+  if (base == AppColors.alertError) {
+    return light ? AppColors.alertError : AppColors.errorTextDark;
+  }
+  if (base == AppColors.alertSuccess) {
+    return light ? AppColors.alertSuccess : AppColors.successTextDark;
+  }
+  return light ? AppColors.brandBlack : AppColors.softWhite;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // WIDGETS
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -303,7 +328,6 @@ class _NotificationTile extends StatelessWidget {
   const _NotificationTile({
     required this.icon,
     required this.iconBg,
-    required this.iconFg,
     required this.title,
     required this.subtitle,
     required this.time,
@@ -327,7 +351,6 @@ class _NotificationTile extends StatelessWidget {
     return _NotificationTile(
       icon: icon,
       iconBg: color,
-      iconFg: _deriveFg(color),
       title: message.title,
       subtitle: message.body,
       time: message.createdAt,
@@ -352,7 +375,6 @@ class _NotificationTile extends StatelessWidget {
     return _NotificationTile(
       icon: icon,
       iconBg: color,
-      iconFg: _deriveFg(color),
       // Título/corpo localizados por tipo (os persistidos são dados).
       title: _InvoiceTypeLabel.label(notification.type, l10n),
       subtitle: _InvoiceTypeLabel.body(notification, l10n),
@@ -368,7 +390,6 @@ class _NotificationTile extends StatelessWidget {
 
   final IconData icon;
   final Color iconBg;
-  final Color iconFg;
   final String title;
   final String subtitle;
   final DateTime time;
@@ -384,6 +405,7 @@ class _NotificationTile extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
+    final typeTextColor = _typeTextColor(typeColor, theme);
 
     return Column(
       children: [
@@ -402,16 +424,20 @@ class _NotificationTile extends StatelessWidget {
                 children: [
                   // ── Ícone ──
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: AppSizes.avatarMd,
+                    height: AppSizes.avatarMd,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: iconBg.withValues(alpha: isRead ? 0.08 : 0.14),
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
-                    child: Icon(icon, size: 20, color: iconFg),
+                    child: Icon(
+                      icon,
+                      size: AppSizes.iconMd,
+                      color: _deriveFg(iconBg, theme.brightness),
+                    ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.sm),
 
                   // ── Conteúdo ──
                   Expanded(
@@ -425,12 +451,8 @@ class _NotificationTile extends StatelessWidget {
                                 title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                // Título da notificação = labelMedium (12):
-                                // não lida sobe para w600, lida fica w500.
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  fontWeight: isRead
-                                      ? FontWeight.w500
-                                      : FontWeight.w600,
+                                // Não lida = tinta; lida = secundária.
+                                style: AppTypography.labelLarge.copyWith(
                                   color: isRead
                                       ? scheme.onSurfaceVariant
                                       : scheme.onSurface,
@@ -438,10 +460,10 @@ class _NotificationTile extends StatelessWidget {
                               ),
                             ),
                             if (!isRead) ...[
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppSpacing.xs),
                               Container(
-                                width: 7,
-                                height: 7,
+                                width: AppSpacing.xs,
+                                height: AppSpacing.xs,
                                 decoration: BoxDecoration(
                                   color: typeColor,
                                   shape: BoxShape.circle,
@@ -450,34 +472,29 @@ class _NotificationTile extends StatelessWidget {
                             ],
                           ],
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: AppSpacing.xxs),
                         Text(
                           subtitle,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant.withValues(
-                              alpha: 0.7,
-                            ),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.xs),
                         Row(
                           children: [
                             Text(
                               _formatTime(time, l10n),
-                              // Horário = metadado (bodySmall 12).
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: scheme.onSurfaceVariant.withValues(
-                                  alpha: 0.5,
-                                ),
+                              style: AppTypography.bodySmall.copyWith(
+                                color: scheme.onSurfaceVariant,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppSpacing.xs),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.xs,
-                                vertical: 2,
+                                vertical: AppSpacing.micro,
                               ),
                               decoration: BoxDecoration(
                                 color: typeColor.withValues(alpha: 0.08),
@@ -487,9 +504,10 @@ class _NotificationTile extends StatelessWidget {
                               ),
                               child: Text(
                                 typeLabel,
-                                // Selo de tipo = labelMedium (12/w500).
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  color: typeColor,
+                                // Selo em tinta/semântica AA — o tom laranja
+                                // a 12px falhava contraste.
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: typeTextColor,
                                 ),
                               ),
                             ),
@@ -497,24 +515,19 @@ class _NotificationTile extends StatelessWidget {
                             if (onMarkAsRead != null)
                               IconButton(
                                 // A11y: alvo de toque 48dp + rótulo para
-                                // leitores de ecrã (antes: gesto de 24dp
-                                // sem rótulo).
+                                // leitores de ecrã.
                                 tooltip: l10n.notificationMarkRead,
                                 onPressed: onMarkAsRead,
                                 icon: Icon(
                                   Icons.done_all_outlined,
-                                  size: 16,
-                                  color: scheme.onSurfaceVariant.withValues(
-                                    alpha: 0.4,
-                                  ),
+                                  size: AppSizes.iconSm,
+                                  color: scheme.onSurfaceVariant,
                                 ),
                               ),
                             Icon(
                               Icons.chevron_right_rounded,
-                              size: 18,
-                              color: scheme.onSurfaceVariant.withValues(
-                                alpha: 0.3,
-                              ),
+                              size: AppSizes.iconMd,
+                              color: scheme.onSurfaceVariant,
                             ),
                           ],
                         ),
@@ -529,24 +542,12 @@ class _NotificationTile extends StatelessWidget {
         if (showDivider)
           Divider(
             height: 1,
-            thickness: 0.5,
-            color: scheme.outlineVariant.withValues(alpha: 0.2),
-            indent: 56,
+            color: PremiumDecor.hairline(scheme),
+            // Alinhado ao início do texto (ícone 40 + gap 12 + respiro 4).
+            indent: AppSizes.avatarMd + AppSpacing.sm + AppSpacing.xxs,
           ),
       ],
     );
-  }
-
-  /// Glifo sobre o fundo do ícone, só com as cores do anexo.
-  /// Preto e alertas escuros recebem o suave; laranja, cinza e suave
-  /// recebem o preto (rótulo sobre #FF6A2A).
-  static Color _deriveFg(Color base) {
-    if (base == AppColors.brandBlack ||
-        base == AppColors.alertError ||
-        base == AppColors.alertSuccess) {
-      return AppColors.softWhite;
-    }
-    return AppColors.brandBlack;
   }
 
   static String _formatTime(DateTime date, AppLocalizations l10n) {
@@ -592,65 +593,67 @@ class _DetailBottomSheet extends StatelessWidget {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.75,
       ),
-      margin: EdgeInsets.only(top: topPadding + 8),
+      margin: EdgeInsets.only(top: topPadding + AppSpacing.xs),
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppRadius.xl),
         ),
+        border: Border(top: BorderSide(color: PremiumDecor.hairline(scheme))),
+        boxShadow: PremiumDecor.upwardShadow(scheme),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Handle ──
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(
-                top: AppSpacing.sm,
-                bottom: AppSpacing.xxs,
-              ),
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: scheme.outlineVariant.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(AppRadius.full),
-              ),
-            ),
+          // ── Handle (barra padrão das sheets) ──
+          const Padding(
+            padding: EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
+            child: SheetHandle(),
           ),
 
           // ── Header ──
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              0,
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 44,
-                  height: 44,
+                  width: AppSizes.avatarMd,
+                  height: AppSizes.avatarMd,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: typeColor.withValues(alpha: 0.12),
                     borderRadius: AppRadius.mdAll,
                   ),
-                  child: Icon(icon, size: 22, color: typeColor),
+                  child: Icon(
+                    icon,
+                    size: AppSizes.iconMd,
+                    color: _deriveFg(typeColor, theme.brightness),
+                  ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         title,
-                        // Título do detalhe = titleMedium (16/w500).
-                        style: theme.textTheme.titleMedium,
+                        style: AppTypography.titleMedium.copyWith(
+                          color: scheme.onSurface,
+                        ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xxs),
                       Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.xs,
-                              vertical: 2,
+                              vertical: AppSpacing.micro,
                             ),
                             decoration: BoxDecoration(
                               color: typeColor.withValues(alpha: 0.1),
@@ -660,20 +663,16 @@ class _DetailBottomSheet extends StatelessWidget {
                             ),
                             child: Text(
                               typeLabel,
-                              // Selo de tipo = labelMedium (12/w500).
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: typeColor,
+                              style: AppTypography.labelMedium.copyWith(
+                                color: _typeTextColor(typeColor, theme),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.xs),
                           Text(
                             _DetailBottomSheet._formatTime(time, l10n),
-                            // Horário = metadado (bodySmall 12).
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant.withValues(
-                                alpha: 0.5,
-                              ),
+                            style: AppTypography.bodySmall.copyWith(
+                              color: scheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -688,8 +687,8 @@ class _DetailBottomSheet extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(),
                   icon: Icon(
                     Icons.close_rounded,
-                    size: 20,
-                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    size: AppSizes.iconMd,
+                    color: scheme.onSurfaceVariant,
                   ),
                   padding: EdgeInsets.zero,
                   // A11y: alvo de toque ≥48dp.
@@ -704,12 +703,13 @@ class _DetailBottomSheet extends StatelessWidget {
 
           // ── Divider ──
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-            child: Divider(
-              height: 1,
-              thickness: 0.5,
-              color: scheme.outlineVariant.withValues(alpha: 0.25),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.md,
+              AppSpacing.lg,
+              0,
             ),
+            child: Divider(height: 1, color: PremiumDecor.hairline(scheme)),
           ),
 
           // ── Body ──
@@ -723,9 +723,7 @@ class _DetailBottomSheet extends StatelessWidget {
               ),
               child: Text(
                 body,
-                // Corpo da mensagem = bodyMedium (14) com a entrelinha do
-                // token; o 12 anterior deixava o conteúdo abaixo do corpo.
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: AppTypography.bodyMedium.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
@@ -804,7 +802,7 @@ class _Pill extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: theme.textTheme.labelMedium?.copyWith(
+                    style: AppTypography.labelMedium.copyWith(
                       // Rótulo sempre legível (onSurface/onSurfaceVariant ≥ 4.5:1):
                       // a seleção é sinalizada pela pílula, borda e badge — o
                       // rótulo em activeColor dava ~4.4:1 (claro) e 3.6:1 (escuro).
@@ -815,7 +813,7 @@ class _Pill extends StatelessWidget {
                     ),
                   ),
                   if (count > 0) ...[
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.xs),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.xs,
@@ -829,14 +827,13 @@ class _Pill extends StatelessWidget {
                       ),
                       child: Text(
                         '$count',
-                        style: theme.textTheme.labelMedium?.copyWith(
+                        style: AppTypography.labelMedium.copyWith(
                           color: selected
                               // Badge sólido: usa o "on" do papel de fundo
                               // (primary ou error) — branco puro falhava 3:1 no
                               // escuro sobre #F87171.
                               ? (accent ? scheme.onError : scheme.onPrimary)
                               : scheme.onSurfaceVariant,
-                          // w600 (o w700 saía da escala 400/500/600).
                           fontWeight: FontWeight.w600,
                         ),
                       ),

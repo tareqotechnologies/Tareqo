@@ -17,18 +17,17 @@ class _PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final scheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
     return Container(
       width: double.infinity,
       margin: EdgeInsets.fromLTRB(
         AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-        12,
+        AppSpacing.sm,
         AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
-        4,
+        AppSpacing.xxs,
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: scheme.primaryContainer.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -40,34 +39,40 @@ class _PlanCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.workspace_premium_outlined,
+                size: AppSizes.iconMd,
                 color: scheme.onPrimaryContainer,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
                   plan?.name ?? l10n.planCardTitle,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.titleMedium.copyWith(
                     color: scheme.onPrimaryContainer,
                   ),
                 ),
               ),
               TextButton.icon(
                 onPressed: onUpgrade,
-                icon: const Icon(Icons.upgrade_outlined, size: 18),
+                // Acção em tinta sobre o cartão tintado: 14px laranja não
+                // passa AA no claro — o ícone de upgrade carrega a acção.
+                style: TextButton.styleFrom(
+                  foregroundColor: scheme.onPrimaryContainer,
+                  textStyle: AppTypography.labelMedium,
+                ),
+                icon: const Icon(Icons.upgrade_outlined, size: AppSizes.iconSm),
                 label: Text(l10n.planCardUpgrade),
               ),
             ],
           ),
           if (plan != null) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               plan!.description,
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: AppTypography.bodySmall.copyWith(
                 color: scheme.onPrimaryContainer.withValues(alpha: 0.8),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
                 Expanded(
@@ -78,7 +83,7 @@ class _PlanCard extends StatelessWidget {
                     scheme: scheme,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: _LimitMeter(
                     label: l10n.planCardEmployees,
@@ -111,6 +116,8 @@ class _LimitMeter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final ratio = (used / max).clamp(0.0, 1.0);
     final reached = used >= max;
 
@@ -129,33 +136,33 @@ class _LimitMeter extends StatelessWidget {
                 // Quebra em até 2 linhas — o rótulo do limite nunca é cortado.
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                style: AppTypography.labelSmall.copyWith(
                   color: scheme.onPrimaryContainer.withValues(alpha: 0.8),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.xs),
             Flexible(
               child: Text(
                 '$used/$max',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                style: AppTypography.labelSmall.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: reached ? scheme.error : scheme.onPrimaryContainer,
+                  color: reached ? theme.expense : scheme.onPrimaryContainer,
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xxs),
         ClipRRect(
           borderRadius: BorderRadius.circular(AppRadius.full),
           child: LinearProgressIndicator(
             value: ratio,
             minHeight: 6,
             backgroundColor: scheme.onPrimaryContainer.withValues(alpha: 0.15),
-            color: reached ? scheme.error : scheme.primary,
+            color: reached ? theme.expense : scheme.primary,
           ),
         ),
       ],

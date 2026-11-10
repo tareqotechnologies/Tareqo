@@ -19,6 +19,7 @@ import '../../widgets/app_page.dart';
 import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/section_label.dart';
 
 /// Ecra de transferências entre lojas — envio, recebimento e histórico.
@@ -57,12 +58,12 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
           : ListView.separated(
               padding: EdgeInsets.fromLTRB(
                 horizontal,
-                AppSpacing.md,
+                AppSpacing.sm,
                 horizontal,
                 AppSpacing.fabBottomClearance,
               ),
               itemCount: transfers.length,
-              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.xs),
               itemBuilder: (context, index) =>
                   _TransferCard(transfer: transfers[index]),
             ),
@@ -93,23 +94,20 @@ class _TransferCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    final (statusColor, statusIcon) = switch (transfer.status) {
+    final (statusTone, statusIcon) = switch (transfer.status) {
       StockTransferStatus.pending => (
-        ModuleColors.credit,
+        AppColors.alertWarning,
         Icons.schedule_outlined,
       ),
       StockTransferStatus.inTransit => (
-        ModuleColors.reports,
+        scheme.primary,
         Icons.local_shipping_outlined,
       ),
       StockTransferStatus.received => (
-        AppColors.accentOrange,
+        theme.income,
         Icons.check_circle_outline,
       ),
-      StockTransferStatus.cancelled => (
-        AppColors.errorNeutral,
-        Icons.cancel_outlined,
-      ),
+      StockTransferStatus.cancelled => (theme.expense, Icons.cancel_outlined),
     };
 
     final formattedQty = Quantity.format(
@@ -126,75 +124,70 @@ class _TransferCard extends StatelessWidget {
 
     return AppCard(
       elevated: true,
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: IconTone.darkBackground(ModuleColors.stores),
-                  shape: BoxShape.circle,
+          Container(
+            width: AppSizes.avatarSm,
+            height: AppSizes.avatarSm,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer,
+              borderRadius: AppRadius.smAll,
+            ),
+            child: Icon(
+              Icons.swap_horiz,
+              size: AppSizes.iconMd,
+              color: scheme.primary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  // Nomes COMPLETOS das lojas — quebra quando necessário
+                  // (nunca truncar o percurso da transferência).
+                  '${transfer.fromStoreName}  →  ${transfer.toStoreName}',
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
+                  ),
                 ),
-                child: Icon(
-                  Icons.swap_horiz,
-                  size: 16,
-                  color: IconTone.lightForeground(ModuleColors.stores),
+                const SizedBox(height: AppSpacing.micro),
+                Text(
+                  '${transfer.productName}  ·  $formattedQty  ·  ${Formatters.date(transfer.createdAt)}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      // Nomes COMPLETOS das lojas — quebra quando necessário
-                      // (nunca truncar o percurso da transferência).
-                      '${transfer.fromStoreName}  →  ${transfer.toStoreName}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      '${transfer.productName}  ·  $formattedQty  ·  ${Formatters.date(transfer.createdAt)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xs,
+              vertical: AppSpacing.micro,
+            ),
+            decoration: BoxDecoration(
+              color: statusTone.withValues(alpha: 0.12),
+              borderRadius: AppRadius.xsAll,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(statusIcon, size: AppSizes.iconSm, color: statusTone),
+                const SizedBox(width: AppSpacing.xxs),
+                Text(
+                  statusLabel,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: scheme.onSurface,
+                  ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xs,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppRadius.xs),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusIcon, size: 12, color: statusColor),
-                    const SizedBox(width: 3),
-                    Text(
-                      statusLabel,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: statusColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -364,13 +357,14 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
             children: [
               Icon(
                 Icons.store_outlined,
-                size: 40,
+                size: AppSpacing.xxxl,
                 color: scheme.onSurfaceVariant.withValues(alpha: 0.3),
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
                 l10n.transfersNoStoresTitle,
-                style: theme.textTheme.bodyMedium?.copyWith(
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyMedium.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
@@ -378,7 +372,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
               Text(
                 l10n.transfersNoStoresSubtitle,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: AppTypography.bodySmall.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
               ),
@@ -402,9 +396,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
           children: [
             Text(
               l10n.transfersNewFab,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTypography.titleLarge.copyWith(color: scheme.onSurface),
             ),
             const SizedBox(height: AppSpacing.lg),
             AppPickerField<String>(
@@ -432,10 +424,10 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
               onChanged: (v) => setState(() => _toStoreId = v),
             ),
             const SizedBox(height: AppSpacing.md),
-            const Divider(),
+            Divider(height: 1, color: PremiumDecor.hairline(scheme)),
             const SizedBox(height: AppSpacing.sm),
             SectionLabel(text: l10n.transfersProduct),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             if (activeProducts.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedProductId,
@@ -459,7 +451,10 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
               InputDecorator(
                 decoration: InputDecoration(
                   hintText: l10n.transfersProductPlaceholder,
-                  prefixIcon: const Icon(Icons.inventory_2_outlined, size: 20),
+                  prefixIcon: const Icon(
+                    Icons.inventory_2_outlined,
+                    size: AppSizes.iconMd,
+                  ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md,
@@ -499,19 +494,25 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                     children: [
                       Icon(
                         Icons.check_circle_outline,
-                        size: 16,
+                        size: AppSizes.iconSm,
                         color: scheme.primary,
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.xs),
                       Expanded(
                         child: Text(
                           '${entry.value.product.name}  ·  ${Quantity.format(entry.value.qtyMilli, unitLabel: entry.value.product.vendaPorFracao ? entry.value.product.unitLabel : null)}',
-                          style: theme.textTheme.bodyMedium,
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: scheme.onSurface,
+                          ),
                         ),
                       ),
                       InkWell(
                         onTap: () => setState(() => _items.removeAt(entry.key)),
-                        child: Icon(Icons.close, size: 16, color: scheme.error),
+                        child: Icon(
+                          Icons.close,
+                          size: AppSizes.iconSm,
+                          color: scheme.error,
+                        ),
                       ),
                     ],
                   ),

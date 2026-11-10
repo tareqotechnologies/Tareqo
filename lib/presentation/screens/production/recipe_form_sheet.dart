@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/quantity.dart';
@@ -144,6 +146,7 @@ class _RecipeFormSheetState extends ConsumerState<RecipeFormSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final products = ref.watch(productsProvider).value ?? const <Product>[];
     // Produtos que podem ser o ACABADO da ficha.
     final producible = [
@@ -175,18 +178,16 @@ class _RecipeFormSheetState extends ConsumerState<RecipeFormSheet> {
           child: ListView(
             shrinkWrap: true,
             padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
               AppSpacing.md,
-              AppSpacing.md,
-              AppSpacing.md,
+              AppSpacing.xl,
               AppSpacing.xl,
             ),
             children: [
               if (_error != null) ...[
                 Text(
                   _error!,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
+                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
                 ),
                 const SizedBox(height: AppSpacing.sm),
               ],
@@ -197,7 +198,9 @@ class _RecipeFormSheetState extends ConsumerState<RecipeFormSheet> {
                   children: [
                     Text(
                       l10n.productionNoProducibleSubtitle,
-                      style: theme.textTheme.bodySmall,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 )
@@ -271,7 +274,7 @@ class _RecipeFormSheetState extends ConsumerState<RecipeFormSheet> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, size: 18),
+                          icon: const Icon(Icons.close, size: AppSizes.iconMd),
                           tooltip: l10n.commonDelete,
                           onPressed: () => setState(() {
                             _components.removeAt(i).dispose();
@@ -285,7 +288,7 @@ class _RecipeFormSheetState extends ConsumerState<RecipeFormSheet> {
                     alignment: Alignment.centerLeft,
                     child: AppButton.secondary(
                       label: l10n.productionAddComponent,
-                      icon: const Icon(Icons.add, size: 18),
+                      icon: const Icon(Icons.add, size: AppSizes.iconMd),
                       onPressed: () =>
                           setState(() => _components.add(_ComponentDraft())),
                     ),

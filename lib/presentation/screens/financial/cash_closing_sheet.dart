@@ -20,7 +20,10 @@ import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/money_live_preview.dart';
+import '../../widgets/premium_decor.dart';
+import '../../widgets/section_label.dart';
 import '../../widgets/smart_amount.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 
@@ -185,30 +188,33 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(AppRadius.md),
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: AppRadius.mdAll,
+              border: Border.all(
+                color: PremiumDecor.hairline(theme.colorScheme),
+              ),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.check_circle_outline,
-                  size: 20,
-                  color: theme.colorScheme.onTertiaryContainer,
+                  size: AppSizes.iconMd,
+                  color: theme.income,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Text(
                     '${l10n.cashClosingClosedAt} '
                     '${Formatters.dateTime(summary.existingClosing!.closedAt)}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onTertiaryContainer,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
         ],
         // Resumo do dia: total, esperado na gaveta e diferença ao vivo.
         _SummaryCard(
@@ -217,12 +223,12 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
               ? null
               : _parseAmount(_countedController.text),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         // Abertura por forma de pagamento (o Z).
-        Text(l10n.cashClosingByMethod, style: theme.textTheme.titleMedium),
-        const SizedBox(height: 8),
+        SectionLabel(text: l10n.cashClosingByMethod),
+        const SizedBox(height: AppSpacing.xs),
         _ByMethodBreakdown(summary: summary),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.lg),
         // AppTextField (design system ultra-clean): o botão de auto-refresh
         // (suffixIcon) preenche com o esperado; a borda acende no foco.
         AppTextField(
@@ -243,15 +249,15 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
         // A2: mostra ao vivo a contagem que será registada — "1390" aparece
         // como 1.390,00 ANTES de confirmar o fecho.
         MoneyLivePreview(controller: _countedController),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         // AppButton (design system ultra-clean): altura 48, cantos 12,
         // cores sólidas — o spinner substitui o ícone durante o envio.
         AppButton.primary(
           onPressed: _isSubmitting ? null : () => _submit(summary: summary),
           icon: _isSubmitting
               ? const SizedBox(
-                  height: 20,
-                  width: 20,
+                  height: AppSizes.iconMd,
+                  width: AppSizes.iconMd,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.lock_clock_outlined),
@@ -260,13 +266,11 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
               : l10n.cashClosingConfirm,
         ),
         if (_successMessage != null) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             _successMessage!,
             textAlign: TextAlign.center,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.primary,
-            ),
+            style: AppTypography.labelLarge.copyWith(color: theme.income),
           ),
         ],
       ],
@@ -285,6 +289,7 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
     final difference = countedCents == null
@@ -292,63 +297,63 @@ class _SummaryCard extends StatelessWidget {
         : countedCents! - summary.expectedCashCents;
     final (Color color, IconData icon, String label) = difference == null
         ? (
-            theme.colorScheme.onSurfaceVariant,
+            scheme.onSurfaceVariant,
             Icons.edit_note_outlined,
             l10n.cashClosingCountedCashHint,
           )
         : switch (difference) {
             == 0 => (
-              theme.colorScheme.primary,
+              theme.income,
               Icons.check_circle_outline,
               l10n.cashClosingConfers,
             ),
             > 0 => (
-              theme.colorScheme.tertiary,
+              scheme.tertiary,
               Icons.trending_up,
               l10n.cashClosingSurplus(Formatters.currency(difference)),
             ),
             _ => (
-              theme.colorScheme.error,
+              scheme.error,
               Icons.trending_down,
               l10n.cashClosingShortage(Formatters.currency(difference.abs())),
             ),
           };
 
-    // AppCard (design system ultra-clean): radius 12, borda 0.5px #222E35,
-    // flat — o resumo do dia segue o padrão dos demais cards.
+    // AppCard (design system ultra-clean): flat, hairline — o resumo do dia
+    // segue o padrão dos demais cards.
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l10n.cashClosingDaySummary, style: theme.textTheme.titleMedium),
-          const SizedBox(height: 12),
+          SectionLabel(text: l10n.cashClosingDaySummary),
+          const SizedBox(height: AppSpacing.sm),
           _row(theme, l10n.cashClosingTotalSales, summary.totalSalesCents),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           _row(
             theme,
             l10n.cashClosingExpectedCash,
             summary.expectedCashCents,
             emphasize: true,
           ),
-          const Divider(height: 24),
+          Divider(height: AppSpacing.xl, color: PremiumDecor.hairline(scheme)),
           Row(
             children: [
-              Icon(icon, size: 20, color: color),
-              const SizedBox(width: 8),
+              Icon(icon, size: AppSizes.iconMd, color: color),
+              const SizedBox(width: AppSpacing.xs),
               Expanded(
                 child: Text(
                   label,
                   // Indicador de atenção do fecho: 14/w500 + cor.
-                  style: theme.textTheme.labelLarge?.copyWith(color: color),
+                  style: AppTypography.labelLarge.copyWith(color: color),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             l10n.cashClosingExpectedCashHint,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppTypography.bodySmall.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -414,10 +419,10 @@ class _ByMethodBreakdown extends StatelessWidget {
               children: [
                 Icon(
                   _methodIcon(entry.key),
-                  size: 18,
+                  size: AppSizes.iconSm,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     _methodLabel(l10n, entry.key),

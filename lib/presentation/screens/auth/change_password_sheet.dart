@@ -149,7 +149,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                   ? l10n.loginPasswordError
                   : null,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             AppTextField(
               controller: _newController,
               obscureText: _obscureNew,
@@ -177,7 +177,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 };
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             AppTextField(
               controller: _confirmController,
               obscureText: _obscureConfirm,
@@ -205,14 +205,14 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
             AppButton.primary(
               onPressed: _isSubmitting ? null : _submit,
               label: l10n.changePasswordSubmit,
               icon: _isSubmitting
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: AppSizes.iconMd,
+                      width: AppSizes.iconMd,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,

@@ -10,6 +10,7 @@ import '../../navigation/app_routes.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/search_field.dart';
 import 'doc_reader_screen.dart';
 
@@ -109,42 +110,58 @@ class _SupportScreenState extends State<SupportScreen> {
   }) {
     final theme = Theme.of(context);
     final accent = theme.accent;
+    final scheme = theme.colorScheme;
     return AppCard(
       elevated: true,
       padding: const EdgeInsets.all(AppSpacing.md),
-      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.lg)),
+      borderRadius: AppRadius.lgAll,
       onTap: onTap,
       child: Row(
         children: [
           Container(
-            width: 46,
-            height: 46,
+            width: AppSizes.touchTarget,
+            height: AppSizes.touchTarget,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: IconTone.darkBackground(accent),
+              // No escuro o círculo preto some sobre o cartão preto — o
+              // hairline mantém a forma visível.
+              border: theme.brightness == Brightness.dark
+                  ? Border.all(color: PremiumDecor.hairline(scheme))
+                  : null,
             ),
             child: Icon(
               icon,
-              size: 22,
+              size: AppSizes.iconMd,
               color: IconTone.lightForeground(accent),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTypography.titleLarge),
+                Text(
+                  title,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: scheme.onSurface,
+                  ),
+                ),
                 const SizedBox(height: AppSpacing.micro),
-                Text(hint, style: AppTypography.bodySmall),
+                Text(
+                  hint,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.xs),
           Icon(
             Icons.chevron_right,
-            size: 24,
-            color: theme.colorScheme.onSurfaceVariant,
+            size: AppSizes.iconMd,
+            color: scheme.onSurfaceVariant,
           ),
         ],
       ),
@@ -171,15 +188,15 @@ class _SupportScreenState extends State<SupportScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 20,
-                height: 20,
+                width: AppSizes.iconMd,
+                height: AppSizes.iconMd,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: scheme.surfaceContainerHighest,
                 ),
                 child: Icon(
                   Icons.question_mark,
-                  size: 12,
+                  size: AppSizes.iconSm,
                   color: scheme.onSurface,
                 ),
               ),

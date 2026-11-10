@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/admin_providers.dart';
 import '../../controllers/invoice_providers.dart';
 import '../../widgets/admin_thin_bridge.dart';
 import '../../widgets/fade_indexed_stack.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/sign_out_button.dart';
 import 'admin_addons_screen.dart';
 import 'admin_addon_revenue_screen.dart';
@@ -79,14 +81,14 @@ class _AdminShellState extends ConsumerState<AdminShell> {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 48,
+        toolbarHeight: AppSizes.touchTarget,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Row(
           children: [
             Container(
-              width: 28,
-              height: 28,
+              width: AppSizes.iconXl,
+              height: AppSizes.iconXl,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: scheme.primary,
@@ -94,22 +96,23 @@ class _AdminShellState extends ConsumerState<AdminShell> {
               ),
               child: Icon(
                 Icons.admin_panel_settings_outlined,
-                size: 16,
+                size: AppSizes.iconSm,
                 color: scheme.onPrimary,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
               l10n.adminTitle,
+              // Identidade thin do painel: título em 400, hierarquia pela
+              // cor e pelo espaço — a escala vem do papel (titleSmall).
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w400,
-                letterSpacing: 0.4,
               ),
             ),
           ],
         ),
-        titleSpacing: 16,
-        actions: const [SignOutButton(), SizedBox(width: 8)],
+        titleSpacing: AppSpacing.md,
+        actions: const [SignOutButton(), SizedBox(width: AppSpacing.xs)],
       ),
       body: wide
           ? Row(
@@ -236,59 +239,62 @@ class _AdminFab extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: scheme.primary,
-          borderRadius: BorderRadius.circular(AppRadius.full),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(currentIcon, size: 20, color: scheme.onPrimary),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                currentLabel,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: scheme.onPrimary,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.keyboard_arrow_up_rounded,
-              size: 18,
-              color: scheme.onPrimary,
-            ),
-            if (totalBadge > 0) ...[
-              const SizedBox(width: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xs,
-                  vertical: 1,
-                ),
-                decoration: BoxDecoration(
-                  color: scheme.error,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
+      child: Semantics(
+        button: true,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: scheme.primary,
+            borderRadius: BorderRadius.circular(AppRadius.full),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(currentIcon, size: AppSizes.iconMd, color: scheme.onPrimary),
+              const SizedBox(width: AppSpacing.xs),
+              Flexible(
                 child: Text(
-                  '$totalBadge',
-                  // Badge de ênfase: w500 explícito — a ponte thin do painel
-                  // rebaixa labelMedium para w400, mas o badge sobre vermelho
-                  // precisa de destaque (mesmo contrato do teste).
+                  currentLabel,
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: scheme.onError,
-                    fontWeight: FontWeight.w500,
+                    color: scheme.onPrimary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Icon(
+                Icons.keyboard_arrow_up_rounded,
+                size: AppSizes.iconMd,
+                color: scheme.onPrimary,
+              ),
+              if (totalBadge > 0) ...[
+                const SizedBox(width: AppSpacing.xxs),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs,
+                    vertical: AppSpacing.micro,
+                  ),
+                  decoration: BoxDecoration(
+                    color: scheme.error,
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                  ),
+                  child: Text(
+                    '$totalBadge',
+                    // Badge de ênfase: w500 explícito — a ponte thin do painel
+                    // rebaixa labelMedium para w400, mas o badge sobre vermelho
+                    // precisa de destaque (mesmo contrato do teste).
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: scheme.onError,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -320,12 +326,10 @@ class _NavBottomSheet extends StatelessWidget {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.7,
       ),
-      margin: EdgeInsets.only(top: topPadding + 8),
+      margin: EdgeInsets.only(top: topPadding + AppSpacing.xs),
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppRadius.xl),
-        ),
+        borderRadius: AppRadius.sheetTop,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -337,10 +341,10 @@ class _NavBottomSheet extends StatelessWidget {
                 top: AppSpacing.sm,
                 bottom: AppSpacing.md,
               ),
-              width: 36,
-              height: 4,
+              width: AppSizes.avatarSm,
+              height: AppSpacing.xxs,
               decoration: BoxDecoration(
-                color: scheme.outlineVariant.withValues(alpha: 0.4),
+                color: PremiumDecor.hairline(scheme),
                 borderRadius: BorderRadius.circular(AppRadius.full),
               ),
             ),
@@ -353,16 +357,11 @@ class _NavBottomSheet extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Navegação',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
-                  fontWeight: FontWeight.w300,
-                  fontSize: 12,
-                  letterSpacing: 0.3,
-                ),
+                style: AppTypography.eyebrow(scheme.onSurfaceVariant),
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
 
           // Items — scrollável para ecrãs pequenos
           Flexible(
@@ -382,7 +381,7 @@ class _NavBottomSheet extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + AppSpacing.md),
         ],
       ),
     );
@@ -419,28 +418,28 @@ class _NavSheetItem extends StatelessWidget {
             children: [
               // Icon
               Container(
-                width: 38,
-                height: 38,
+                width: AppSizes.avatarMd,
+                height: AppSizes.avatarMd,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: selected
                       ? scheme.primary
                       : scheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  borderRadius: AppRadius.smAll,
                 ),
                 child: Icon(
                   selected ? item.selectedIcon : item.icon,
-                  size: 20,
+                  size: AppSizes.iconMd,
                   color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
 
               // Label
               Expanded(
                 child: Text(
                   item.label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: AppTypography.labelLarge.copyWith(
                     fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
                     color: color,
                   ),
@@ -452,7 +451,7 @@ class _NavSheetItem extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xs,
-                    vertical: 2,
+                    vertical: AppSpacing.micro,
                   ),
                   decoration: BoxDecoration(
                     color: scheme.error,
@@ -496,14 +495,10 @@ class _MinimalSidebar extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return Container(
-      width: 64,
+      width: AppSpacing.gigantic,
       decoration: BoxDecoration(
         color: scheme.surface,
-        border: Border(
-          right: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.25),
-          ),
-        ),
+        border: Border(right: BorderSide(color: PremiumDecor.hairline(scheme))),
       ),
       child: Column(
         children: [
@@ -554,19 +549,19 @@ class _SidebarIcon extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: AppDurations.fast,
-          width: 48,
-          height: 48,
+          width: AppSizes.touchTarget,
+          height: AppSizes.touchTarget,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: selected ? scheme.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: AppRadius.mdAll,
           ),
           child: Stack(
             clipBehavior: Clip.none,
             children: [
               Icon(
                 selected ? item.selectedIcon : item.icon,
-                size: 22,
+                size: AppSizes.navIcon,
                 color: selected ? scheme.onPrimary : scheme.onSurfaceVariant,
               ),
               if (item.badge > 0)
@@ -574,8 +569,8 @@ class _SidebarIcon extends StatelessWidget {
                   top: 0,
                   right: 0,
                   child: Container(
-                    width: 16,
-                    height: 16,
+                    width: AppSizes.iconSm,
+                    height: AppSizes.iconSm,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: scheme.error,

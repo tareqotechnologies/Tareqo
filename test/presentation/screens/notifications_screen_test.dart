@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/test_app.dart';
+import '../../helpers/viewport.dart';
 
 import 'package:tareqo/domain/entities/app_user.dart';
 import 'package:tareqo/domain/entities/invoice_notification.dart';
@@ -309,7 +310,8 @@ void main() {
       await tester.pumpWidget(_buildApp(notifications: notifications));
       await tester.pumpAndSettle();
 
-      expect(find.text('Marcar todas como lidas'), findsOneWidget);
+      // Acção "marcar todas" no AppBar (ícone com tooltip = rótulo).
+      expect(find.byTooltip('Marcar todas como lidas'), findsOneWidget);
     });
 
     testWidgets(
@@ -320,7 +322,7 @@ void main() {
         await tester.pumpWidget(_buildApp(notifications: notifications));
         await tester.pumpAndSettle();
 
-        expect(find.text('Marcar todas como lidas'), findsNothing);
+        expect(find.byTooltip('Marcar todas como lidas'), findsNothing);
       },
     );
 
@@ -489,8 +491,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Toca no botão "Marcar todas como lidas"
-      await tester.tap(find.text('Marcar todas como lidas'));
+      // Toca no botão "marcar todas" do AppBar (ícone com tooltip).
+      await tester.tap(find.byTooltip('Marcar todas como lidas'));
       await tester.pumpAndSettle();
 
       expect(markAllAsRead.calls, 1);
@@ -500,6 +502,10 @@ void main() {
     testWidgets('múltiplas notificações exibe a quantidade correta', (
       tester,
     ) async {
+      // Viewport alto: o ListView.builder só constrói o que está na janela
+      // (+ cacheExtent) — com 5 tiles de altura premium a janela padrão
+      // (800×600) deixava o último por construir.
+      usePortraitViewport(tester, size: const Size(800, 1400));
       // Mesmo tipo → todas exibem o título localizado do tipo.
       final notifications = List.generate(5, (i) => _notif(id: 'n$i'));
 

@@ -5,6 +5,7 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/money.dart';
 import '../../../domain/entities/addon_catalog.dart';
@@ -17,8 +18,10 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/error_view.dart';
 import '../../widgets/money_live_preview.dart';
 import '../../widgets/list_skeleton.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/metric_pill.dart';
 
@@ -244,16 +247,14 @@ class _TenantPicker extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: bulkMode
                           ? scheme.primary.withValues(alpha: 0.12)
-                          : scheme.surfaceContainerHighest.withValues(
-                              alpha: 0.5,
-                            ),
+                          : scheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Icon(
                       bulkMode
                           ? Icons.checklist_rounded
                           : Icons.checklist_outlined,
-                      size: 20,
+                      size: AppSizes.iconMd,
                       color: bulkMode
                           ? scheme.primary
                           : scheme.onSurfaceVariant,
@@ -287,18 +288,22 @@ class _TenantPicker extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: scheme.primaryContainer.withValues(alpha: 0.3),
+                  color: scheme.primaryContainer,
                   borderRadius: AppRadius.smAll,
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, size: 16, color: scheme.primary),
+                    Icon(
+                      Icons.info_outline,
+                      size: AppSizes.iconSm,
+                      color: scheme.primary,
+                    ),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
                         context.l10n.adminAddonsListHint,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: scheme.primary,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: scheme.onPrimaryContainer,
                         ),
                       ),
                     ),
@@ -312,8 +317,10 @@ class _TenantPicker extends ConsumerWidget {
           Expanded(
             child: allAsync.when(
               loading: () => const ListSkeleton(items: 4),
-              error: (e, _) =>
-                  Center(child: Text(context.l10n.adminAddonsLoadError('$e'))),
+              error: (e, _) => ErrorView(
+                message: context.l10n.adminAddonsLoadError('$e'),
+                onRetry: () => ref.invalidate(allTenantsProvider),
+              ),
               data: (tenants) {
                 final filtered = _filterTenants(tenants);
                 if (filtered.isEmpty) {
@@ -330,10 +337,11 @@ class _TenantPicker extends ConsumerWidget {
                     AppSpacing.lg,
                     AppSpacing.xs,
                     AppSpacing.lg,
-                    AppSpacing.xl,
+                    AppSpacing.fabBottomClearance,
                   ),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.xs),
                   itemBuilder: (_, i) {
                     final tenant = filtered[i];
                     return _TenantTile(
@@ -405,24 +413,22 @@ class _BulkSelectionBar extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer.withValues(alpha: 0.3),
+        color: scheme.primaryContainer,
         border: Border(
-          bottom: BorderSide(
-            color: scheme.outlineVariant.withValues(alpha: 0.5),
-          ),
+          bottom: BorderSide(color: PremiumDecor.hairline(scheme)),
         ),
       ),
       child: Row(
         children: [
           IconButton(
             tooltip: context.l10n.commonCancel,
-            icon: const Icon(Icons.close, size: 20),
+            icon: const Icon(Icons.close, size: AppSizes.iconMd),
             onPressed: onCancel,
           ),
           const SizedBox(width: AppSpacing.xs),
           Text(
             '$selectedCount / $totalCount',
-            style: theme.textTheme.labelMedium,
+            style: AppTypography.labelMedium,
           ),
           const SizedBox(width: AppSpacing.sm),
           TextButton(
@@ -478,7 +484,7 @@ class _TenantTile extends ConsumerWidget {
       onLongPress: onLongPress,
       child: AppCard(
         elevated: true,
-        borderRadius: const BorderRadius.all(Radius.circular(14)),
+        borderRadius: AppRadius.mdAll,
         padding: const EdgeInsets.all(AppSpacing.sm),
         borderColor: isSelected ? scheme.primary.withValues(alpha: 0.5) : null,
         onTap: onTap,
@@ -492,19 +498,19 @@ class _TenantTile extends ConsumerWidget {
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 visualDensity: VisualDensity.compact,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: AppSpacing.xxs),
             ],
             Container(
-              width: 38,
-              height: 38,
+              width: AppSizes.avatarSm,
+              height: AppSizes.avatarSm,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: scheme.primaryContainer.withValues(alpha: 0.5),
+                color: scheme.primaryContainer,
                 borderRadius: AppRadius.smAll,
               ),
               child: Icon(
                 Icons.business_outlined,
-                size: 18,
+                size: AppSizes.iconMd,
                 color: scheme.primary,
               ),
             ),
@@ -515,16 +521,14 @@ class _TenantTile extends ConsumerWidget {
                 children: [
                   Text(
                     tenant.businessName,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w400,
-                    ),
+                    style: AppTypography.labelLarge,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: AppSpacing.micro),
                   Text(
                     context.l10n.adminPlanLabel(planName),
-                    style: theme.textTheme.bodySmall?.copyWith(
+                    style: AppTypography.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
@@ -534,7 +538,7 @@ class _TenantTile extends ConsumerWidget {
             if (!bulkMode)
               Icon(
                 Icons.chevron_right_rounded,
-                size: 20,
+                size: AppSizes.iconMd,
                 color: scheme.onSurfaceVariant,
               ),
           ],
@@ -566,9 +570,7 @@ class _BulkAddOnSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppRadius.xl),
-        ),
+        borderRadius: AppRadius.sheetTop,
       ),
       child: SingleChildScrollView(
         padding: AppSpacing.sheetPadding,
@@ -579,14 +581,14 @@ class _BulkAddOnSheet extends StatelessWidget {
             // Handle bar
             Center(
               child: Container(
-                width: AppSpacing.xxxl,
+                width: AppSizes.avatarSm,
                 height: AppSpacing.xxs,
                 margin: const EdgeInsets.only(
                   top: AppSpacing.sm,
                   bottom: AppSpacing.lg,
                 ),
                 decoration: BoxDecoration(
-                  color: scheme.outlineVariant,
+                  color: PremiumDecor.hairline(scheme),
                   borderRadius: AppRadius.microAll,
                 ),
               ),
@@ -601,14 +603,12 @@ class _BulkAddOnSheet extends StatelessWidget {
                     children: [
                       Text(
                         context.l10n.adminAddonsBulkSheetTitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w400,
-                        ),
+                        style: theme.textTheme.titleMedium,
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.micro),
                       Text(
                         context.l10n.adminAddonsBulkSheetCount(tenantCount),
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: AppTypography.bodySmall.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
                       ),
@@ -664,21 +664,21 @@ class _BulkAddOnOption extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: scheme.surfaceContainerHighest,
         borderRadius: AppRadius.smAll,
       ),
       child: Row(
         children: [
           // Icon
           Container(
-            width: 36,
-            height: 36,
+            width: AppSizes.avatarSm,
+            height: AppSizes.avatarSm,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: scheme.primary.withValues(alpha: 0.12),
               borderRadius: AppRadius.smAll,
             ),
-            child: Icon(iconData, size: 18, color: scheme.primary),
+            child: Icon(iconData, size: AppSizes.iconMd, color: scheme.primary),
           ),
           const SizedBox(width: AppSpacing.sm),
 
@@ -689,35 +689,29 @@ class _BulkAddOnOption extends StatelessWidget {
               children: [
                 Text(
                   addon.name,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: AppTypography.labelLarge,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Row(
                   children: [
                     Text(
                       addon.category.label,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontSize: 11,
                       ),
                     ),
                     Text(
                       ' · ',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontSize: 11,
                       ),
                     ),
                     Text(
                       '${Formatters.currency(addon.priceMonthlyCents)}/mês',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -733,17 +727,17 @@ class _BulkAddOnOption extends StatelessWidget {
             onPressed: onActivate,
             label: context.l10n.adminAddonsActivateBtn,
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.successNeutral,
+              foregroundColor: theme.income,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               minimumSize: const Size(0, 32),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.xs),
           AppButton.secondary(
             onPressed: onDeactivate,
             label: context.l10n.adminAddonsDeactivateBtn,
             style: OutlinedButton.styleFrom(
-              foregroundColor: scheme.error,
+              foregroundColor: theme.expense,
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               minimumSize: const Size(0, 32),
             ),
@@ -853,9 +847,7 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(AppRadius.xl),
-        ),
+        borderRadius: AppRadius.sheetTop,
       ),
       child: SingleChildScrollView(
         padding: AppSpacing.sheetPadding,
@@ -866,14 +858,14 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
             // Handle bar
             Center(
               child: Container(
-                width: AppSpacing.xxxl,
+                width: AppSizes.avatarSm,
                 height: AppSpacing.xxs,
                 margin: const EdgeInsets.only(
                   top: AppSpacing.sm,
                   bottom: AppSpacing.lg,
                 ),
                 decoration: BoxDecoration(
-                  color: scheme.outlineVariant,
+                  color: PremiumDecor.hairline(scheme),
                   borderRadius: AppRadius.microAll,
                 ),
               ),
@@ -887,14 +879,12 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
                     children: [
                       Text(
                         l10n.adminAddonsEditPriceTitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w400,
-                        ),
+                        style: theme.textTheme.titleMedium,
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.micro),
                       Text(
                         widget.addon.name,
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: AppTypography.bodySmall.copyWith(
                           color: scheme.onSurfaceVariant,
                         ),
                       ),
@@ -923,7 +913,7 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 _formError!,
-                style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
+                style: AppTypography.bodySmall.copyWith(color: theme.expense),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
@@ -931,8 +921,8 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
               onPressed: _isSubmitting ? null : _submit,
               icon: _isSubmitting
                   ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                      height: AppSizes.iconMd,
+                      width: AppSizes.iconMd,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : null,
@@ -1057,17 +1047,18 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
               AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+              color: scheme.surfaceContainerHighest,
               border: Border(
-                bottom: BorderSide(
-                  color: scheme.outlineVariant.withValues(alpha: 0.3),
-                ),
+                bottom: BorderSide(color: PremiumDecor.hairline(scheme)),
               ),
             ),
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                  icon: const Icon(
+                    Icons.arrow_back_rounded,
+                    size: AppSizes.iconMd,
+                  ),
                   onPressed: widget.onBack,
                   tooltip: context.l10n.adminBackToList,
                 ),
@@ -1078,17 +1069,14 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
                     children: [
                       Text(
                         widget.tenant.businessName,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w400,
-                        ),
+                        style: AppTypography.labelLarge,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         '${context.l10n.commonId}: ${widget.tenant.id.length > 8 ? widget.tenant.id.substring(0, 8) : widget.tenant.id}...',
-                        style: theme.textTheme.bodySmall?.copyWith(
+                        style: AppTypography.bodySmall.copyWith(
                           color: scheme.onSurfaceVariant,
-                          fontSize: 11,
                           fontFamily: 'monospace',
                         ),
                       ),
@@ -1105,15 +1093,21 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
           // Add-on list
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const ListSkeleton(items: 4)
                 : ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.sm,
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.sm,
+                      AppSpacing.lg,
+                      AppSpacing.fabBottomClearance,
                     ),
                     itemCount: addOns.length,
-                    separatorBuilder: (_, _) =>
-                        const Divider(height: 1, indent: 40, endIndent: 0),
+                    separatorBuilder: (_, _) => Divider(
+                      height: 1,
+                      indent: AppSpacing.xxxl,
+                      endIndent: 0,
+                      color: PremiumDecor.hairline(scheme),
+                    ),
                     itemBuilder: (_, i) => _AddOnToggleTile(
                       addon: addOns[i],
                       isActive: _activeAddOnIds.contains(addOns[i].id),
@@ -1138,34 +1132,35 @@ class _CompactStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
-    return Container(
-      height: 44,
-      margin: const EdgeInsets.fromLTRB(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
         AppSpacing.lg,
         0,
       ),
-      child: Row(
+      child: Wrap(
+        spacing: AppSpacing.xs,
+        runSpacing: AppSpacing.xs,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           MetricPill(
             count: total,
             label: context.l10n.commonTotal,
             color: scheme.onSurface,
           ),
-          const SizedBox(width: AppSpacing.xs),
           MetricPill(
             count: active,
             label: context.l10n.adminAddonsActivePill,
-            color: AppColors.successNeutral,
+            color: theme.income,
           ),
-          const SizedBox(width: AppSpacing.xs),
           MetricPill(
             count: total - active,
             label: context.l10n.adminAddonsInactivePill,
-            color: AppColors.statusError,
+            color: theme.expense,
           ),
         ],
       ),
@@ -1211,8 +1206,8 @@ class _AddOnToggleTile extends StatelessWidget {
 
           // Icon
           Container(
-            width: 36,
-            height: 36,
+            width: AppSizes.avatarSm,
+            height: AppSizes.avatarSm,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: (isActive ? scheme.primary : scheme.outline).withValues(
@@ -1222,7 +1217,7 @@ class _AddOnToggleTile extends StatelessWidget {
             ),
             child: Icon(
               iconData,
-              size: 18,
+              size: AppSizes.iconMd,
               color: isActive ? scheme.primary : scheme.outline,
             ),
           ),
@@ -1235,32 +1230,29 @@ class _AddOnToggleTile extends StatelessWidget {
               children: [
                 Text(
                   addon.name,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: AppTypography.labelLarge,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Row(
                   children: [
                     Text(
                       addon.category.label,
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                     Text(
                       ' · ',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
                     Text(
                       '${Formatters.currency(addon.priceMonthlyCents)}/mês',
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -1274,7 +1266,7 @@ class _AddOnToggleTile extends StatelessWidget {
           // Editar preço (super admin) — toque no valor abre o sheet.
           IconButton(
             tooltip: context.l10n.adminAddonsEditPriceTooltip,
-            icon: const Icon(Icons.edit_outlined, size: 16),
+            icon: const Icon(Icons.edit_outlined, size: AppSizes.iconSm),
             color: scheme.onSurfaceVariant,
             onPressed: onEditPrice,
           ),

@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/ui/haptics.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/quantity.dart';
@@ -23,7 +25,7 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/payment_method_picker.dart';
-import '../../widgets/product_type_badge.dart';
+import '../../widgets/product_type_badge.dart' show productTypeLabel;
 import '../../widgets/search_field.dart';
 import '../../widgets/smart_amount.dart';
 import '../../../core/observability/crash_reporting.dart';
@@ -281,6 +283,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
     final productsAsync = ref.watch(productsProvider);
     // Mantém o catálogo por id em sincronia com o provider.
@@ -298,7 +301,12 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
         children: [
           SheetHeader(title: l10n.purchasesAddNew),
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              0,
+              AppSpacing.xl,
+              AppSpacing.xs,
+            ),
             child: AppTextField(
               controller: _supplierController,
               textInputAction: TextInputAction.next,
@@ -307,7 +315,12 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              0,
+              AppSpacing.xl,
+              AppSpacing.xs,
+            ),
             child: SearchField(
               controller: _searchController,
               hintText: l10n.productsSearchHint,
@@ -320,7 +333,9 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
               error: (_, _) => Center(
                 child: Text(
                   l10n.productsLoadError,
-                  style: theme.textTheme.bodyMedium,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
               ),
               data: (all) {
@@ -368,7 +383,8 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                     horizontal: AppSpacing.xl,
                   ),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.xs),
                   itemBuilder: (context, index) => _CartProductRow(
                     product: filtered[index],
                     quantity: _cart[filtered[index].id] ?? 0,
@@ -387,12 +403,17 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
           // Rodapé: total + confirmar
           Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
+              color: scheme.surface,
               border: Border(
-                top: BorderSide(color: theme.colorScheme.outlineVariant),
+                top: BorderSide(color: scheme.outlineVariant, width: 0.5),
               ),
             ),
-            padding: const EdgeInsets.fromLTRB(24, AppSpacing.sm, 24, 16),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xl,
+              AppSpacing.sm,
+              AppSpacing.xl,
+              AppSpacing.md,
+            ),
             // O rodapé é COMPACTO (alturas calibradas) para caber junto com
             // o catálogo mesmo em sheets baixos/paisagem — o Expanded do
             // catálogo é o que encolhe primeiro.
@@ -406,52 +427,53 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                   onChanged: (method) =>
                       setState(() => _paymentMethod = method),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
                       child: Text(
                         l10n.dashboardSaleItems(_itemCount),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: scheme.onSurfaceVariant,
                         ),
                       ),
                     ),
-                    // Total do carrinho em destaque (22) — SmartAmount:
-                    // o valor encolhe para SEMPRE caber, sem truncar nem
-                    // estourar o rodapé em telas estreitas.
+                    const SizedBox(width: AppSpacing.sm),
+                    // Total do carrinho em tinta (AA nos dois temas) — o
+                    // laranja fica para a ação de confirmar. SmartAmount:
+                    // o valor encolhe para SEMPRE caber, sem truncar.
                     Flexible(
                       child: SmartAmount(
                         cents: _totalCents,
                         alignment: Alignment.centerRight,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: theme.colorScheme.primary,
-                        ),
+                        style: AppTypography.heroAmount(scheme.onSurface),
                       ),
                     ),
                   ],
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
                     _error!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
+                    // Variante de TEXTO do erro (AA no escuro).
+                    style: AppTypography.bodySmall.copyWith(
+                      color: theme.expense,
                     ),
                   ),
                 ],
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 // AppButton ultra-clean: altura 48, cantos 12, texto w400.
                 AppButton.primary(
                   label: l10n.purchasesConfirm,
                   onPressed: _cart.isEmpty || _isSubmitting ? null : _confirm,
                   icon: _isSubmitting
                       ? const SizedBox(
-                          height: 18,
-                          width: 18,
+                          height: AppSizes.iconMd,
+                          width: AppSizes.iconMd,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.check, size: 20),
+                      : const Icon(Icons.check, size: AppSizes.iconMd),
                 ),
               ],
             ),
@@ -490,8 +512,10 @@ class _CartProductRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
     final isWeight = product.vendaPorFracao;
+    final inCart = quantity > 0;
 
     // Card premium (estilo Apple): cantos 18, superfície elevada — a linha
     // do carrinho segue o padrão das listas principais.
@@ -512,43 +536,51 @@ class _CartProductRow extends StatelessWidget {
                 // necessário (nada de truncar nomes no carrinho).
                 Text(
                   product.name,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: scheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.micro),
                 Text(
                   '${Formatters.currency(product.purchasePriceCents)} · '
                   '${l10n.purchasesStockLabel(Quantity.toUnits(product.stockQuantity).round(), l10n.commonUnits)}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
-                // Fase 1: papel do produto na compra — o operador vê o selo
-                // do tipo (matéria-prima, revenda ou embalagem) em TODA a
-                // linha, sem abrir o cadastro.
-                const SizedBox(height: 2),
-                ProductTypeBadge(type: product.type),
+                // Fase 1: papel do produto na compra — como TEXTO na linha
+                // de metadados (mesma linguagem do PDV e da lista de
+                // Produtos): o operador vê o tipo sem abrir o cadastro e o
+                // selo deixa de disputar atenção com o preço.
+                const SizedBox(height: AppSpacing.micro),
+                Text(
+                  productTypeLabel(context, product.type),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
                 // Validade definida (lote FIFO da entrada).
                 if (expiry != null) ...[
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xxs),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.event_available_outlined,
-                        size: 14,
-                        color: theme.colorScheme.primary,
+                        size: AppSizes.iconSm,
+                        color: scheme.onSurfaceVariant,
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppSpacing.xxs),
                       Flexible(
                         child: Text(
                           '${l10n.purchasesExpiryLabel} '
                           '${Formatters.date(expiry!)}',
                           // Quebra em até 2 linhas — a data nunca é cortada.
                           maxLines: 2,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.primary,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: scheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -558,7 +590,7 @@ class _CartProductRow extends StatelessWidget {
                       // semântica.
                       IconButton(
                         tooltip: l10n.productsExpiryClear,
-                        icon: const Icon(Icons.close, size: 16),
+                        icon: const Icon(Icons.close, size: AppSizes.iconSm),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(
                           minWidth: 32,
@@ -579,13 +611,21 @@ class _CartProductRow extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.event_outlined, size: 18),
+                    icon: const Icon(
+                      Icons.event_outlined,
+                      size: AppSizes.iconMd,
+                    ),
                     tooltip: l10n.purchasesExpiryAdd,
                     onPressed: onPickExpiry,
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
+                      // Cápsula neutra em repouso e tingida de laranja
+                      // quando o produto já está na compra — mesmo estado
+                      // do stepper do PDV.
+                      color: inCart
+                          ? scheme.primaryContainer
+                          : scheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Row(
@@ -595,6 +635,9 @@ class _CartProductRow extends StatelessWidget {
                           // Alvo de toque ≥ 48dp (a11y — guideline).
                           icon: const Icon(Icons.remove, size: 18),
                           tooltip: l10n.a11yDecreaseQuantity,
+                          color: inCart
+                              ? scheme.primary
+                              : scheme.onSurfaceVariant,
                           onPressed: quantity == 0 ? null : onRemove,
                         ),
                         InkWell(
@@ -612,7 +655,9 @@ class _CartProductRow extends StatelessWidget {
                                 language: Formatters.currentLanguage,
                               ),
                               textAlign: TextAlign.center,
-                              style: theme.textTheme.labelLarge,
+                              style: AppTypography.labelMedium.copyWith(
+                                color: scheme.onSurface,
+                              ),
                             ),
                           ),
                         ),
@@ -622,6 +667,7 @@ class _CartProductRow extends StatelessWidget {
                           tooltip: isWeight
                               ? l10n.a11yAddFraction
                               : l10n.a11yIncreaseQuantity,
+                          color: scheme.primary,
                           onPressed: isWeight ? onAddFraction : onAdd,
                         ),
                       ],

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../widgets/pulse_badge.dart';
 import '../../../domain/entities/financial_transaction.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -385,7 +386,12 @@ class _ActionMenuSheet extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SheetHeader(title: l10n.fabMenuTitle),
-          Text(l10n.fabMenuSubtitle, style: theme.textTheme.bodySmall),
+          Text(
+            l10n.fabMenuSubtitle,
+            style: AppTypography.bodySmall.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           _ActionTile(
             icon: Icons.add_shopping_cart_rounded,
@@ -519,7 +525,7 @@ class _ActionTile extends StatelessWidget {
                     ),
                     child: Icon(
                       icon,
-                      size: 18,
+                      size: AppSizes.iconMd,
                       color: IconTone.lightForeground(color),
                     ),
                   ),
@@ -528,16 +534,26 @@ class _ActionTile extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(title, style: theme.textTheme.titleSmall),
-                        const SizedBox(height: 2),
-                        Text(hint, style: theme.textTheme.bodySmall),
+                        Text(
+                          title,
+                          style: AppTypography.labelLarge.copyWith(
+                            color: scheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.micro),
+                        Text(
+                          hint,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   Icon(
                     Icons.chevron_right_rounded,
-                    size: 20,
-                    color: theme.colorScheme.onSurfaceVariant,
+                    size: AppSizes.iconMd,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ],
               ),
