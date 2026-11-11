@@ -23,7 +23,7 @@ import 'forgot_password_sheet.dart';
 ///
 /// Os neutros e o acento vêm dos tokens do anexo: canvas `#F9F9F9` /
 /// `#232323`, tinta `#232323` / `#F9F9F9`, ação `#0067FF`. O rótulo do
-/// botão é preto sobre o azul (6.1:1).
+/// botão é branco suave sobre o azul (4.55:1).
 @immutable
 class _LoginPalette {
   const _LoginPalette({
@@ -31,6 +31,8 @@ class _LoginPalette {
     required this.textPrimary,
     required this.textSecondary,
     required this.accent,
+    required this.link,
+    required this.linkDecoration,
   });
 
   /// Fundo da página (atrás dos campos).
@@ -42,8 +44,14 @@ class _LoginPalette {
   /// Texto secundário (subtítulo, dicas, rodapé).
   final Color textSecondary;
 
-  /// Acento: links, cursor e ícone dos campos com foco.
+  /// Acento: cursor e foco (não-texto — o azul sobre tinta passa 3:1).
   final Color accent;
+
+  /// Cor dos links de texto. No escuro o azul `#0067FF` sobre a tinta mede
+  /// 3.28:1 (reprova AA); o link vira gelo e ganha sublinhado para não
+  /// depender só da cor. No claro permanece o azul (4.55:1).
+  final Color link;
+  final TextDecoration linkDecoration;
 
   /// Modo escuro — preto oficial com texto gelo.
   static const _LoginPalette dark = _LoginPalette(
@@ -51,6 +59,8 @@ class _LoginPalette {
     textPrimary: AppColors.softWhite,
     textSecondary: AppColors.darkTextSecondary,
     accent: AppColors.brandBlue,
+    link: AppColors.softWhite,
+    linkDecoration: TextDecoration.underline,
   );
 
   /// Modo claro — espelha os neutros do `AppTheme.light` via tokens.
@@ -59,6 +69,8 @@ class _LoginPalette {
     textPrimary: AppColors.lightTextPrimary,
     textSecondary: AppColors.lightTextSecondary,
     accent: AppColors.brandBlue,
+    link: AppColors.brandBlue,
+    linkDecoration: TextDecoration.none,
   );
 }
 
@@ -433,8 +445,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: TextButton(
                       onPressed: _isSubmitting ? null : _openForgotPassword,
                       style: TextButton.styleFrom(
-                        foregroundColor: palette.accent,
-                        textStyle: AppTypography.labelLarge,
+                        foregroundColor: palette.link,
+                        textStyle: AppTypography.labelLarge.copyWith(
+                          decoration: palette.linkDecoration,
+                          decorationColor: palette.link,
+                        ),
                       ),
                       child: Text(l10n.loginForgotPassword),
                     ),
@@ -469,7 +484,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ? l10n.loginSignIn
                                 : l10n.loginSignUp,
                             style: AppTypography.labelLarge.copyWith(
-                              color: palette.accent,
+                              color: palette.link,
+                              decoration: palette.linkDecoration,
+                              decorationColor: palette.link,
                             ),
                           ),
                         ],

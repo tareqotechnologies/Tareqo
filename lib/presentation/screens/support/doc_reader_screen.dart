@@ -170,8 +170,10 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
                   left: BorderSide(color: scheme.primary, width: 3),
                 ),
               ),
+              // Marcadores de lista = texto secundário (azul sobre a tinta
+              // não serve para glifos de texto).
               listBullet: AppTypography.bodyMedium.copyWith(
-                color: scheme.primary,
+                color: scheme.onSurfaceVariant,
               ),
 
               strong: AppTypography.bodyMedium.copyWith(

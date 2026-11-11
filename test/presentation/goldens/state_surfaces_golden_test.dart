@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/golden_fonts.dart';
 import '../../helpers/test_app.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
@@ -20,12 +18,7 @@ import 'package:tareqo/presentation/widgets/list_skeleton.dart';
 /// Skeletons pulsantes ficam determinísticos via `disableAnimations` (o
 /// [Skeleton] respeita reduce-motion e desenha estático).
 void main() {
-  setUpAll(() async {
-    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Outfit')
-      ..addFont(Future.value(ByteData.view(bytes.buffer)));
-    await loader.load();
-  });
+  setUpAll(loadGoldenFonts);
 
   Future<void> pumpStates(
     WidgetTester tester, {

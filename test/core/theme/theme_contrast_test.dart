@@ -252,13 +252,17 @@ void main() {
         const <WidgetState>{},
       );
 
-      // U-23: onError escuro = gelo sobre azul (texto grande);
-      // no claro = gelo sobre erro vermelho 4.0:1 — 3:1 não-texto.
+      // Preenchimento de erro: gelo sobre tinta no claro e tinta sobre
+      // gelo no escuro — 14.9:1 nos dois temas (AA de texto).
       _expectContrast(
         scheme.onError,
         scheme.error,
         'onError/error ($name)',
-        minRatio: 3.0,
+      );
+      _expectContrast(
+        scheme.onErrorContainer,
+        scheme.errorContainer,
+        'onErrorContainer/errorContainer ($name)',
       );
       _expectContrast(action, snackBg, 'ação do snackbar ($name)');
       if (side != null) {
@@ -274,6 +278,57 @@ void main() {
           minRatio: 3.0,
         );
       }
+    }
+  });
+
+  // Campos de formulário: o fill #E7E5E5 (claro) e #232323 (escuro)
+  // apagava o rótulo cinza (3.91:1), o hint (3.91:1), o rótulo flutuante
+  // azul (3.82:1) e a própria borda (1:1 sobre o fill). O pares abaixo
+  // são os tokens efetivos aplicados pelo InputDecorationTheme.
+  test('campos: rótulo, hint, borda e erro atingem contraste', () {
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      final scheme = theme.colorScheme;
+      final name = theme.brightness.name;
+      final fill = theme.inputDecorationTheme.fillColor ?? scheme.surface;
+      final canvas = theme.scaffoldBackgroundColor;
+      final label = theme.inputDecorationTheme.labelStyle?.color;
+      final floating = theme.inputDecorationTheme.floatingLabelStyle?.color;
+      final hint = theme.inputDecorationTheme.hintStyle?.color;
+      final enabled = theme.inputDecorationTheme.enabledBorder;
+      final borderColor = enabled is OutlineInputBorder
+          ? enabled.borderSide.color
+          : null;
+
+      if (label != null) {
+        _expectContrast(label, fill, 'rótulo/campo ($name)');
+      }
+      if (floating != null) {
+        _expectContrast(floating, fill, 'rótulo flutuante/campo ($name)');
+      }
+      if (hint != null) {
+        // `hintStyle` pode ter alfa: o contraste é medido na cor composta.
+        final effective = _compose(fill, hint, hint.a);
+        _expectContrast(effective, fill, 'hint/campo ($name)');
+      }
+      if (borderColor != null) {
+        // WCAG 1.4.11 — limite do campo ≥ 3:1 sobre o fill e o canvas.
+        _expectContrast(
+          borderColor,
+          fill,
+          'borda do campo/fill ($name)',
+          minRatio: 3.0,
+        );
+        _expectContrast(
+          borderColor,
+          canvas,
+          'borda do campo/canvas ($name)',
+          minRatio: 3.0,
+        );
+      }
+      // Erro como texto no campo e na superfície (no escuro o papel
+      // `error` era #232323 sobre #232323 = 1:1).
+      _expectContrast(scheme.error, fill, 'erro/campo ($name)');
+      _expectContrast(scheme.error, scheme.surface, 'erro/superfície ($name)');
     }
   });
 

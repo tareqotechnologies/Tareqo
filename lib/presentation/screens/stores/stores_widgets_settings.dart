@@ -127,6 +127,9 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
         : ref.watch(activeStoreIdProvider(user.id));
 
     return ListView(
+      // Chave estável para os testes rolarem até o rodapé (o botão Salvar
+      // é o último elemento e a lista é lazy).
+      key: const ValueKey('settingsTabList'),
       padding: EdgeInsets.fromLTRB(
         AppSpacing.pagePaddingForWidth(MediaQuery.sizeOf(context).width),
         AppSpacing.md,
@@ -134,30 +137,8 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
         AppSpacing.fabBottomClearance,
       ),
       children: [
-        // SALVAR — botão verde de largura total no TOPO da aba (referência
-        // de produto): persiste idioma + moeda. O spinner substitui o
-        // ícone durante o envio (design system ultra-clean).
-        AppButton.primary(
-          onPressed: _isSaving ? null : _save,
-          icon: _isSaving
-              ? const SizedBox(
-                  height: AppSizes.iconMd,
-                  width: AppSizes.iconMd,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.save_outlined, size: AppSizes.iconMd),
-          label: l10n.settingsSave,
-        ),
-        if (_formError != null) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            _formError!,
-            style: AppTypography.bodySmall.copyWith(color: theme.expense),
-          ),
-        ],
         // MFA + FEEDBACK TÁTIL — switches de efeito IMEDIATO (salvam
-        // sozinhos, sem passar pelo botão Salvar), logo abaixo dele como
-        // na referência.
+        // sozinhos, sem passar pelo botão Salvar do rodapé).
         // P1 (MFA server-side): exigência de aal2 nas escritas de dinheiro
         // do tenant — persistida no SERVIDOR via update_tenant_settings.
         SwitchListTile(
@@ -308,6 +289,28 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
           subtitle: l10n.settingsSupportEntryHint,
           // U-09: rota nomeada (SupportScreen via AppRoutes.support).
           onTap: () => AppNavigator.push(context, AppRoutes.support),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        // SALVAR — último elemento da aba (rodapé): persiste idioma +
+        // moeda depois de todas as definições. O spinner substitui o
+        // ícone durante o envio (design system ultra-clean).
+        if (_formError != null) ...[
+          Text(
+            _formError!,
+            style: AppTypography.bodySmall.copyWith(color: theme.expense),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        AppButton.primary(
+          onPressed: _isSaving ? null : _save,
+          icon: _isSaving
+              ? const SizedBox(
+                  height: AppSizes.iconMd,
+                  width: AppSizes.iconMd,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.save_outlined, size: AppSizes.iconMd),
+          label: l10n.settingsSave,
         ),
       ],
     );

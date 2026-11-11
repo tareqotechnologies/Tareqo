@@ -197,9 +197,11 @@ class _MFASetupScreenState extends ConsumerState<MFASetupScreen> {
                   _secret!,
                   // Código MFA: família mono (códigos/IDs) no degrau de
                   // corpo 16 do design system — sem tamanho solto.
+                  // Código selecionável = texto primário (azul sobre a
+                  // tinta mede 3.28:1 e reprova AA de texto pequeno).
                   style: AppTypography.bodyLarge.copyWith(
                     fontFamily: 'monospace',
-                    color: scheme.primary,
+                    color: scheme.onSurface,
                   ),
                   textAlign: TextAlign.center,
                 ),

@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/golden_fonts.dart';
 import '../../helpers/test_app.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
@@ -66,12 +65,7 @@ Widget _buildApp(ThemeData? theme) {
 }
 
 void main() {
-  setUpAll(() async {
-    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Outfit')
-      ..addFont(Future.value(ByteData.view(bytes.buffer)));
-    await loader.load();
-  });
+  setUpAll(loadGoldenFonts);
 
   Future<void> pumpLogin(WidgetTester tester, ThemeData theme) async {
     tester.view.physicalSize = const Size(412, 915);

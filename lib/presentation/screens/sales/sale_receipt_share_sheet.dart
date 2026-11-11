@@ -193,8 +193,10 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
               // Paleta oficial: azul é azul em qualquer estado
               // (o verde brand do WhatsApp é uma cor de terceiros fora da
               // paleta — proibido na interface geral).
+              // Texto em tinta/gelo (azul sobre a tinta mede 3.28:1 e
+              // reprova AA); o contorno azul permanece como acento.
               style: OutlinedButton.styleFrom(
-                foregroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onSurface,
                 side: BorderSide(color: theme.colorScheme.primary),
               ),
               icon: const Icon(Icons.chat_bubble_outline_rounded),

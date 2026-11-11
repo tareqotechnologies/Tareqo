@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/golden_fonts.dart';
 import '../../helpers/test_app.dart';
 
 import 'package:tareqo/core/ui/haptics.dart';
@@ -186,6 +187,10 @@ Widget _stores(Tenant tenant) => ProviderScope(
 );
 
 void main() {
+  // Fontes reais (Outfit + MaterialIcons) também nesta auditoria: sem isso
+  // os PNGs mostram o texto em blocos Ahem e os ícones em quadrados.
+  setUpAll(loadGoldenFonts);
+
   Haptics.debugOverrideEnabled = false;
 
   final tenant = Tenant(

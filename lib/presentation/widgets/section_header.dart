@@ -63,8 +63,11 @@ class SectionHeader extends StatelessWidget {
               children: [
                 Text(
                   actionLabel!,
+                  // Rótulo de ação em texto primário no escuro (o azul
+                  // #0067FF sobre a tinta mede 3.28:1); o chevron azul
+                  // preserva a leitura de "ação" (ícone ≥ 3:1).
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.primary,
+                    color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

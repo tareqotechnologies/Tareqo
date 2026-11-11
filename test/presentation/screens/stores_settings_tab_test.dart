@@ -138,11 +138,21 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// O botão Guardar é o ÚLTIMO elemento da aba — numa ListView lazy ele
+  /// só é montado depois de rolar até o rodapé.
+  Future<void> scrollToSave(WidgetTester tester) async {
+    await tester.dragUntilVisible(
+      find.text('Guardar'),
+      find.byKey(const ValueKey('settingsTabList')),
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('aba Ajustes exibe idioma/moeda e reflete o estado do tenant', (
     tester,
   ) async {
-    // Viewport alto: com Guardar + switches MFA/tátil no topo (referência
-    // de produto), os chips de idioma/moeda ficam abaixo da dobra padrão
+    // Viewport alto: os chips de idioma/moeda ficam abaixo da dobra padrão
     // (600px) e a ListView lazy não os monta.
     tester.view.physicalSize = const Size(600, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -181,6 +191,7 @@ void main() {
       await tester.tap(find.text('Metical (MZN)'));
       await tester.pumpAndSettle();
 
+      await scrollToSave(tester);
       await tester.tap(find.text('Guardar'));
       await tester.pumpAndSettle();
 
@@ -200,6 +211,7 @@ void main() {
     await openSettingsTab(tester);
 
     await tester.tap(find.text('English'));
+    await scrollToSave(tester);
     await tester.tap(find.text('Guardar'));
     await tester.pumpAndSettle();
     expect(
@@ -238,8 +250,7 @@ void main() {
   testWidgets('aba Ajustes: sem seção Loja activa com uma única loja', (
     tester,
   ) async {
-    // Viewport alto: a asserção "Idioma" fica abaixo da dobra com o Guardar
-    // + switches no topo.
+    // Viewport alto: a asserção "Idioma" fica abaixo da dobra padrão.
     tester.view.physicalSize = const Size(600, 1600);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -305,6 +316,8 @@ void main() {
     await openSettingsTab(tester);
     expect(find.text('Idioma'), findsOneWidget);
     expect(find.text('Moeda'), findsOneWidget);
+    // Guardar é o último elemento — em paisagem exige rolar até o rodapé.
+    await scrollToSave(tester);
     expect(find.text('Guardar'), findsOneWidget);
     expect(tester.takeException(), isNull);
 

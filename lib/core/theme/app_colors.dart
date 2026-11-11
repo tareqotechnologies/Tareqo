@@ -236,8 +236,9 @@ abstract final class AppColors {
   /// Texto de alerta escuro (suave sobre tinta — aviso é ícone/borda).
   static const Color darkWarningText = softWhite;
 
-  /// error escuro — tinta oficial.
-  static const Color darkErrorNeutral = alertError;
+  /// error escuro — branco suave (tinta sobre tinta daria 1:1: texto e
+  /// bordas de erro invisíveis no canvas escuro).
+  static const Color darkErrorNeutral = softWhite;
 
   /// Fundo suave de erro escuro.
   static const Color darkErrorSoft = alertError;

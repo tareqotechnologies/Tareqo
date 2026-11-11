@@ -1,10 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/golden_fixtures.dart';
+import '../../helpers/golden_fonts.dart';
 import '../../helpers/viewport.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
@@ -17,12 +15,7 @@ import 'package:tareqo/core/utils/app_clock.dart';
 ///
 /// Relógio injetado na âncora [kGoldenNow] — determinismo temporal.
 void main() {
-  setUpAll(() async {
-    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Outfit')
-      ..addFont(Future.value(ByteData.view(bytes.buffer)));
-    await loader.load();
-  });
+  setUpAll(loadGoldenFonts);
 
   setUp(() => AppClock.inject(() => kGoldenNow));
   tearDown(AppClock.reset);

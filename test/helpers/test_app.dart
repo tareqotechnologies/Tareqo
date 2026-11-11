@@ -69,6 +69,9 @@ Widget testApp({
   return MaterialApp(
     locale: locale,
     theme: theme ?? AppTheme.dark,
+    // Mesmo valor de produção (`lib/app.dart`): a faixa de DEBUG não entra
+    // nos goldens nem na árvore de widgets dos testes.
+    debugShowCheckedModeBanner: false,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: home,

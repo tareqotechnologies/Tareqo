@@ -1,9 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/golden_fonts.dart';
 import '../../helpers/test_app.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
@@ -32,15 +30,11 @@ import 'package:tareqo/presentation/widgets/status_chip.dart';
 ///   da captura não é reproduzível.
 /// * Indicadores de progresso usam `value` determinado (não indeterminado).
 ///
-/// Fonte Outfit real carregada no setUpAll: sem ela o framework renderiza a
-/// fonte de teste (Ahem) e o golden não representa a tipografia do app.
+/// Fontes reais carregadas no setUpAll (`loadGoldenFonts`): sem Outfit e
+/// MaterialIcons o framework renderiza a fonte de teste (Ahem) — texto em
+/// blocos e ícones em quadrados — e o golden não representa o app.
 void main() {
-  setUpAll(() async {
-    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Outfit')
-      ..addFont(Future.value(ByteData.view(bytes.buffer)));
-    await loader.load();
-  });
+  setUpAll(loadGoldenFonts);
 
   Future<void> pumpGallery(WidgetTester tester, ThemeData theme) async {
     tester.view.physicalSize = const Size(400, 1400);

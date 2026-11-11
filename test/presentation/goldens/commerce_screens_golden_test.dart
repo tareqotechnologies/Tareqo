@@ -1,10 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/golden_fixtures.dart';
+import '../../helpers/golden_fonts.dart';
 import '../../helpers/viewport.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
@@ -22,12 +20,7 @@ import 'package:tareqo/core/utils/app_clock.dart';
 /// A migração 2.3 é mecânica por design — `AppSpacing.lg` == `20.0` — e a
 /// prova é este teste correndo VERDE depois dela, sem `--update-goldens`.
 void main() {
-  setUpAll(() async {
-    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Outfit')
-      ..addFont(Future.value(ByteData.view(bytes.buffer)));
-    await loader.load();
-  });
+  setUpAll(loadGoldenFonts);
 
   setUp(() => AppClock.inject(() => kGoldenNow));
   tearDown(AppClock.reset);

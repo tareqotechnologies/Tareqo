@@ -66,6 +66,10 @@ abstract final class AppTheme {
     // ── Bordas ───────────────────────────────────────────────────────
     final border = isLight ? AppColors.lightBorder : AppColors.darkBorder;
     final separator = isLight ? AppColors.lightDivider : AppColors.darkDivider;
+    // Borda de campo: `border` (cinza de superfície no claro) sumiria dentro
+    // do próprio fill `#E7E5E5`. O cinza médio mede 3.9:1 sobre o fill no
+    // claro; no escuro `darkBorder` mede 3.2:1 sobre a tinta (WCAG 1.4.11).
+    final fieldBorder = isLight ? AppColors.grayMid : AppColors.darkBorder;
 
     // ── Ação / Primária ──────────────────────────────────────────────
     // `action` = azul #0067FF nos dois temas. `onAction` = branco suave
@@ -89,12 +93,16 @@ abstract final class AppTheme {
         : AppColors.darkAccentBlueSoft;
 
     // ── Semântica ────────────────────────────────────────────────────
+    // No claro o erro é tinta sobre canvas suave; no escuro é o inverso
+    // (suave sobre tinta). Antes o papel `error` valia `#232323` nos dois
+    // temas e sumia no canvas escuro (1:1).
     final error = isLight ? AppColors.errorNeutral : AppColors.darkErrorNeutral;
     final errorSoft = isLight
         ? AppColors.lightErrorSoft
         : AppColors.darkErrorSoft;
-    // Rótulo sobre erro segue o contraste de texto do tema.
-    final onError = AppColors.softWhite;
+    // Rótulo sobre o preenchimento de erro: suave sobre tinta no claro,
+    // tinta sobre suave no escuro.
+    final onError = isLight ? AppColors.softWhite : AppColors.brandInk;
 
     // ── ColorScheme (papéis explícitos) ──────────────────────────────
     final scheme = ColorScheme(
@@ -125,8 +133,10 @@ abstract final class AppTheme {
       outlineVariant: border,
       error: error,
       onError: onError,
+      // `errorSoft` é a tinta oficial: o rótulo sobre ela é suave nos dois
+      // temas (no escuro `error` é suave — texto sobre texto sumiria).
       errorContainer: errorSoft,
-      onErrorContainer: error,
+      onErrorContainer: AppColors.softWhite,
       inverseSurface: textPrimary,
       onInverseSurface: isLight ? AppColors.softWhite : AppColors.brandInk,
       // Sobre `inverseSurface` (snackbar): o oposto da ação do tema.
@@ -276,21 +286,30 @@ abstract final class AppTheme {
         ),
         prefixIconColor: textSecondary,
         suffixIconColor: textSecondary,
-        labelStyle: AppTypography.labelMedium.copyWith(color: textSecondary),
-        // Rótulo flutuante na cor de ação (antes: branco, ilegível no claro).
-        floatingLabelStyle: AppTypography.labelLarge.copyWith(color: action),
-        hintStyle: AppTypography.bodyMedium.copyWith(color: textSecondary),
+        // Rótulo: tinta/gelo. O cinza médio sobre o fill `#E7E5E5` media
+        // 3.91:1 (reprovava AA de texto pequeno) e o azul flutuante 3.82:1.
+        labelStyle: AppTypography.labelMedium.copyWith(color: textPrimary),
+        floatingLabelStyle: AppTypography.labelLarge.copyWith(
+          color: textPrimary,
+        ),
+        // Hint: tinta a 72% no claro (5.6:1 sobre o fill — ainda lê como
+        // dica, não como valor) e o texto secundário no escuro (12.5:1).
+        hintStyle: AppTypography.bodyMedium.copyWith(
+          color: isLight
+              ? AppColors.brandInk.withValues(alpha: 0.72)
+              : textSecondary,
+        ),
         // Texto auxiliar do campo = 12 (metadado). Nunca 11: a instrução
         // do campo é necessária para concluir a ação.
         helperStyle: AppTypography.bodySmall.copyWith(color: textSecondary),
         errorStyle: AppTypography.labelMedium.copyWith(color: error),
         border: OutlineInputBorder(
           borderRadius: AppRadius.mdAll,
-          borderSide: BorderSide(color: border),
+          borderSide: BorderSide(color: fieldBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: AppRadius.mdAll,
-          borderSide: BorderSide(color: border),
+          borderSide: BorderSide(color: fieldBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppRadius.mdAll,
@@ -424,8 +443,11 @@ abstract final class AppTheme {
         // Ativo usa w600 para estado selecionado.
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
+          // Azul sobre a tinta mede 3.28:1 — o rótulo ativo usa texto
+          // primário no escuro; o estado continua no ícone azul e no
+          // indicador tintado.
           return AppTypography.navigationLabel(
-            selected ? action : textSecondary,
+            selected ? (isLight ? action : textPrimary) : textSecondary,
             selected: selected,
           );
         }),
@@ -440,7 +462,7 @@ abstract final class AppTheme {
         groupAlignment: -0.85,
         selectedIconTheme: IconThemeData(color: action, size: AppSizes.navIcon),
         selectedLabelTextStyle: AppTypography.navigationLabel(
-          action,
+          isLight ? action : textPrimary,
           selected: true,
         ),
         unselectedIconTheme: IconThemeData(
@@ -451,7 +473,9 @@ abstract final class AppTheme {
       ),
 
       tabBarTheme: TabBarThemeData(
-        labelColor: action,
+        // Texto ativo: azul no claro (4.55:1); no escuro o azul só serve
+        // para o indicador (não-texto) — o rótulo usa o texto primário.
+        labelColor: isLight ? action : textPrimary,
         unselectedLabelColor: textSecondary,
         indicatorColor: action,
         indicatorSize: TabBarIndicatorSize.label,

@@ -412,9 +412,11 @@ class _PlanCard extends StatelessWidget {
               plan.priceMonthlyCents,
               language: language,
             ),
+            // Preço = informação: texto primário (o azul sobre a tinta
+            // mede 3.28:1 — só serve para ícones/ações).
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: scheme.primary,
+              color: scheme.onSurface,
             ),
           ),
         ],

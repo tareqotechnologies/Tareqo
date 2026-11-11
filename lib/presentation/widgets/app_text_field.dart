@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
+
 /// Campo de texto padrão do design system ultra-clean — minimalista, sem
 /// rótulo pesado: borda sutil em repouso (`#222E35`) que muda para o acento
 /// suavemente no foco (o [InputDecorationTheme] global anima a cor da borda
@@ -97,6 +99,12 @@ class AppTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius;
+    // Mesma borda de campo do InputDecorationTheme global: o cinza de
+    // superfície no claro sumiria dentro do fill `#E7E5E5` (1:1).
+    final fieldBorder =
+        Theme.of(context).brightness == Brightness.light
+        ? AppColors.grayMid
+        : AppColors.darkBorder;
     return TextFormField(
       controller: controller,
       focusNode: focusNode,
@@ -132,17 +140,13 @@ class AppTextField extends StatelessWidget {
             ? null
             : OutlineInputBorder(
                 borderRadius: radius,
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
+                borderSide: BorderSide(color: fieldBorder),
               ),
         enabledBorder: radius == null
             ? null
             : OutlineInputBorder(
                 borderRadius: radius,
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                ),
+                borderSide: BorderSide(color: fieldBorder),
               ),
         focusedBorder: radius == null
             ? null
