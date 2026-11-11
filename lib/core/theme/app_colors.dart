@@ -53,7 +53,7 @@ abstract final class AppColors {
   static const Color alertError = brandInk;
 
   /// Aviso: cinza médio oficial (estado indicado também por ícone e rótulo).
-  static const Color alertWarning = grayMid;'} (commentary) 。。{} пож`functions.Edit` tool running with the following input: {
+  static const Color alertWarning = grayMid;
 
   // ─────────────────────────────────────────────────────────────────────
   // 0.1 Tints semânticos de TEXTO no escuro (WCAG AA)
