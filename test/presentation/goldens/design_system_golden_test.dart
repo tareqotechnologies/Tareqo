@@ -32,12 +32,12 @@ import 'package:tareqo/presentation/widgets/status_chip.dart';
 ///   da captura não é reproduzível.
 /// * Indicadores de progresso usam `value` determinado (não indeterminado).
 ///
-/// Fonte Inter real carregada no setUpAll: sem ela o framework renderiza a
+/// Fonte Outfit real carregada no setUpAll: sem ela o framework renderiza a
 /// fonte de teste (Ahem) e o golden não representa a tipografia do app.
 void main() {
   setUpAll(() async {
-    final bytes = File('assets/fonts/Inter-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Inter')
+    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
+    final loader = FontLoader('Outfit')
       ..addFont(Future.value(ByteData.view(bytes.buffer)));
     await loader.load();
   });

@@ -169,7 +169,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
                     ),
                   ),
               ],
-              // Aba ativa em tinta (não laranja): 12px em laranja falha AA
+              // Aba ativa em tinta (não azul): 12px em azul falha AA
               // no claro — a seleção já é reforçada pelo indicador.
               labelColor: scheme.onSurface,
               unselectedLabelColor: scheme.onSurfaceVariant,
@@ -552,7 +552,7 @@ class _StoresScreenState extends ConsumerState<StoresScreen>
               // semântica do resto do app (fiado a receber, vence hoje).
               PlanRequestStatus.pending => (theme.warning, l10n.statusPending),
               // Aprovado = sucesso e rejeitado = erro — verdes/vermelhos de
-              // ALERTA (não laranja de marca: 12px laranja falha AA no claro).
+              // ALERTA (não azul de marca: 12px azul falha AA no claro).
               PlanRequestStatus.approved => (theme.income, l10n.statusApproved),
               PlanRequestStatus.rejected => (
                 theme.expense,

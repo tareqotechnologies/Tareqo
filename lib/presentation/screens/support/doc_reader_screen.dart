@@ -205,7 +205,7 @@ class _DocReaderScreenState extends State<DocReaderScreen> {
               tableBorder: TableBorder.all(
                 color: PremiumDecor.hairline(scheme),
               ),
-              // Hiperlinks — tinta sublinhada: laranja a 14px não passa AA
+              // Hiperlinks — tinta sublinhada: azul a 14px não passa AA
               // no claro (o acento fica na decoração/ícones).
               a: AppTypography.bodyMedium.copyWith(
                 color: scheme.onSurface,

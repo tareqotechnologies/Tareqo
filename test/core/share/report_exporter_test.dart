@@ -53,7 +53,7 @@ void main() {
   // Formatters usa DateFormat com locale; fora de MaterialApp a base do
   // intl não está carregada.
   setUpAll(() => initializeDateFormatting());
-  // O buildPdf embute a fonte Inter via rootBundle (asset do pubspec).
+  // O buildPdf embute a fonte Outfit via rootBundle (asset do pubspec).
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const exporter = ReportExporter();

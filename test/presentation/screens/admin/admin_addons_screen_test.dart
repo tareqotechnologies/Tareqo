@@ -97,7 +97,7 @@ Tenant _approvedTenant({String id = 'tn1', String name = 'Comercial Demo'}) =>
     );
 
 /// Viewport largo e alto (1000×1600): a fonte de teste (Ahem) é bem mais
-/// larga que a Inter de produção — tiles/sheets estouram no padrão 400px.
+/// larga que a Outfit de produção — tiles/sheets estouram no padrão 400px.
 void _useWideViewport(WidgetTester tester) {
   tester.view.physicalSize = const Size(1000, 1600);
   tester.view.devicePixelRatio = 1.0;
@@ -123,7 +123,7 @@ Widget _buildApp({
     ],
     child: testApp(
       home: const AdminAddOnsScreen(),
-      // A fonte de teste (Ahem) é mais larga que a Inter de produção — o
+      // A fonte de teste (Ahem) é mais larga que a Outfit de produção — o
       // sheet de activação em lote (largura limitada pelo framework)
       // estoura a linha categoria · preço. Clamp compensa sem afetar
       // as asserções de texto.

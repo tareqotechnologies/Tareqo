@@ -60,11 +60,11 @@ class CustomInvoicePreview extends StatelessWidget {
     // tinta preta, e o conteúdo desaparecia. A cor primária continua a ser
     // a identidade escolhida pelo utilizador para o documento.
     const paper = AppColors.softWhite;
-    const ink = AppColors.brandBlack;
-    final inkSecondary = AppColors.brandBlack.withValues(alpha: 0.66);
-    final hairline = AppColors.brandBlack.withValues(alpha: 0.12);
+    const ink = AppColors.brandInk;
+    final inkSecondary = AppColors.brandInk.withValues(alpha: 0.66);
+    final hairline = AppColors.brandInk.withValues(alpha: 0.12);
     final onPrimaryFill = primaryColor.computeLuminance() > 0.22
-        ? AppColors.brandBlack
+        ? AppColors.brandInk
         : AppColors.softWhite;
 
     return Container(
@@ -338,7 +338,7 @@ class _PreviewRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const ink = AppColors.brandBlack;
+    const ink = AppColors.brandInk;
 
     return Container(
       padding: const EdgeInsets.symmetric(

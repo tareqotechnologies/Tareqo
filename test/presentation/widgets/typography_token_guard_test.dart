@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// O que a varredura tranca em `lib/presentation`:
 ///
 /// 1. `fontSize:` inline — só nas superfícies de exceção abaixo;
-/// 2. `fontFamily:` — apenas a Inter (herdada do tema) ou `'monospace'`
+/// 2. `fontFamily:` — apenas a Outfit (herdada do tema) ou `'monospace'`
 ///    (códigos/IDs, família declarada no pubspec);
 /// 3. pesos fora da escala 400/500/600 — só nas mesmas exceções.
 ///
@@ -72,18 +72,18 @@ void main() {
     expect(problems, isEmpty, reason: problems.join('\n'));
   });
 
-  test('fontFamily só a Inter do tema ou a mono declarada', () {
+  test('fontFamily só a Outfit do tema ou a mono declarada', () {
     final family = RegExp(
       r'''fontFamily:\s*'([^']*)'|fontFamily:\s*"([^"]*)"''',
     );
-    final allowed = {'Inter', 'monospace'};
+    final allowed = {'Outfit', 'monospace'};
     final problems = <String>[];
     for (final (rel, source) in sources()) {
       for (final m in family.allMatches(source)) {
         final value = m.group(1) ?? m.group(2)!;
         if (allowed.contains(value)) continue;
         problems.add(
-          '$rel: fontFamily "$value" — a app usa apenas Inter '
+          '$rel: fontFamily "$value" — a app usa apenas Outfit '
           '(herdada do tema) e monospace para códigos/IDs.',
         );
       }

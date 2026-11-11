@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Abertura Android (<12): canvas do anexo (#F9F9F9 / #0C0B0A). -->
+<!-- Abertura Android (<12): canvas do anexo (#F9F9F9 / #232323). -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/splash_background" />
     <item>

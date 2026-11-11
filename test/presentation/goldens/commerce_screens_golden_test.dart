@@ -14,7 +14,7 @@ import 'package:tareqo/core/utils/app_clock.dart';
 /// 2.3 (tokens de espaçamento/raio) vai tocar. Cada tela em DOIS brilhos
 /// (dark é o default do app; light é o tema auditado paralelo).
 ///
-/// Mesmo contrato dos goldens existentes: fonte Inter real carregada (o
+/// Mesmo contrato dos goldens existentes: fonte Outfit real carregada (o
 /// golden falha com a Ahem placeholder), relógio injetado em [kGoldenNow],
 /// viewport retrato de telefone real (412×915) e fakes determinísticos de
 /// `golden_fixtures.dart`.
@@ -23,8 +23,8 @@ import 'package:tareqo/core/utils/app_clock.dart';
 /// prova é este teste correndo VERDE depois dela, sem `--update-goldens`.
 void main() {
   setUpAll(() async {
-    final bytes = File('assets/fonts/Inter-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Inter')
+    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
+    final loader = FontLoader('Outfit')
       ..addFont(Future.value(ByteData.view(bytes.buffer)));
     await loader.load();
   });

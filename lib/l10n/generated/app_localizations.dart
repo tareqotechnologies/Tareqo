@@ -5372,11 +5372,11 @@ abstract class AppLocalizations {
   /// **'Preview'**
   String get quotationTemplatePreviewBadge;
 
-  /// No description provided for @paletteTerracotta.
+  /// No description provided for @paletteBlue.
   ///
   /// In pt, this message translates to:
-  /// **'Terracota'**
-  String get paletteTerracotta;
+  /// **'Azul'**
+  String get paletteBlue;
 
   /// No description provided for @paletteBeige.
   ///

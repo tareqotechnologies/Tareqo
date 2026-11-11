@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_tokens.dart';
 
 /// SegmentedButton no padrão do anexo: pílula em repouso com contorno
-/// laranja `#FF6A2A`, segmento ativo preenchido (preto no claro, suave
+/// azul `#0067FF`, segmento ativo preenchido (preto no claro, suave
 /// no escuro) e alvo de toque ≥ 48dp. As cores vêm do
 /// [SegmentedButtonTheme] — este widget só garante o formato e o alvo.
 ///

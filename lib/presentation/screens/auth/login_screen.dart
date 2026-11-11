@@ -22,8 +22,8 @@ import 'forgot_password_sheet.dart';
 /// (antes, a auth era SEMPRE escura mesmo no light mode).
 ///
 /// Os neutros e o acento vêm dos tokens do anexo: canvas `#F9F9F9` /
-/// `#0C0B0A`, tinta `#0C0B0A` / `#F9F9F9`, ação `#FF6A2A`. O rótulo do
-/// botão é preto sobre o laranja (6.1:1).
+/// `#232323`, tinta `#232323` / `#F9F9F9`, ação `#0067FF`. O rótulo do
+/// botão é preto sobre o azul (6.1:1).
 @immutable
 class _LoginPalette {
   const _LoginPalette({
@@ -50,7 +50,7 @@ class _LoginPalette {
     background: AppColors.darkBackground,
     textPrimary: AppColors.softWhite,
     textSecondary: AppColors.darkTextSecondary,
-    accent: AppColors.brandOrange,
+    accent: AppColors.brandBlue,
   );
 
   /// Modo claro — espelha os neutros do `AppTheme.light` via tokens.
@@ -58,7 +58,7 @@ class _LoginPalette {
     background: AppColors.lightBackground,
     textPrimary: AppColors.lightTextPrimary,
     textSecondary: AppColors.lightTextSecondary,
-    accent: AppColors.brandOrange,
+    accent: AppColors.brandBlue,
   );
 }
 
@@ -408,7 +408,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 32),
 
                 // ── Botão Entrar ──
-                // CTA padrão do design system (fill laranja oficial, raio
+                // CTA padrão do design system (fill azul oficial, raio
                 // md, 48dp); sem brilho colorido nem altura ad-hoc.
                 AppButton.primary(
                   expanded: true,

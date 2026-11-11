@@ -57,7 +57,7 @@ void main() {
       });
 
       expect(restored.businessName, '');
-      expect(restored.primaryColor, AppColors.brandBlack);
+      expect(restored.primaryColor, AppColors.brandInk);
       expect(restored.templateStyle, 'Classic');
       expect(restored.logoBytes, isNull);
     });

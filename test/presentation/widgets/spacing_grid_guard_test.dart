@@ -46,7 +46,8 @@ void main() {
       'screens/admin/admin_audit_log_screen.dart': 1, // indent: 72 (timeline)
       'screens/admin/admin_tenants_widgets.dart': 1, // left: 44 (checkbox)
       'screens/dashboard/dashboard_screen.dart': 1, // indent: 60 (timeline)
-      'screens/dashboard/notifications_screen.dart': 1, // SizedBox h 120 (vazio)
+      'screens/dashboard/notifications_screen.dart':
+          1, // SizedBox h 120 (vazio)
       'screens/sales/sale_detail_screen.dart': 2, // indent: 60 (timeline)
       'screens/sales/sales_screen.dart': 1, // indent: 60 (timeline)
       'screens/sales/sales_widgets.dart': 1, // indent: 60 (timeline)

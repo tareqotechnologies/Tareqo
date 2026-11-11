@@ -10,8 +10,8 @@
 
 | Token | Arquivo | Conteúdo |
 | --- | --- | --- |
-| `AppColors` | `lib/core/theme/app_colors.dart` | Paleta OFICIAL (fonte única dos hex): laranja `#FF6A2A`, cinza de superfície `#F0F0F0`, branco suave `#F9F9F9`, preto `#0C0B0A` — mais os alertas semânticos `#2E7D32`/`#C62828`/`#F9A825` (só alertas) e os tints de TEXTO desses alertas no escuro `#66BB6A`/`#EF5350` (AA sobre preto). Cores semânticas por brilho (`income`, `expense`, `warning`) e neutros derivam destas 4. Toda cor nova nasce aqui |
-| `AppStatusColors` | idem | `ThemeExtension` com pares claro/escuro; acessado por `Theme.of(context).income/expense/warning/accent`. No escuro `income`/`expense` entregam os tints de texto AA (8.32:1 / 5.64:1 sobre `#0C0B0A`); os tons base ficam para preenchimentos e chips |
+| `AppColors` | `lib/core/theme/app_colors.dart` | Paleta OFICIAL (fonte única dos hex): azul `#0067FF`, cinza médio `#6E7174`, cinza de superfície `#E7E5E5`, branco suave `#F9F9F9`, tinta `#232323` — mais os alertas semânticos `#2E7D32`/`#C62828`/`#F9A825` (só alertas) e os tints de TEXTO desses alertas no escuro `#66BB6A`/`#FF6B66` (AA sobre tinta). Cores semânticas por brilho (`income`, `expense`, `warning`) e neutros derivam destas 5. Toda cor nova nasce aqui |
+| `AppStatusColors` | idem | `ThemeExtension` com pares claro/escuro; acessado por `Theme.of(context).income/expense/warning/accent`. No escuro `income`/`expense` entregam os tints de texto AA (6.65:1 / 5.65:1 sobre `#232323`); os tons base ficam para preenchimentos e chips |
 | `AppBreakpoints` | `lib/core/theme/app_tokens.dart` | Quebras de layout: `compactMax`=599, `mediumMin`=600, `expandedMin`=1024, `sidebarRail`=880 |
 | `AppStateOpacity` | idem | Véus de interação: `hover`=4%, `pressed`=8%, `focus`=12%, `disabled`=38% |
 | `AppSpacing` | `lib/core/theme/app_tokens.dart` | Grelha de 4px (`xxs`=4 … `huge`=48) + `pagePaddingForWidth` (720px quebra mobile/tablet) |

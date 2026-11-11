@@ -103,7 +103,7 @@ Widget _buildApp({
     ],
     child: testApp(
       home: const AdminMessagesScreen(),
-      // A fonte de teste (Ahem) é mais larga que a Inter de produção —
+      // A fonte de teste (Ahem) é mais larga que a Outfit de produção —
       // clamp compensa sem afetar as asserções de texto.
       builder: (context, child) =>
           MediaQuery.withClampedTextScaling(maxScaleFactor: 0.8, child: child!),

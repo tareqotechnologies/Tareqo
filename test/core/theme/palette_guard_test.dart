@@ -2,30 +2,32 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Guard rail da paleta OFICIAL (identidade 2026-11-09).
+/// Guard rail da paleta OFICIAL (identidade Outfit).
 ///
 /// Nenhum ficheiro de `lib/` ou `tool/` pode declarar um HEX fora de:
-/// * laranja `#FF6A2A`, cinza `#F0F0F0`, suave `#F9F9F9`, preto `#0C0B0A`;
+/// * azul `#0067FF`, cinza médio `#6E7174`, cinza `#E7E5E5`,
+///   suave `#F9F9F9`, tinta `#232323`;
 /// * alertas semânticos `#2E7D32` (sucesso), `#C62828` (erro),
 ///   `#F9A825` (aviso);
 /// * tints de texto dos MESMOS alertas no escuro (`#66BB6A` sucesso,
-///   `#EF5350` erro) — a variante de texto AA sobre `#0C0B0A`; os tons
+///   `#FF6B66` erro) — a variante de texto AA sobre `#232323`; os tons
 ///   base acima continuam para preenchimentos/chips;
-/// * preto com qualquer alfa (sombras/véus da paleta).
+/// * tinta com qualquer alfa (sombras/véus da paleta).
 ///
 /// Cores novas entram em `AppColors`/`PdfAccents`, nunca à mão num ecrã.
 void main() {
   test('nenhum HEX fora da paleta oficial em lib/ e tool/', () {
     const official = <int>{
-      0xFFFF6A2A, // laranja
-      0xFFF0F0F0, // cinza de superfície
+      0xFF0067FF, // azul
+      0xFF6E7174, // cinza médio
+      0xFFE7E5E5, // cinza de superfície
       0xFFF9F9F9, // branco suave
-      0xFF0C0B0A, // preto
+      0xFF232323, // tinta escura
       0xFF2E7D32, // alerta: sucesso
       0xFFC62828, // alerta: erro
       0xFFF9A825, // alerta: aviso
       0xFF66BB6A, // alerta: sucesso (texto AA no escuro)
-      0xFFEF5350, // alerta: erro (texto AA no escuro)
+      0xFFFF6B66, // alerta: erro (texto AA no escuro)
     };
 
     final hexPatterns = [
@@ -36,7 +38,7 @@ void main() {
     bool isOfficial(int value) =>
         official.contains(value) ||
         // Sombras e véus: preto oficial com alfa variável.
-        (value & 0x00FFFFFF) == 0x0C0B0A;
+        (value & 0x00FFFFFF) == 0x232323;
 
     final problems = <String>[];
 

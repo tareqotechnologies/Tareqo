@@ -6,7 +6,7 @@
 //
 // Lê os markdown de docs/{pt,en,fr}/, embeleza com capa + índice (two-pass
 // com números de página reais) e grava em docs/pdf/{pt,en,fr}/. Também
-// remove os glifos que a Inter embutida não cobre (emoji etc.), avisando no
+// remove os glifos que a Outfit embutida não cobre (emoji etc.), avisando no
 // stderr.
 //
 // Bibliotecas usadas: package:pdf (já no pubspec, via report_exporter) e o
@@ -19,7 +19,7 @@ import 'package:pdf/pdf.dart' show TtfParser;
 import 'user_docs_pdf/markdown_pdf.dart';
 
 const _appName = 'TAREQO';
-const _fontPath = 'assets/fonts/Inter-Variable.ttf';
+const _fontPath = 'assets/fonts/Outfit-Regular.ttf';
 
 Future<void> main() async {
   final fontData = await File(_fontPath).readAsBytes();

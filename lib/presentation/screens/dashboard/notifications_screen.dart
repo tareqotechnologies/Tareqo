@@ -294,21 +294,21 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 // HELPERS — Cores do tipo no tile e na sheet
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Texto do selo sobre o tint do tipo: laranja → tinta; alertas → as
+/// Texto do selo sobre o tint do tipo: azul → tinta; alertas → as
 /// variantes AA de sucesso/erro do tema.
 Color _typeTextColor(Color base, ThemeData theme) {
-  if (base == AppColors.accentOrange) return theme.colorScheme.onSurface;
+  if (base == AppColors.accentBlue) return theme.colorScheme.onSurface;
   if (base == AppColors.successNeutral) return theme.income;
   return theme.expense;
 }
 
 /// Glifo sobre o fundo do ícone, só com as cores do anexo.
-/// Laranja: preto no claro (tint pálido) e suave no escuro (tint escuro).
+/// Azul: preto no claro (tint pálido) e suave no escuro (tint escuro).
 /// Alertas: o próprio tom no claro e o tint AA no escuro.
 Color _deriveFg(Color base, Brightness brightness) {
   final light = brightness == Brightness.light;
-  if (base == AppColors.accentOrange) {
-    return light ? AppColors.brandBlack : AppColors.softWhite;
+  if (base == AppColors.accentBlue) {
+    return light ? AppColors.brandInk : AppColors.softWhite;
   }
   if (base == AppColors.alertError) {
     return light ? AppColors.alertError : AppColors.errorTextDark;
@@ -316,7 +316,7 @@ Color _deriveFg(Color base, Brightness brightness) {
   if (base == AppColors.alertSuccess) {
     return light ? AppColors.alertSuccess : AppColors.successTextDark;
   }
-  return light ? AppColors.brandBlack : AppColors.softWhite;
+  return light ? AppColors.brandInk : AppColors.softWhite;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -504,7 +504,7 @@ class _NotificationTile extends StatelessWidget {
                               ),
                               child: Text(
                                 typeLabel,
-                                // Selo em tinta/semântica AA — o tom laranja
+                                // Selo em tinta/semântica AA — o tom azul
                                 // a 12px falhava contraste.
                                 style: AppTypography.labelMedium.copyWith(
                                   color: typeTextColor,
@@ -862,10 +862,10 @@ abstract final class _AdminMessageTypeLabel {
   };
 
   static Color color(AdminMessageType type) => switch (type) {
-    AdminMessageType.billingQuote => AppColors.accentOrange,
-    AdminMessageType.planExpiryChange => AppColors.accentOrange,
-    AdminMessageType.planExpiringSoon => AppColors.accentOrange,
-    AdminMessageType.general => AppColors.accentOrange,
+    AdminMessageType.billingQuote => AppColors.accentBlue,
+    AdminMessageType.planExpiryChange => AppColors.accentBlue,
+    AdminMessageType.planExpiringSoon => AppColors.accentBlue,
+    AdminMessageType.general => AppColors.accentBlue,
   };
 
   static String label(
@@ -890,11 +890,11 @@ abstract final class _InvoiceTypeLabel {
   };
 
   static Color color(InvoiceNotificationType type) => switch (type) {
-    InvoiceNotificationType.invoiceGenerated => AppColors.accentOrange,
-    InvoiceNotificationType.invoiceDueSoon => AppColors.accentOrange,
+    InvoiceNotificationType.invoiceGenerated => AppColors.accentBlue,
+    InvoiceNotificationType.invoiceDueSoon => AppColors.accentBlue,
     InvoiceNotificationType.invoiceExpired => AppColors.errorNeutral,
     InvoiceNotificationType.invoicePaid => AppColors.successNeutral,
-    InvoiceNotificationType.addOnExpiringSoon => AppColors.accentOrange,
+    InvoiceNotificationType.addOnExpiringSoon => AppColors.accentBlue,
     InvoiceNotificationType.addOnExpired => AppColors.errorNeutral,
   };
 

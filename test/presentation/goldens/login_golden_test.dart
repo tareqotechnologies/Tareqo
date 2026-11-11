@@ -67,8 +67,8 @@ Widget _buildApp(ThemeData? theme) {
 
 void main() {
   setUpAll(() async {
-    final bytes = File('assets/fonts/Inter-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Inter')
+    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
+    final loader = FontLoader('Outfit')
       ..addFont(Future.value(ByteData.view(bytes.buffer)));
     await loader.load();
   });

@@ -190,7 +190,7 @@ class _SaleReceiptShareSheetState extends ConsumerState<SaleReceiptShareSheet> {
             AppButton.secondary(
               expanded: true,
               onPressed: _sharing ? null : _shareWhatsApp,
-              // Paleta oficial: terracota é terracota em qualquer estado
+              // Paleta oficial: azul é azul em qualquer estado
               // (o verde brand do WhatsApp é uma cor de terceiros fora da
               // paleta — proibido na interface geral).
               style: OutlinedButton.styleFrom(

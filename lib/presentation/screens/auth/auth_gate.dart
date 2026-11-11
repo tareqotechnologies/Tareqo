@@ -507,7 +507,7 @@ class _SplashScreen extends StatelessWidget {
     final textSecondary = isDark
         ? AppColors.onSurfaceVariantDark
         : AppColors.onSurfaceVariantLight;
-    // Acento da marca: laranja oficial nos dois brilhos — o indicador de
+    // Acento da marca: azul oficial nos dois brilhos — o indicador de
     // carregamento é uma ação, não uma superfície.
     final accent = scheme.primary;
 
@@ -547,7 +547,7 @@ class _SplashScreen extends StatelessWidget {
                 style: AppTypography.bodyMedium.copyWith(color: textSecondary),
               ),
               const SizedBox(height: AppSpacing.huge),
-              // Spinner no laranja oficial — ação, não superfície.
+              // Spinner no azul oficial — ação, não superfície.
               SizedBox(
                 height: 24,
                 width: 24,

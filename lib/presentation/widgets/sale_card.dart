@@ -12,7 +12,7 @@ import 'app_page.dart' show HoverableTile;
 import 'focus_ring.dart';
 import 'semantics_composed.dart';
 
-/// Linha de venda no padrão do feed de atividade — ícone circular laranja,
+/// Linha de venda no padrão do feed de atividade — ícone circular azul,
 /// título + método/ data à esquerda, valor total à direita.
 ///
 /// Fonte reduzida em relação ao card anterior para maior densidade da lista.
@@ -90,18 +90,18 @@ class _SalesCardState extends State<SalesCard> {
                     ),
                     child: Row(
                       children: [
-                        // Ícone circular laranja (40px) — padrão do feed.
+                        // Ícone circular azul (40px) — padrão do feed.
                         Container(
                           width: 40,
                           height: 40,
                           decoration: const BoxDecoration(
-                            color: AppColors.accentOrange,
+                            color: AppColors.accentBlue,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.north_east_rounded,
                             size: 18,
-                            color: AppColors.brandBlack,
+                            color: AppColors.brandInk,
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),

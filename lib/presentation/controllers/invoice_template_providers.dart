@@ -19,9 +19,9 @@ class InvoiceTemplateConfig {
     this.businessAddress = '',
     this.businessPhone = '',
     this.businessTaxId = '',
-    // Paleta do anexo: default preto #0C0B0A.
+    // Paleta do anexo: default preto #232323.
     // O utilizado persiste nos prefs do utilizador.
-    this.primaryColor = AppColors.brandBlack,
+    this.primaryColor = AppColors.brandInk,
     this.templateStyle = 'Classic',
   });
 
@@ -73,7 +73,7 @@ class InvoiceTemplateConfig {
         businessPhone: json['phone'] is String ? json['phone'] as String : '',
         businessTaxId: json['taxId'] is String ? json['taxId'] as String : '',
         primaryColor: Color(
-          json['color'] is int ? json['color'] as int : 0xFF0C0B0A,
+          json['color'] is int ? json['color'] as int : 0xFF232323,
         ),
         templateStyle: _knownStyles.contains(json['style'])
             ? json['style']! as String
@@ -112,7 +112,7 @@ class InvoiceTemplateNotifier extends Notifier<InvoiceTemplateConfig> {
           current.businessTaxId.isEmpty &&
           current.logoBytes == null &&
           current.templateStyle == 'Classic' &&
-          current.primaryColor == AppColors.brandBlack;
+          current.primaryColor == AppColors.brandInk;
       if (untouched) state = decoded;
     } catch (_) {
       // Prefs indisponível (ex.: teste) — mantém default sem quebrar.

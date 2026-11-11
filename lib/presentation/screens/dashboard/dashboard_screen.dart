@@ -462,7 +462,7 @@ class _BalanceHero extends StatelessWidget {
 
     // Acabamento: superfície elevada do design system — sem gradiente
     // decorativo nem sombra colorida; o destaque vem da hierarquia
-    // tipográfica e do laranja oficial na pílula da métrica.
+    // tipográfica e do azul oficial na pílula da métrica.
     return AppCard(
       elevated: true,
       borderRadius: AppRadius.xlAll,
@@ -726,13 +726,13 @@ class _ActivityItem {
           '${_timeLabel(sale.dateTime, l10n)}',
       dateTime: sale.dateTime,
       icon: Icons.north_east_rounded,
-      // Ícone padronizado (U-24): fundo sólido laranja #FF6A2A
+      // Ícone padronizado (U-24): fundo sólido azul #0067FF
       // oficial + ícone gelo — nunca HSL derivado.
-      iconBackground: AppColors.brandOrange,
+      iconBackground: AppColors.brandBlue,
       iconColor: AppColors.softWhite,
       amount: Formatters.signedAmount(sale.totalAmountCents),
       // amountColor resolvido como scheme.primary em _ActivityRow
-      // quando null (antes: AppColors.accentOrange fixo — claro em
+      // quando null (antes: AppColors.accentBlue fixo — claro em
       // ambos os temas, U-02).
       onTap: onTap,
     );
@@ -750,8 +750,8 @@ class _ActivityItem {
     ),
     dateTime: purchase.dateTime,
     icon: Icons.inventory_2_outlined,
-    // Ícone padronizado (U-24): fundo laranja oficial.
-    iconBackground: AppColors.brandOrange,
+    // Ícone padronizado (U-24): fundo azul oficial.
+    iconBackground: AppColors.brandBlue,
     iconColor: AppColors.softWhite,
     amount: '+${Quantity.format(item.quantity)}',
     // Antes Colors.white incondicional — invisível sobre surface clara
@@ -769,8 +769,8 @@ class _ActivityItem {
       details: '${debt.personName} · ${_timeLabel(paidAt, l10n)}',
       dateTime: paidAt,
       icon: Icons.payments_outlined,
-      // Ícone padronizado (U-24): fundo laranja oficial.
-      iconBackground: AppColors.brandOrange,
+      // Ícone padronizado (U-24): fundo azul oficial.
+      iconBackground: AppColors.brandBlue,
       iconColor: AppColors.softWhite,
       amount: Formatters.signedAmount(debt.amountCents),
       // amountColor null → scheme.primary em _ActivityRow (U-02).
@@ -787,8 +787,8 @@ class _ActivityItem {
     details: _timeLabel(transaction.date, l10n),
     dateTime: transaction.date,
     icon: Icons.south_west_rounded,
-    // Ícone padronizado (U-24): fundo laranja oficial.
-    iconBackground: AppColors.brandOrange,
+    // Ícone padronizado (U-24): fundo azul oficial.
+    iconBackground: AppColors.brandBlue,
     iconColor: AppColors.softWhite,
     amount: Formatters.signedAmount(-transaction.amountCents),
     // amountColor null → scheme.expense via _ActivityRow (U-02).
@@ -806,12 +806,12 @@ class _ActivityItem {
     ),
     dateTime: AppClock.now(),
     icon: Icons.warning_amber_rounded,
-    // Ícone padronizado (U-24): fundo laranja oficial.
-    iconBackground: AppColors.brandOrange,
+    // Ícone padronizado (U-24): fundo azul oficial.
+    iconBackground: AppColors.brandBlue,
     iconColor: AppColors.softWhite,
     badge: l10n.dashboardAlertBadge,
-    badgeColor: IconTone.amber,
-    badgeBackground: IconTone.amber,
+    badgeColor: IconTone.blue,
+    badgeBackground: IconTone.blue,
     onTap: onTap,
   );
   factory _ActivityItem.expiry({
@@ -820,7 +820,7 @@ class _ActivityItem {
     VoidCallback? onTap,
   }) {
     final expired = alert.isExpired;
-    final color = expired ? IconTone.errorNeutral : IconTone.amber;
+    final color = expired ? IconTone.errorNeutral : IconTone.blue;
     return _ActivityItem(
       title: alert.product.name,
       details: expired
@@ -1137,7 +1137,7 @@ class _ActivityRow extends StatelessWidget {
                           child: Text(
                             item.badge!,
                             style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.brandBlack,
+                              color: AppColors.brandInk,
                             ),
                           ),
                         ),

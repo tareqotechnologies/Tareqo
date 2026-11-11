@@ -6,10 +6,10 @@ import '../../domain/entities/product.dart';
 import 'status_chip.dart';
 
 /// Cores dos selos de categoria de produto — paleta oficial.
-/// Revenda: preto; Produzido: laranja; Composto: cinza.
+/// Revenda: preto; Produzido: azul; Composto: cinza.
 /// Utilizadas nos selos/badges ao lado dos produtos.
 Color productTypeColor(ProductType type) => switch (type) {
-  ProductType.rawMaterial => AppColors.accentOrangeSoft,
+  ProductType.rawMaterial => AppColors.accentBlueSoft,
   ProductType.resale => AppColors.categoryResale,
   ProductType.manufactured => AppColors.categoryProduzido,
   ProductType.composite => AppColors.categoryComposto,

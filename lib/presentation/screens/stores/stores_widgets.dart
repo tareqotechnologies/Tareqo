@@ -53,7 +53,7 @@ class _PlanCard extends StatelessWidget {
               ),
               TextButton.icon(
                 onPressed: onUpgrade,
-                // Acção em tinta sobre o cartão tintado: 14px laranja não
+                // Acção em tinta sobre o cartão tintado: 14px azul não
                 // passa AA no claro — o ícone de upgrade carrega a acção.
                 style: TextButton.styleFrom(
                   foregroundColor: scheme.onPrimaryContainer,

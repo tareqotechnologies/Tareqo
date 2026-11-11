@@ -23,17 +23,17 @@ import 'package:tareqo/presentation/widgets/app_button.dart';
 ///   strings (`salesCartSection` fr: "Panier · …", `salesConfirm` fr:
 ///   "Confirmer la vente"); telas densas a 360dp (celular pequeno real)
 ///   exercitam `maxLines: 1` e FittedBox no limite.
-/// - **P2-C · Cobertura de glifos da Inter** — parse do cmap dos dois TTFs
-///   embutidos (variável da UI + Bold estático dos PDFs) contra os
+/// - **P2-C · Cobertura de glifos da Outfit** — parse do cmap dos TTFs
+///   embutidos (variável da UI + Regular/Bold estáticos dos PDFs) contra os
 ///   caracteres reais dos três ARBs + símbolos de moeda do `Formatters`.
-///   Falha se uma tradução nova introduzir caractere que a Inter não tem
+///   Falha se uma tradução nova introduzir caractere que a Outfit não tem
 ///   (tofu ou fallback de sistema em produção).
 void main() {
   setUpAll(() async {
     // Mesma carga de fonte dos goldens: os testes usam o tema real do app
-    // (AppTheme.dark/light), que referencia a família 'Inter'.
-    final bytes = File('assets/fonts/Inter-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Inter')
+    // (AppTheme.dark/light), que referencia a família 'Outfit'.
+    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
+    final loader = FontLoader('Outfit')
       ..addFont(Future.value(ByteData.view(bytes.buffer)));
     await loader.load();
   });
@@ -124,7 +124,7 @@ void main() {
     });
   });
 
-  group('P2-C — cobertura de glifos da Inter (cmap)', () {
+  group('P2-C — cobertura de glifos da Outfit (cmap)', () {
     final required = _uiCharacters();
 
     test('conjunto de caracteres extraído não é trivialmente pequeno', () {
@@ -134,8 +134,9 @@ void main() {
     });
 
     for (final fontPath in const [
-      'assets/fonts/Inter-Variable.ttf',
-      'assets/fonts/Inter-Bold.ttf',
+      'assets/fonts/Outfit-Variable.ttf',
+      'assets/fonts/Outfit-Regular.ttf',
+      'assets/fonts/Outfit-Bold.ttf',
     ]) {
       test('$fontPath cobre todos os caracteres da UI (pt/en/fr + moedas)', () {
         final cmap = _parseCmap(File(fontPath).readAsBytesSync());
@@ -154,12 +155,12 @@ void main() {
       });
     }
 
-    test('Inter-Bold tem os mesmos glifos essenciais da variável', () {
+    test('Outfit-Bold tem os mesmos glifos essenciais da variável', () {
       final variable = _parseCmap(
-        File('assets/fonts/Inter-Variable.ttf').readAsBytesSync(),
+        File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync(),
       );
       final bold = _parseCmap(
-        File('assets/fonts/Inter-Bold.ttf').readAsBytesSync(),
+        File('assets/fonts/Outfit-Bold.ttf').readAsBytesSync(),
       );
       final missingInBold = required
           .map((c) => c.codeUnitAt(0))
@@ -209,7 +210,7 @@ void main() {
 ///
 /// Allowlist documentada: `═` (U+2550) dos cabeçalhos de WhatsApp
 /// (`customInvoiceWhatsAppHeader`/`quotationWhatsAppHeader`) é texto enviado
-/// por mensagem — nunca renderizado pela Inter dentro do app.
+/// por mensagem — nunca renderizado pela Outfit dentro do app.
 Set<String> _uiCharacters() {
   const arbs = [
     'lib/l10n/app_pt.arb',
@@ -248,7 +249,7 @@ void _collectStrings(Object? node, Set<String> out) {
 // ── Parser mínimo de cmap (formatos 4 e 12) — sem dependências ──────────────
 
 /// Code points mapeados no TTF. Suporta subtables formato 4 (BMP) e 12 —
-/// suficiente para Latin/Latin-Ext; os demais formatos da Inter cobrem os
+/// suficiente para Latin/Latin-Ext; os demais formatos da Outfit cobrem os
 /// mesmos rangos e não adicionam code points para a UI.
 Set<int> _parseCmap(Uint8List bytes) {
   final data = ByteData.sublistView(bytes);

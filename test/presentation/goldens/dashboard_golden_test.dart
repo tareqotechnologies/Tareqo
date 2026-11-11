@@ -17,8 +17,8 @@ import 'package:tareqo/core/utils/app_clock.dart';
 /// os períodos de caixa são determinísticos — o golden não muda entre dias.
 void main() {
   setUpAll(() async {
-    final bytes = File('assets/fonts/Inter-Variable.ttf').readAsBytesSync();
-    final loader = FontLoader('Inter')
+    final bytes = File('assets/fonts/Outfit-Variable.ttf').readAsBytesSync();
+    final loader = FontLoader('Outfit')
       ..addFont(Future.value(ByteData.view(bytes.buffer)));
     await loader.load();
   });

@@ -30,19 +30,21 @@ extension PaymentMethodIcon on PaymentMethod {
 extension PaymentMethodAccent on PaymentMethod {
   Color accent(ThemeData theme) => switch (this) {
     PaymentMethod.cash => theme.income,
-    // Cartão: no escuro usa o BEGE da paleta (o primary do tema escuro é
-    // o próprio bege — mas o selo do card precisa de um tom mais luminoso
-    // para ≥ 3:1 sobre a sobreposição de 22%; calibrado no teste de
-    // contraste). No claro, o slate do primário.
+    // Cartão: tinta no claro e gelo no escuro — pares AA dos DOIS temas
+    // sobre a sobreposição de 22% do selo (calibrado no teste de
+    // contraste).
     PaymentMethod.debitCard || PaymentMethod.creditCard =>
       theme.brightness == Brightness.light
           ? AppColors.warningText
-          : AppColors.darkAccentOrange,
+          : AppColors.softWhite,
     // Dinheiro móvel de Moçambique: M-Pesa em vermelho de erro, E-Mola
-    // em terracota — paleta oficial (alertas são componentes semânticos,
+    // em azul — paleta oficial (alertas são componentes semânticos,
     // nunca decoração geral).
-    PaymentMethod.mPesa => AppColors.alertError,
-    PaymentMethod.eMola => AppColors.brandOrange,
+    PaymentMethod.mPesa =>
+      theme.brightness == Brightness.light
+          ? AppColors.alertError
+          : AppColors.errorTextDark,
+    PaymentMethod.eMola => AppColors.brandBlue,
     PaymentMethod.transfer => theme.warning,
   };
 }

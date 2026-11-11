@@ -138,7 +138,7 @@ Widget _buildApp({
     ],
     child: testApp(
       home: const QuotationScreen(),
-      // Fonte de teste Ahem é mais larga que a Inter — clamp compensa.
+      // Fonte de teste Ahem é mais larga que a Outfit — clamp compensa.
       builder: (context, child) =>
           MediaQuery.withClampedTextScaling(maxScaleFactor: 0.6, child: child!),
     ),

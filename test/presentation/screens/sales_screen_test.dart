@@ -264,14 +264,14 @@ void main() {
     expect(find.text('2 × R\$ 2,00'), findsOneWidget);
     // Subtotal do item + total (resumo e rodapé) da venda.
     expect(find.text('R\$ 4,00'), findsAtLeastNWidgets(2));
-    // Chrome do feed: ícone circular laranja (40px) no cabeçalho + no item do sheet.
+    // Chrome do feed: ícone circular azul (40px) no cabeçalho + no item do sheet.
     expect(
       find.byWidgetPredicate(
         (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
             (widget.decoration as BoxDecoration).color ==
-                AppColors.accentOrange &&
+                AppColors.accentBlue &&
             (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
             widget.constraints?.maxWidth == 40 &&
             widget.constraints?.maxHeight == 40,

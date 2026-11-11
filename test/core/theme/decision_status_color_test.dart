@@ -19,7 +19,7 @@ void main() {
     });
 
     test('pending mapeia para statusWarning', () {
-      expect(AppColors.decisionStatusColor('pending'), AppColors.accentOrange);
+      expect(AppColors.decisionStatusColor('pending'), AppColors.accentBlue);
     });
 
     test('desconhecido ou null cai no cinza neutro (sem papel de cor)', () {

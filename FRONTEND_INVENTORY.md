@@ -321,8 +321,8 @@ Componentes reutilizáveis do design system. Um ecrã novo deve preferir estes w
 
 ### 8.1 Fontes
 
-- `assets/fonts/Inter-Variable.ttf` — família principal da UI.
-- `assets/fonts/Inter-Bold.ttf` — corte estático usado na exportação PDF.
+- `assets/fonts/Outfit-Variable.ttf` — família principal da UI (Outfit).
+- `assets/fonts/Outfit-Bold.ttf` — corte estático usado na exportação PDF.
 - `assets/fonts/RobotoMono-Variable.ttf` — IDs, códigos MFA e conteúdo monoespaçado.
 - `assets/fonts/OFL.txt` — licença das fontes.
 

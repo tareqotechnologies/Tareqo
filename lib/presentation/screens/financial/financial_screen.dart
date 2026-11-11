@@ -30,7 +30,7 @@ import 'financial_widgets.dart';
 ///
 /// Linguagem minimalista: o saldo é um hero sem moldura, o resumo fecha em
 /// duas colunas e a lista lê-se como um extrato (hairlines, sem cartões).
-/// O laranja fica reservado à ação de registar e à pendência.
+/// O azul fica reservado à ação de registar e à pendência.
 class FinancialScreen extends ConsumerWidget {
   const FinancialScreen({super.key});
 

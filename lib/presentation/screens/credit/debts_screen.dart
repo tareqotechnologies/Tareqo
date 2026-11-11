@@ -432,7 +432,7 @@ class _DebtCard extends StatelessWidget {
     final l10n = context.l10n;
     // Tag de vencimento (canvas): Atrasada (vermelho) / Vence hoje
     // (âmbar) / Em X dias (neutro). O chip futuro fica em tinta neutra:
-    // laranja a 12px sobre a superfície não alcança AA em tema claro — o
+    // azul a 12px sobre a superfície não alcança AA em tema claro — o
     // prazo não é um alerta, a cor ali só decorava.
     final (chipLabel, chipColor) = daysUntilDue > 0
         ? (l10n.debtsLate, theme.expense)

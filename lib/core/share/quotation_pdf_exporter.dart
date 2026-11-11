@@ -111,7 +111,7 @@ class QuotationPdfExporter {
     String? businessPhone,
     String? businessTaxId,
     Uint8List? logoBytes,
-    PdfColor primaryColor = PdfAccents.terracotta,
+    PdfColor primaryColor = PdfAccents.brandBlue,
     String templateStyle = 'Classic',
   }) async {
     final doc = await newPdfDocument();
@@ -381,7 +381,7 @@ class QuotationPdfExporter {
     String? businessPhone,
     String? businessTaxId,
     Uint8List? logoBytes,
-    PdfColor primaryColor = PdfAccents.terracotta,
+    PdfColor primaryColor = PdfAccents.brandBlue,
     String templateStyle = 'Classic',
   }) async {
     final bytes = await buildPdf(

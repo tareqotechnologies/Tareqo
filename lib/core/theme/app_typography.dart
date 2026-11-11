@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 /// Tipografia do TAREQO — dois cortes do anexo (Text & Styles):
 /// **Regular (400)** e **Medium (500)**. Semibold não faz parte do tema.
 ///
-/// A família desenhada no anexo é Neue Montreal. Os ficheiros dessa fonte
-/// são comerciais e não estão no repositório; a família empacotada é Inter
-/// (OFL), no mesmo papel: Regular no corpo, Medium nos títulos e controlos.
-/// Trocar o ficheiro por Neue Montreal licenciada é só mudar [family] e o
-/// bloco `fonts` do pubspec — a escala não muda.
+/// A família do guia de identidade (Outfit) — variável OFL 1.1, eixo wght
+/// 100–900 — resolve Regular no corpo, Medium nos títulos e controlos.
+/// O guia também lista Light/Semibold; o tema usa apenas 400/500.
 ///
 /// Escala modular centralizada — todos os textos, títulos, valores financeiros,
 /// botões, campos, cards, filtros, modais, notificações e elementos de navegação
@@ -39,14 +37,14 @@ abstract final class AppTypography {
   /// Família tipográfica principal.
   ///
   /// Flutter resolve `fontFamily` pelo **nome exato** registrado no pubspec
-  /// (`fonts: - family: Inter`). Uma lista no estilo CSS
-  /// (`'Inter, -apple-system, …'`) não é resolvida pelo motor e cai
+  /// (`fonts: - family: Outfit`). Uma lista no estilo CSS
+  /// (`'Outfit, -apple-system, …'`) não é resolvida pelo motor e cai
   /// silenciosamente na fonte padrão da plataforma — por isso a família é o
   /// nome puro e o fallback de plataforma vive em [familyFallback].
-  static const String family = 'Inter';
+  static const String family = 'Outfit';
 
   /// Fallback por plataforma, consultado apenas quando um glifo não existe na
-  /// Inter (a Inter cobre Latin/Latin-Ext — o fallback é rede de segurança).
+  /// Outfit (a Outfit cobre Latin/Latin-Ext — o fallback é rede de segurança).
   static const List<String> familyFallback = <String>[
     'Roboto', // Android
     'Segoe UI', // Windows

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <!-- Paleta oficial: laranja #FF6A2A, cinza #F0F0F0, suave #F9F9F9, preto #0C0B0A -->
-  <rect width="1024" height="1024" rx="200" fill="#0C0B0A"/>
+  <!-- Paleta oficial: azul #0067FF, cinza #E7E5E5, suave #F9F9F9, preto #232323 -->
+  <rect width="1024" height="1024" rx="200" fill="#232323"/>
   <!-- Simplified storefront shape -->
   <g fill="#F9F9F9">
     <!-- Roof -->
@@ -10,11 +10,11 @@
     <!-- Pillars -->
     <rect x="200" y="360" width="55" height="440"/>
     <rect x="769" y="360" width="55" height="440"/>
-    <!-- Door cutout: laranja da marca (destaque oficial) -->
-    <rect x="390" y="500" width="244" height="300" fill="#FF6A2A"/>
-    <circle cx="512" cy="500" r="122" fill="#FF6A2A"/>
+    <!-- Door cutout: azul da marca (destaque oficial) -->
+    <rect x="390" y="500" width="244" height="300" fill="#0067FF"/>
+    <circle cx="512" cy="500" r="122" fill="#0067FF"/>
     <!-- Windows cutout -->
-    <rect x="250" y="400" width="110" height="70" fill="#FF6A2A"/>
-    <rect x="664" y="400" width="110" height="70" fill="#FF6A2A"/>
+    <rect x="250" y="400" width="110" height="70" fill="#0067FF"/>
+    <rect x="664" y="400" width="110" height="70" fill="#0067FF"/>
   </g>
 </svg>

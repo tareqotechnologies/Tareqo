@@ -14,7 +14,7 @@ void main() {
       expect(AppStatusColors.light.income, AppColors.incomeLight);
       expect(AppStatusColors.light.expense, AppColors.expenseLight);
       expect(AppStatusColors.light.warning, AppColors.warningText);
-      expect(AppStatusColors.light.accent, AppColors.accentOrange);
+      expect(AppStatusColors.light.accent, AppColors.accentBlue);
     });
 
     test(

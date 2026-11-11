@@ -33,7 +33,7 @@ class _BillingInfoCard extends StatelessWidget {
     final isExpired = daysLeft < 0;
 
     // Texto pequeno sobre o véu do cartão: vermelho/âmbar/verde do tema têm
-    // contraste AA nos dois modos; o laranja puro fica só no ícone.
+    // contraste AA nos dois modos; o azul puro fica só no ícone.
     final statusColor = isExpired
         ? theme.expense
         : isExpiringSoon

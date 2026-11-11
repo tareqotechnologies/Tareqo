@@ -277,7 +277,7 @@ class _QuickActionCard extends StatelessWidget {
               if (action.badge > 0) ...[
                 const Spacer(),
                 // Contagem em pílula tingida com texto neutro — a cor do
-                // item fica no ícone/fundo; texto pequeno em laranja sobre
+                // item fica no ícone/fundo; texto pequeno em azul sobre
                 // o véu não atinge AA no claro.
                 Container(
                   padding: const EdgeInsets.symmetric(

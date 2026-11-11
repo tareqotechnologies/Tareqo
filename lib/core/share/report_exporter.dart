@@ -185,7 +185,7 @@ class ReportExporter {
 
   /// Bytes do PDF do relatório (A4, resumo + tabelas).
   ///
-  /// A fonte Inter do app é EMBUTIDA no documento (a Helvetica padrão não
+  /// A fonte Outfit do app é EMBUTIDA no documento (a Helvetica padrão não
   /// tem suporte a Unicode — acentos pt como ó/ã/ç falhariam ao codificar).
   @visibleForTesting
   Future<Uint8List> buildPdf({
@@ -195,12 +195,14 @@ class ReportExporter {
     required String periodLabel,
     required DateTime generatedAt,
   }) async {
-    final data = await rootBundle.load('assets/fonts/Inter-Variable.ttf');
-    // Bold REAL: TTF estático Inter-Bold (mesma versão upstream 4.001 da
-    // Inter variável do app) embutido como fonte `bold` do dart_pdf — o
+    // Base REAL: TTF estático Outfit-Regular (w400) — o pacote não resolve
+    // o eixo wght da variável (instância padrão Thin, w100).
+    final data = await rootBundle.load('assets/fonts/Outfit-Regular.ttf');
+    // Bold REAL: TTF estático Outfit-Bold (mesma família upstream da
+    // Outfit variável do app) embutido como fonte `bold` do dart_pdf — o
     // pacote não seleciona o eixo wght da variável, então sem isto os pesos
     // bold caem na base (hierarquia do relatório perdia o peso).
-    final bold = await rootBundle.load('assets/fonts/Inter-Bold.ttf');
+    final bold = await rootBundle.load('assets/fonts/Outfit-Bold.ttf');
     final doc = pw.Document(
       theme: pw.ThemeData.withFont(
         base: pw.Font.ttf(data),

@@ -232,7 +232,7 @@ class _PrimaryTab extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: AppTypography.labelMedium.copyWith(
                   // Texto da aba selecionada em tinta (AA sobre o tint);
-                  // o laranja fica no ícone e no contorno.
+                  // o azul fica no ícone e no contorno.
                   color: selected
                       ? theme.colorScheme.onPrimaryContainer
                       : theme.colorScheme.onSurfaceVariant,

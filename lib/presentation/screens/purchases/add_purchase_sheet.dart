@@ -441,7 +441,7 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     // Total do carrinho em tinta (AA nos dois temas) — o
-                    // laranja fica para a ação de confirmar. SmartAmount:
+                    // azul fica para a ação de confirmar. SmartAmount:
                     // o valor encolhe para SEMPRE caber, sem truncar.
                     Flexible(
                       child: SmartAmount(
@@ -620,7 +620,7 @@ class _CartProductRow extends StatelessWidget {
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      // Cápsula neutra em repouso e tingida de laranja
+                      // Cápsula neutra em repouso e tingida de azul
                       // quando o produto já está na compra — mesmo estado
                       // do stepper do PDV.
                       color: inCart

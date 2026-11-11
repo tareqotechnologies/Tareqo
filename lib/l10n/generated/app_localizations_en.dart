@@ -3086,7 +3086,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quotationTemplatePreviewBadge => 'Preview';
 
   @override
-  String get paletteTerracotta => 'Terracotta';
+  String get paletteBlue => 'Blue';
 
   @override
   String get paletteBeige => 'Beige';

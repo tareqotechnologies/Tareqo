@@ -133,7 +133,7 @@ class PurchaseCard extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     // Unidades adicionadas — metadado neutro: o stock que
-                    // entrou não é um alerta, e laranja a 12px não alcança
+                    // entrou não é um alerta, e azul a 12px não alcança
                     // AA no tema claro.
                     StatusChip(
                       label: l10n.purchasesStockAdded(units, l10n.commonUnits),

@@ -31,7 +31,7 @@ void main() {
 
       // Arquivo → ocorrências `Color(0x…)` documentadas (caminho com `/`).
       // U-23: paleta oficial — nenhum hex literal em apresentação; o
-      // recibo impresso usa tokens (AppColors.brandBlack/surfaceGray).
+      // recibo impresso usa tokens (AppColors.brandInk/surfaceGray).
       const documented = <String, int>{};
 
       final problems = <String>[];

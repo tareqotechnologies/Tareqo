@@ -17,7 +17,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 import 'user_docs_pdf/markdown_pdf.dart';
 
-const _fontPath = 'assets/fonts/Inter-Variable.ttf';
+const _fontPath = 'assets/fonts/Outfit-Regular.ttf';
 
 const _sample = '''
 # Manual de Teste
@@ -168,7 +168,7 @@ Fim.
   group('filterGlyphs', () {
     test('remove glifos sem suporte e mantém quebras de linha', () {
       expect(filterGlyphs('ok\nlinha 2', _ttf), 'ok\nlinha 2');
-      // U+1F512 não existe na Inter; \n é preservado.
+      // U+1F512 não existe na Outfit; \n é preservado.
       expect(filterGlyphs('x \ny', _ttf), 'x \ny');
     });
   });

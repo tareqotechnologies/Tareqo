@@ -69,7 +69,7 @@ class _FakePathProvider extends PathProviderPlatform {
 }
 
 void main() {
-  // O buildPdf embute a fonte Inter via rootBundle (asset do pubspec).
+  // O buildPdf embute a fonte Outfit via rootBundle (asset do pubspec).
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const shareChannel = MethodChannel('dev.fluttercommunity.plus/share');

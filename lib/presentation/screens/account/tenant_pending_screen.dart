@@ -32,7 +32,7 @@ class TenantPendingScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Estado "a aguardar": laranja oficial em véu — o mesmo
+                  // Estado "a aguardar": azul oficial em véu — o mesmo
                   // ícone-em-superfície usado nas telas de estado.
                   Container(
                     width: 72,

@@ -77,7 +77,7 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
               if (outlinedAction)
                 // Ação secundária no botão oficial do DS (tinta + contorno);
-                // o laranja fica reservado ao CTA primário.
+                // o azul fica reservado ao CTA primário.
                 AppButton.secondary(label: actionLabel!, onPressed: onAction)
               else
                 AppButton.primary(

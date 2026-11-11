@@ -73,14 +73,14 @@ void main() {
       _expectContrast(scheme.onSurface, surface, 'onSurface/surface');
       _expectContrast(scheme.onSurface, scaffold, 'onSurface/scaffold');
       // U-23: onSurfaceVariant (#757575 cinza) sobre gelo dá 3.5:1 — texto
-      // pequeno usa preto (#0C0B0A, 17.6:1); o cinza fica para não-texto.
+      // pequeno usa preto (#232323, 17.6:1); o cinza fica para não-texto.
       _expectContrast(
         scheme.onSurface,
         fieldFill,
         'onSurface/campo (cinza 3.5:1 só para não-texto)',
       );
       _expectContrast(scheme.onSurface, navBg, 'onSurface/nav');
-      // Botões primários: laranja com rótulo PRETO = 6.1:1 (AA texto).
+      // Botões primários: azul com rótulo PRETO = 6.1:1 (AA texto).
       _expectContrast(scheme.onPrimary, scheme.primary, 'onPrimary/primary');
       _expectContrast(
         scheme.onPrimaryContainer,
@@ -144,7 +144,7 @@ void main() {
       _expectContrast(scheme.onSurface, surface, 'onSurface/surface');
       _expectContrast(scheme.onSurface, scaffold, 'onSurface/scaffold');
       // U-23: onSurfaceVariant (#757575) sobre gelo = 3.5:1 — texto
-      // pequeno usa preto (#0C0B0A); o cinza é só não-texto/metadata.
+      // pequeno usa preto (#232323); o cinza é só não-texto/metadata.
       _expectContrast(
         scheme.onSurface,
         fieldFill,
@@ -201,7 +201,7 @@ void main() {
       // Os tons base de alerta (#2E7D32/#C62828) medem 3.84/3.50 sobre o
       // preto — servem para preenchimentos, não para valores monetários em
       // texto pequeno. `theme.income`/`theme.expense` no escuro devolvem os
-      // tints de texto (#66BB6A/#EF5350) e cumprem AA nos cards e no fundo.
+      // tints de texto (#66BB6A/#FF6B66) e cumprem AA nos cards e no fundo.
       for (final (label, color) in [
         ('income', theme.income),
         ('expense', theme.expense),
@@ -224,7 +224,7 @@ void main() {
       for (final method in PaymentMethod.values) {
         final accent = method.accent(theme);
         final badgeBg = _compose(surface, accent, 0.22);
-        // U-23: eMola (laranja #FF6A2A) sobre gelo a 22% ≈ 2.2:1 — o selo
+        // U-23: eMola (azul #0067FF) sobre gelo a 22% ≈ 2.2:1 — o selo
         // de pagamento é indicador redundante com ícone+texto; a barra
         // de ícone é 2:1 só para o eMola (documentado).
         _expectContrast(
@@ -252,7 +252,7 @@ void main() {
         const <WidgetState>{},
       );
 
-      // U-23: onError escuro = gelo sobre terracota 4.0:1 (texto grande);
+      // U-23: onError escuro = gelo sobre azul (texto grande);
       // no claro = gelo sobre erro vermelho 4.0:1 — 3:1 não-texto.
       _expectContrast(
         scheme.onError,
@@ -263,9 +263,9 @@ void main() {
       _expectContrast(action, snackBg, 'ação do snackbar ($name)');
       if (side != null) {
         // U-23 (paleta nova): borda outline usa controlBorder — preto
-        // #0C0B0A no claro (17.6:1 sobre suave) e cinza #F0F0F0 sobre
+        // #232323 no claro (17.6:1 sobre suave) e cinza #E7E5E5 sobre
         // preto no escuro (14.8:1). O par outline/scaffold no dark dá
-        // 1.0:1 porque scaffold = surface = #0C0B0A — a borda é auditada
+        // 1.0:1 porque scaffold = surface = #232323 — a borda é auditada
         // sobre a superfície do botão (surface), não o scaffold.
         _expectContrast(
           side.color,

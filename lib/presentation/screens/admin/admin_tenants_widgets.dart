@@ -78,7 +78,7 @@ class _AdminTenantCard extends ConsumerWidget {
                 vertical: AppSpacing.micro,
               ),
               decoration: BoxDecoration(
-                color: AppColors.accentOrange.withValues(alpha: 0.12),
+                color: AppColors.accentBlue.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppRadius.full),
               ),
               child: Row(
@@ -87,7 +87,7 @@ class _AdminTenantCard extends ConsumerWidget {
                   const Icon(
                     Icons.extension_outlined,
                     size: AppSizes.iconSm,
-                    color: AppColors.accentOrange,
+                    color: AppColors.accentBlue,
                   ),
                   const SizedBox(width: AppSpacing.micro),
                   Text(

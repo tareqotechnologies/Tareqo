@@ -8,16 +8,16 @@
 // generate_icons_test.dart — não entra na suíte `flutter test`).
 //
 // Design (espelho do design system do app):
-// - Capa escura (fundo #0C0B0A) com o acento laranja da marca e título leve;
+// - Capa escura (fundo #232323) com o acento azul da marca e título leve;
 // - Índice com números de página — calculado em DOIS PASSOS (o pacote pdf
 // não sabe a página de um heading antes de renderizar; um widget sonda
 // `context.pageNumber` durante o layout do 1.º passe e o 2.º passe
 // desenha os números reais);
 // - Conteúdo em páginas CLARAS (impressão/leitura): cabeçalhos com régua
-// laranja, listas, citações, regras, tabelas com cabeçalho tingido;
+// azul, listas, citações, regras, tabelas com cabeçalho tingido;
 // - Marcadores de navegação (bookmarks) via `pw.Outline`;
 // - Glifos sem suporte na fonte (emoji, símbolos raros) são removidos
-// usando o cmap da Inter (TtfParser.charToGlyphIndexMap) — nunca fica
+// usando o cmap da Outfit (TtfParser.charToGlyphIndexMap) — nunca fica
 // um quadrado vazio no PDF.
 import 'dart:convert';
 import 'dart:math' as math;
@@ -28,37 +28,37 @@ import 'package:pdf/widgets.dart' as pw;
 
 // ---------------------------------------------------------------------------
 // Cores da marca — paleta OFICIAL do app (lib/core/theme/app_colors.dart):
-// laranja #FF6A2A, cinza #F0F0F0, suave #F9F9F9, preto #0C0B0A.
+// azul #0067FF, cinza #E7E5E5, suave #F9F9F9, preto #232323.
 // ---------------------------------------------------------------------------
 
 /// Fundo escuro da capa (preto oficial).
-const PdfColor coverBg = PdfColor.fromInt(0xFF0C0B0A);
+const PdfColor coverBg = PdfColor.fromInt(0xFF232323);
 
-/// Laranja da marca (ações, réguas e destaques — não-texto pequeno).
-const PdfColor accent = PdfColor.fromInt(0xFFFF6A2A);
+/// Azul da marca (ações, réguas e destaques — não-texto pequeno).
+const PdfColor accent = PdfColor.fromInt(0xFF0067FF);
 
-/// Texto/link sobre fundo claro: preto oficial (o laranja só passa AA
-/// para área grande; #FF6A2A sobre branco é 2.9:1).
-const PdfColor accentDark = PdfColor.fromInt(0xFF0C0B0A);
+/// Texto/link sobre fundo claro: preto oficial (o azul só passa AA
+/// para área grande; #0067FF sobre branco é 2.9:1).
+const PdfColor accentDark = PdfColor.fromInt(0xFF232323);
 
 /// Texto principal sobre fundo claro.
-const PdfColor textColor = PdfColor.fromInt(0xFF0C0B0A);
+const PdfColor textColor = PdfColor.fromInt(0xFF232323);
 
-/// Texto secundário (legendas, meta) — preto oficial: o cinza #F0F0F0
+/// Texto secundário (legendas, meta) — preto oficial: o cinza #E7E5E5
 /// sobre branco é 1.2:1 e não é legível.
-const PdfColor textMuted = PdfColor.fromInt(0xFF0C0B0A);
+const PdfColor textMuted = PdfColor.fromInt(0xFF232323);
 
 /// Cinza de superfície dos fundos de citação.
-const PdfColor quoteBg = PdfColor.fromInt(0xFFF0F0F0);
+const PdfColor quoteBg = PdfColor.fromInt(0xFFE7E5E5);
 
 /// Cinza de superfície do cabeçalho das tabelas.
-const PdfColor tableHeadBg = PdfColor.fromInt(0xFFF0F0F0);
+const PdfColor tableHeadBg = PdfColor.fromInt(0xFFE7E5E5);
 
 /// Borda suave (cinza de superfície oficial).
-const PdfColor borderColor = PdfColor.fromInt(0xFFF0F0F0);
+const PdfColor borderColor = PdfColor.fromInt(0xFFE7E5E5);
 
 /// Cinza de superfície (texto da capa, notas) — 14.8:1 sobre o preto.
-const PdfColor onCoverMuted = PdfColor.fromInt(0xFFF0F0F0);
+const PdfColor onCoverMuted = PdfColor.fromInt(0xFFE7E5E5);
 
 /// Branco suave oficial (texto da capa).
 const PdfColor onCover = PdfColor.fromInt(0xFFF9F9F9);
@@ -183,7 +183,7 @@ class DocModel {
 // Emoji / glifos sem suporte na fonte
 // ---------------------------------------------------------------------------
 
-/// Emoji e símbolos decorativos removidos do texto impresso (a Inter não tem
+/// Emoji e símbolos decorativos removidos do texto impresso (a Outfit não tem
 /// esses glifos; o texto que os acompanha preserva o significado).
 final RegExp _emojiRe = RegExp(
   r'[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]',
@@ -192,7 +192,7 @@ final RegExp _emojiRe = RegExp(
 
 String stripEmoji(String s) => s.replaceAll(_emojiRe, '');
 
-/// Remove runes que a fonte embutida não cobre (cmap da Inter). Retorna o
+/// Remove runes que a fonte embutida não cobre (cmap da Outfit). Retorna o
 /// texto pronto para o PDF — sem quadrados vazios. Quebras de linha e tabs
 /// são mantidas (são comandos de layout, não glifos).
 String filterGlyphs(String s, TtfParser font) {
@@ -480,11 +480,9 @@ pw.Document buildDoc({
   void Function(int page)? onFooterPage,
 }) {
   final doc2 = pw.Document(
-    // `bold: font`: a Inter é variável (eixo wght) e o dart_pdf não seleciona
-    // o eixo — sem `fontBold` explícito, textos BOLD perdiam a fonte (o
-    // resolvedor caía no fallback e glifos como o bullet `•` sumiam). Com
-    // `bold: font`, o bold usa a MESMA fonte (peso visual da base, como o
-    // report_exporter já documenta) e nenhum glifo se perde.
+    // `bold: font`: o bold usa a MESMA fonte estática da base — sem uma
+    // fonte bold explícita, o resolvedor caía no fallback e glifos como o
+    // bullet `•` sumiam. Assim nenhum glifo se perde.
     theme: pw.ThemeData.withFont(base: font, bold: font),
     title: docName,
     author: appName,

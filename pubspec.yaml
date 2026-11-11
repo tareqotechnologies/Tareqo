@@ -132,8 +132,9 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
   # --- Branding (W7) ---
-  # Gera os ícones nativos a partir de assets/branding (gerados por
-  # tool/generate_icons_test.dart): `dart run flutter_launcher_icons`.
+  # Gera os ícones nativos a partir de assets/branding (masters:
+  # tool/gen_tq_logo.py; recortes: tool/generate_icons_test.dart):
+  # `dart run flutter_launcher_icons`.
   flutter_launcher_icons: ^0.14.3
 
   # --- Geração de código (Freezed + json_serializable) ---
@@ -152,9 +153,9 @@ flutter:
   # Garante que a fonte de ícones Material esteja incluída no aplicativo.
   uses-material-design: true
 
-  # Logotipo oficial da marca (preto/branco — paleta oficial) — usada pela
-  # tela de abertura in-app (_SplashScreen do AuthGate). Gerada por
-  # tool/generate_icons_test.dart a partir de assets/branding/icon_official.png.
+  # Logotipo oficial da marca (tinta #232323 + suave #F9F9F9) — usado pela
+  # tela de abertura in-app (_SplashScreen do AuthGate), login e onboarding.
+  # Masters: tool/gen_tq_logo.py; recortes: tool/generate_icons_test.dart.
   assets:
     # Branding — imagens da marca oficial (splash, login, onboarding).
     - assets/branding/icon_official.png
@@ -169,41 +170,45 @@ flutter:
     - docs/en/TROUBLESHOOTING.md
     - docs/fr/GUIDE_DE_L_UTILISATEUR.md
     - docs/fr/DEPANNAGE.md
-    # Instância estática em w700 — o package `pdf` NÃO resolve o eixo de
-    # uma fonte variável (o texto sairia todo a w400). Os PDFs carregam este
-    # asset diretamente; a UI continua a usar a variável pelo family Inter.
-    - assets/fonts/Inter-Bold.ttf
+    # Instâncias estáticas para os PDFs — o package `pdf` NÃO resolve o
+    # eixo wght da variável (cuja instância padrão é Thin, w100).
+    # Regular (w400) = corpo; Bold (w700) = títulos. A UI continua a usar
+    # a variável pelo family Outfit.
+    - assets/fonts/Outfit-Regular.ttf
+    - assets/fonts/Outfit-Bold.ttf
 
-  # Fonte tipográfica do ERP: Inter (variável, eixo opsz+wght).
-  # Escolhida por legibilidade em telas densas de dados (ERP) e suporte
-  # nativo a pesos via eixo wght no Flutter (fontWeight mapeia o eixo).
+  # Fonte tipográfica do ERP: Outfit (variável, eixo wght) — a família do
+  # guia de identidade. Suporte nativo a pesos via eixo wght no Flutter
+  # (fontWeight mapeia o eixo).
   fonts:
-    - family: Inter
+    - family: Outfit
       fonts:
-        # Instância variável oficial (OFL 1.1, 854 KB) — eixo wght
-        # 100–900 + opsz. O texto da UI resolve w700 pelo eixo variável;
-        # os PDFs usam a estática Inter-Bold.ttf declarada em `assets:`.
-        - asset: assets/fonts/Inter-Variable.ttf
+        # Instância variável oficial (OFL 1.1, ~110 KB) — eixo wght
+        # 100–900. O texto da UI resolve os pesos pelo eixo variável;
+        # os PDFs usam as estáticas Outfit-Regular.ttf (corpo) e
+        # Outfit-Bold.ttf (títulos) declaradas em `assets:`.
+        - asset: assets/fonts/Outfit-Variable.ttf
     # Mono — família 'monospace' (nome do PAPEL, não da fonte): todos os
     # `fontFamily: 'monospace'` do app (código MFA, IDs do painel admin,
     # snippets do leitor de ajuda) caem aqui. Política de fallback:
     # trocar a mono do app é editar SÓ este bloco — os 6 usos em código
     # permanecem estáveis. Variável Roboto Mono v3.001 (OFL, 180 KB) —
-    # pesos w400/w600 resolvidos pelo eixo wght (mesmo mecanismo da Inter).
+    # pesos w400/w600 resolvidos pelo eixo wght (mesmo mecanismo da Outfit).
     - family: monospace
       fonts:
         - asset: assets/fonts/RobotoMono-Variable.ttf
 
-# Ícones nativos (W7) — gerados por tool/generate_icons_test.dart a partir
-# da imagem-fonte assets/branding/icon_official.png (monograma TQ oficial,
-# preto #0C0B0A + branco suave #F9F9F9). Correr:
-#   flutter test tool/generate_icons_test.dart && dart run flutter_launcher_icons
+# Ícones nativos (W7) — masters por tool/gen_tq_logo.py (monograma TQ
+# oficial, tinta #232323 + branco suave #F9F9F9); recortes nativos/web por
+# tool/generate_icons_test.dart. Correr:
+#   python tool/gen_tq_logo.py && flutter test tool/generate_icons_test.dart
+#   dart run flutter_launcher_icons
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/branding/icon_legacy.png"
-  # Fundo do adaptativo: preto oficial da paleta.
-  adaptive_icon_background: "#0C0B0A"
+  # Fundo do adaptativo: tinta oficial da paleta.
+  adaptive_icon_background: "#232323"
   adaptive_icon_foreground: "assets/branding/icon_fg.png"
   adaptive_icon_monochrome: "assets/branding/icon_mono.png"
   remove_alpha_ios: true

@@ -1,5 +1,5 @@
 # Verificacao pos-build do icone oficial (monograma TQ, paleta oficial:
-# preto #0C0B0A + branco suave #F9F9F9).
+# tinta #232323 + branco suave #F9F9F9).
 # Uso: python tool/check_apk_icon.py build/app/outputs/flutter-apk/app-dev-debug.apk
 import io
 import sys

@@ -890,7 +890,7 @@ class _CartProductRow extends StatelessWidget {
 }
 
 /// Stepper da linha do catálogo — cápsula neutra em repouso e tingida de
-/// laranja quando o produto já está no carrinho: o estado da venda fica
+/// azul quando o produto já está no carrinho: o estado da venda fica
 /// óbvio sem gritar. Alvos de 48dp; tocar na quantidade abre a edição
 /// digitada.
 class _Stepper extends StatelessWidget {
@@ -980,7 +980,7 @@ class _Stepper extends StatelessWidget {
 }
 
 /// Linha do carrinho — produto que já está na venda: bolha de quantidade
-/// (laranja), nome, preço unitário + papel e total da linha em tinta.
+/// (azul), nome, preço unitário + papel e total da linha em tinta.
 class _CartPill extends StatelessWidget {
   const _CartPill({required this.product, required this.quantity});
 
@@ -1205,7 +1205,7 @@ class _Footer extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              // Total em tinta (AA nos dois temas); o laranja fica para a
+              // Total em tinta (AA nos dois temas); o azul fica para a
               // ação de confirmar. É o número que fecha a venda.
               Text(
                 Formatters.currency(totalCents),
@@ -1223,7 +1223,7 @@ class _Footer extends StatelessWidget {
             ),
           ],
           const SizedBox(height: AppSpacing.sm),
-          // Botão confirmar: sólido no laranja oficial (sem gradiente) —
+          // Botão confirmar: sólido no azul oficial (sem gradiente) —
           // uma única ação primária no rodapé. Um spinner substitui o
           // check durante o envio.
           AppButton.primary(

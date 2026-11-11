@@ -166,7 +166,7 @@ void main() {
     expect(find.text('M-Pesa'), findsOneWidget);
 
     // Itens com quantidade × preço unitário e subtotal — mesmo padrão do
-    // feed de "Atividade de hoje": ícone circular laranja, título + linha de
+    // feed de "Atividade de hoje": ícone circular azul, título + linha de
     // quantidade × preço à esquerda, valor à direita, divisórias indent: 60.
     expect(find.text('Caneta'), findsOneWidget);
     expect(find.text('2 × R\$ 2,00'), findsOneWidget);
@@ -180,7 +180,7 @@ void main() {
       find.textContaining('13,90'),
       findsAtLeastNWidgets(1),
     ); // total (header + rodapé)
-    // Chrome do feed: ícone circular laranja (40px) no cabeçalho da venda +
+    // Chrome do feed: ícone circular azul (40px) no cabeçalho da venda +
     // em cada item — header + 2 itens = 3 ícones.
     expect(
       find.byWidgetPredicate(
@@ -188,7 +188,7 @@ void main() {
             widget is Container &&
             widget.decoration is BoxDecoration &&
             (widget.decoration as BoxDecoration).color ==
-                AppColors.accentOrange &&
+                AppColors.accentBlue &&
             (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
             widget.constraints?.maxWidth == 40 &&
             widget.constraints?.maxHeight == 40,

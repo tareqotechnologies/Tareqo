@@ -215,7 +215,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       useSafeArea: false,
       // CTA único: sem produtos, o FAB some — o estado vazio traz o botão
       // de cadastro centralizado (mantendo a regra canManageProducts).
-      // FAB sólido oficial: laranja #FF6A2A com ícone preto.
+      // FAB sólido oficial: azul #0067FF com ícone preto.
       floatingActionButton: canManageProducts
           ? FloatingActionButton(
               heroTag: 'fab-products',
@@ -452,7 +452,7 @@ enum _StockTypeFilter { all, weight, unit }
 enum _AvailabilityFilter { all, available, lowStock, outOfStock }
 
 /// Chips de filtro (V4): pílulas com rótulo + ícone — o ativo usa o
-/// laranja oficial (tint 14% + aro) com o rótulo em tinta (AA no claro);
+/// azul oficial (tint 14% + aro) com o rótulo em tinta (AA no claro);
 /// os inativos ficam neutros. Grupo minimalista que substitui o
 /// SegmentedButton para textos longos (ex.: "Peso (kg/g/l/ml)").
 class _FilterChipGroup<T> extends StatelessWidget {
@@ -543,7 +543,7 @@ class _CompactFilterChip extends StatelessWidget {
             Text(
               label,
               // Filtro = labelMedium (12/w500). O ativo mantém o rótulo em
-              // tinta: laranja em texto pequeno não atinge AA no claro — a
+              // tinta: azul em texto pequeno não atinge AA no claro — a
               // seleção lê-se pelo tint, aro e ícone.
               style: AppTypography.labelMedium.copyWith(
                 color: isSelected ? scheme.onSurface : scheme.onSurfaceVariant,
@@ -829,7 +829,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
 
 /// Campo de busca inline — abre pela lupa da AppBar, vive acima da lista
 /// enquanto activo. Pílula cheia neutra (sem borda em repouso) e aro
-/// laranja oficial só com foco; o X limpa e fecha.
+/// azul oficial só com foco; o X limpa e fecha.
 class _ProductSearchField extends StatelessWidget {
   const _ProductSearchField({
     required this.controller,
@@ -898,7 +898,7 @@ class _ProductSearchField extends StatelessWidget {
 ///   é omitido por ser o estado comum do varejo.
 /// * Inactivo vira [StatusChip] neutro ao lado dos metadados; stock baixo
 ///   usa `theme.expense` + ícone de aviso (cor de alerta oficial).
-/// * Preço em tinta (`onSurface`) — AA no claro e no escuro; laranja
+/// * Preço em tinta (`onSurface`) — AA no claro e no escuro; azul
 ///   fica reservado a acções/destaques.
 /// * A linha inteira é UM nó semântico com `InkWell` (alvo ≥48, ripple e
 ///   foco do tema) e a coluna direita é `FittedBox` para não estourar com

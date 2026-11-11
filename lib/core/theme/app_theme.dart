@@ -9,14 +9,14 @@ import 'app_typography.dart';
 // `AppStatusColors` acessíveis para quem importa apenas `app_theme.dart`.
 export 'app_colors.dart';
 
-/// Tema central TAREQO — Material 3 sobre a paleta do anexo.
+/// Tema central TAREQO — Material 3 sobre a paleta Outfit (guia em anexo).
 ///
-/// Quatro cores sólidas: laranja `#FF6A2A` (ação, foco, seleção),
-/// cinza `#F0F0F0` (campos e divisores), suave `#F9F9F9` (canvas claro)
-/// e preto `#0C0B0A` (tinta e canvas escuro). O botão primário é laranja
-/// com rótulo preto. A pílula selecionada (Regular / Medium do anexo) é
-/// preenchida de preto no claro e de suave no escuro, com contorno laranja
-/// no estado em repouso.
+/// Cinco cores sólidas: azul `#0067FF` (ação, foco, seleção), cinza médio
+/// `#6E7174` (texto secundário claro), cinza `#E7E5E5` (campos e
+/// divisores), suave `#F9F9F9` (canvas claro) e tinta `#232323`
+/// (tinta e canvas escuro). O botão primário é azul com rótulo branco
+/// suave. A pílula selecionada é preenchida de tinta no claro e de suave
+/// no escuro, com contorno azul no estado em repouso.
 ///
 /// Arquitetura:
 /// * `AppTheme.light` / `AppTheme.dark` — dois [ThemeData] construídos
@@ -27,18 +27,17 @@ export 'app_colors.dart';
 ///   movimento em `AppTokens`.
 ///
 /// Papéis do [ColorScheme] (contrato):
-/// * `primary` = laranja `#FF6A2A`. `onPrimary` = preto `#0C0B0A` (6.1:1, AA).
-/// * `primaryContainer` = o mesmo laranja em véu sobre a superfície.
+/// * `primary` = azul `#0067FF`. `onPrimary` = suave `#F9F9F9` (4.55:1, AA).
+/// * `primaryContainer` = o mesmo azul em véu sobre a superfície.
 ///   `errorContainer` guarda o alerta de erro.
 ///
 /// Contraste auditado (WCAG): texto de corpo ≥ 4.5:1 sobre as superfícies.
-/// Preto sobre laranja passa AA de texto; laranja sobre suave fica para
-/// ícone, borda e área grande.
+/// Suave sobre azul passa AA de texto; azul sobre suave também (4.55:1).
 abstract final class AppTheme {
-  /// Tema claro — canvas #F9F9F9, campos #F0F0F0, tinta #0C0B0A, ação #FF6A2A.
+  /// Tema claro — canvas #F9F9F9, campos #E7E5E5, tinta #232323, ação #0067FF.
   static final ThemeData light = _base(Brightness.light);
 
-  /// Tema escuro — canvas #0C0B0A, texto #F9F9F9, ação #FF6A2A.
+  /// Tema escuro — canvas #232323, texto #F9F9F9, ação #0067FF.
   static final ThemeData dark = _base(Brightness.dark);
 
   static ThemeData _base(Brightness brightness) {
@@ -69,35 +68,33 @@ abstract final class AppTheme {
     final separator = isLight ? AppColors.lightDivider : AppColors.darkDivider;
 
     // ── Ação / Primária ──────────────────────────────────────────────
-    // `action` = laranja #FF6A2A nos dois temas. `onAction` = preto sobre
-    // o laranja (6.1:1).
+    // `action` = azul #0067FF nos dois temas. `onAction` = branco suave
+    // sobre o azul (4.55:1).
     final action = isLight ? AppColors.lightPrimary : AppColors.darkPrimary;
     final onAction = isLight
         ? AppColors.lightOnPrimary
         : AppColors.darkOnPrimary;
-    // Véu do laranja sobre a superfície: 7% no claro, 12% no escuro.
+    // Véu do azul sobre a superfície: 7% no claro, 12% no escuro.
     final actionTint = Color.alphaBlend(
       action.withValues(alpha: isLight ? 0.07 : 0.12),
       surface,
     );
 
-    // ── Laranja acento - APENAS para alertas e destaques ─────────────
-    final accent = isLight
-        ? AppColors.accentOrange
-        : AppColors.darkAccentOrange;
+    // ── Avisos ───────────────────────────────────────────────────────
     final warningText = isLight
         ? AppColors.warningText
         : AppColors.darkWarningText;
     final warningSoft = isLight
-        ? AppColors.accentOrangeSoft
-        : AppColors.darkAccentOrangeSoft;
+        ? AppColors.accentBlueSoft
+        : AppColors.darkAccentBlueSoft;
 
     // ── Semântica ────────────────────────────────────────────────────
     final error = isLight ? AppColors.errorNeutral : AppColors.darkErrorNeutral;
     final errorSoft = isLight
         ? AppColors.lightErrorSoft
         : AppColors.darkErrorSoft;
-    final onError = isLight ? AppColors.softWhite : AppColors.brandBlack;
+    // Rótulo sobre erro segue o contraste de texto do tema.
+    final onError = AppColors.softWhite;
 
     // ── ColorScheme (papéis explícitos) ──────────────────────────────
     final scheme = ColorScheme(
@@ -107,11 +104,11 @@ abstract final class AppTheme {
       primaryContainer: actionTint,
       onPrimaryContainer: textPrimary,
       secondary: textSecondary,
-      onSecondary: isLight ? AppColors.softWhite : AppColors.brandBlack,
+      onSecondary: isLight ? AppColors.softWhite : AppColors.brandInk,
       secondaryContainer: surfaceSecondary,
       onSecondaryContainer: textPrimary,
       tertiary: warningText,
-      onTertiary: isLight ? AppColors.softWhite : AppColors.brandBlack,
+      onTertiary: isLight ? AppColors.softWhite : AppColors.brandInk,
       tertiaryContainer: warningSoft,
       onTertiaryContainer: warningText,
       surface: surface,
@@ -131,17 +128,17 @@ abstract final class AppTheme {
       errorContainer: errorSoft,
       onErrorContainer: error,
       inverseSurface: textPrimary,
-      onInverseSurface: isLight ? AppColors.softWhite : AppColors.brandBlack,
+      onInverseSurface: isLight ? AppColors.softWhite : AppColors.brandInk,
       // Sobre `inverseSurface` (snackbar): o oposto da ação do tema.
       inversePrimary: isLight ? AppColors.darkPrimary : AppColors.lightPrimary,
       shadow: Colors.transparent,
       // Scrim = preto oficial em ambos os temas (modalBarrierColor).
-      scrim: AppColors.brandBlack,
+      scrim: AppColors.brandInk,
       surfaceTint: Colors.transparent,
     );
 
     // ── Overlays de interação (neutros, paleta oficial) ──────────────
-    final stateVeil = isLight ? AppColors.brandBlack : AppColors.softWhite;
+    final stateVeil = isLight ? AppColors.brandInk : AppColors.softWhite;
     WidgetStateProperty<Color?> surfaceOverlay() =>
         WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) return null;
@@ -159,7 +156,7 @@ abstract final class AppTheme {
 
     // Botão preenchido: o véu vai na direção OPOSTA ao preenchimento (clareia
     // o preto no claro, escurece o gelo no escuro) para o press ser visível.
-    final filledVeil = AppColors.brandBlack;
+    final filledVeil = AppColors.brandInk;
     WidgetStateProperty<Color?> filledOverlay() =>
         WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) return null;
@@ -514,7 +511,7 @@ abstract final class AppTheme {
         backgroundColor: surfaceElevated,
         surfaceTintColor: Colors.transparent,
         modalBackgroundColor: surfaceElevated,
-        modalBarrierColor: AppColors.brandBlack.withValues(
+        modalBarrierColor: AppColors.brandInk.withValues(
           alpha: isLight ? 0.40 : 0.60,
         ),
         modalElevation: AppElevation.e3,
@@ -540,18 +537,15 @@ abstract final class AppTheme {
         behavior: SnackBarBehavior.floating,
         elevation: AppElevation.e3,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
-        // Fundo = tinta invertida (preto no claro, gelo no escuro).
-        backgroundColor: textPrimary,
+        // Fundo = azul da marca (feedback de ação) nos dois temas.
+        backgroundColor: action,
         contentTextStyle: AppTypography.bodyMedium.copyWith(
           fontWeight: FontWeight.w500,
-          color: isLight ? AppColors.softWhite : AppColors.brandBlack,
+          color: onAction,
         ),
-        // Ação legível sobre o fundo invertido (terracota sobre gelo
-        // 4.0:1; no escuro, terracota sobre preto 3.3:1 — não-texto ok).
-        actionTextColor: isLight ? accent : AppColors.warningText,
-        closeIconColor: isLight
-            ? AppColors.softWhite.withValues(alpha: 0.7)
-            : AppColors.brandBlack,
+        // Ação e fecho = branco suave sobre o azul (4.55:1, AA texto).
+        actionTextColor: onAction,
+        closeIconColor: onAction.withValues(alpha: 0.7),
       ),
 
       tooltipTheme: TooltipThemeData(
@@ -576,31 +570,31 @@ abstract final class AppTheme {
               vertical: AppSpacing.xs,
             ),
           ),
-          // Pílula do anexo: repouso com contorno laranja; selecionado
+          // Pílula do anexo: repouso com contorno azul; selecionado
           // preenchido (preto no claro, suave no escuro).
           shape: const WidgetStatePropertyAll(StadiumBorder()),
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             final selected = states.contains(WidgetState.selected);
             if (selected) {
-              return isLight ? AppColors.brandBlack : AppColors.softWhite;
+              return isLight ? AppColors.brandInk : AppColors.softWhite;
             }
-            return isLight ? AppColors.softWhite : AppColors.brandBlack;
+            return isLight ? AppColors.softWhite : AppColors.brandInk;
           }),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
             final selected = states.contains(WidgetState.selected);
             if (selected) {
-              return isLight ? AppColors.softWhite : AppColors.brandBlack;
+              return isLight ? AppColors.softWhite : AppColors.brandInk;
             }
-            return isLight ? AppColors.brandBlack : AppColors.softWhite;
+            return isLight ? AppColors.brandInk : AppColors.softWhite;
           }),
           side: WidgetStateProperty.resolveWith((states) {
             final selected = states.contains(WidgetState.selected);
             if (selected) {
               return BorderSide(
-                color: isLight ? AppColors.brandBlack : AppColors.softWhite,
+                color: isLight ? AppColors.brandInk : AppColors.softWhite,
               );
             }
-            return const BorderSide(color: AppColors.brandOrange, width: 1.5);
+            return const BorderSide(color: AppColors.brandBlue, width: 1.5);
           }),
           overlayColor: surfaceOverlay(),
           animationDuration: AppDurations.fast,
