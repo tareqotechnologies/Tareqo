@@ -385,13 +385,9 @@ class _ActionMenuSheet extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SheetHeader(title: l10n.fabMenuTitle),
-          Text(
-            l10n.fabMenuSubtitle,
-            style: AppTypography.bodySmall.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
+          // O cabeçalho pergunta diretamente o que o utilizador quer fazer;
+          // o antigo subtítulo duplicaria a mesma frase.
+          SheetHeader(title: l10n.fabMenuSubtitle),
           const SizedBox(height: AppSpacing.md),
           _ActionTile(
             icon: Icons.add_shopping_cart_rounded,

@@ -276,7 +276,7 @@
     }
   },
   "dashboardAlertBadge": "Alert",
-  "dashboardSaleItems": "{count, plural, =1{1 item} other{{count} items}}",
+  "dashboardSaleItems": "{count, plural, =0{0 items} =1{1 item} other{{count} items}}",
   "@dashboardSaleItems": {
     "placeholders": {
       "count": {
@@ -939,6 +939,15 @@
   "salesNoProductsSubtitle": "Register products to record sales.",
   "salesNoSellableTitle": "No sellable products",
   "salesNoSellableSubtitle": "Raw materials and packaging are not sold at the counter. Change the product type to resale, manufactured or composite to sell it.",
+  "salesStockAvailable": "In stock: {quantity}",
+  "@salesStockAvailable": {
+    "description": "Remaining stock on the PDV catalog product row",
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
   "salesConfirm": "Confirm sale",
   "saleDetailTitle": "Sale details",
   "saleDetailId": "Sale {id}",
@@ -1866,6 +1875,22 @@
   },
   "productionNoProducibleTitle": "No producible products",
   "productionNoProducibleSubtitle": "Set a product type to \"Manufactured\" or \"Composite\" to create a recipe.",
+  "productionProductRequired": "Select the finished product.",
+  "@productionProductRequired": {
+    "description": "Recipe form validation: finished product required"
+  },
+  "productionYieldRequired": "Enter a yield greater than zero.",
+  "@productionYieldRequired": {
+    "description": "Recipe form validation: invalid yield"
+  },
+  "productionComponentRequired": "Add at least one component.",
+  "@productionComponentRequired": {
+    "description": "Recipe form validation: no components"
+  },
+  "productionComponentQuantityRequired": "Enter a quantity greater than zero.",
+  "@productionComponentQuantityRequired": {
+    "description": "Recipe form validation: invalid component quantity"
+  },
   "productionInsufficientProduct": "Insufficient stock for {product}",
   "@productionInsufficientProduct": {
     "placeholders": {

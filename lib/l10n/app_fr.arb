@@ -276,7 +276,7 @@
     }
   },
   "dashboardAlertBadge": "Alerte",
-  "dashboardSaleItems": "{count, plural, =1{1 article} other{{count} articles}}",
+  "dashboardSaleItems": "{count, plural, =0{0 article} =1{1 article} other{{count} articles}}",
   "@dashboardSaleItems": {
     "placeholders": {
       "count": {
@@ -939,6 +939,15 @@
   "salesNoProductsSubtitle": "Enregistrez des produits pour pouvoir vendre.",
   "salesNoSellableTitle": "Aucun produit vendable",
   "salesNoSellableSubtitle": "Les matières premières et les emballages ne sont pas vendus au comptoir. Changez le type du produit en revente, fabriqué ou composé pour le vendre.",
+  "salesStockAvailable": "En stock : {quantity}",
+  "@salesStockAvailable": {
+    "description": "Stock restant sur la ligne produit du catalogue PDV",
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
   "salesConfirm": "Confirmer la vente",
   "saleDetailTitle": "Détails de la vente",
   "saleDetailId": "Vente {id}",
@@ -1866,6 +1875,22 @@
   },
   "productionNoProducibleTitle": "Aucun produit productible",
   "productionNoProducibleSubtitle": "Définissez le type d'un produit sur \"Produit\" ou \"Composé\" pour créer une fiche technique.",
+  "productionProductRequired": "Sélectionnez le produit fini.",
+  "@productionProductRequired": {
+    "description": "Validation du formulaire de fiche technique : produit fini obligatoire"
+  },
+  "productionYieldRequired": "Indiquez un rendement supérieur à zéro.",
+  "@productionYieldRequired": {
+    "description": "Validation du formulaire de fiche technique : rendement invalide"
+  },
+  "productionComponentRequired": "Ajoutez au moins un composant.",
+  "@productionComponentRequired": {
+    "description": "Validation du formulaire de fiche technique : aucun composant"
+  },
+  "productionComponentQuantityRequired": "Indiquez une quantité supérieure à zéro.",
+  "@productionComponentQuantityRequired": {
+    "description": "Validation du formulaire de fiche technique : quantité de composant invalide"
+  },
   "productionInsufficientProduct": "Stock insuffisant pour {product}",
   "@productionInsufficientProduct": {
     "placeholders": {

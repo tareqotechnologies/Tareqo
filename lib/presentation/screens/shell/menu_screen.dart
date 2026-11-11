@@ -272,10 +272,12 @@ class _MenuTile extends StatelessWidget {
               color: AppColors.brandBlue,
               shape: BoxShape.circle,
             ),
+            // Glifo em branco suave sobre o azul saturado — a regra do
+            // sistema é texto/ícone claro em fundo azul, nunca tinta.
             child: Icon(
               icon,
               size: AppSizes.iconMd,
-              color: AppColors.brandInk,
+              color: AppColors.softWhite,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -340,7 +342,7 @@ class _SignOutButton extends StatelessWidget {
               child: const Icon(
                 Icons.logout_rounded,
                 size: AppSizes.iconSm,
-                color: AppColors.brandInk,
+                color: AppColors.softWhite,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),

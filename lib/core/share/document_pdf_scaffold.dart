@@ -216,10 +216,12 @@ pw.Widget pdfDocumentHeader({
               ),
               child: pw.Text(
                 statusLabel,
-                style: pw.TextStyle(
+                style: const pw.TextStyle(
                   fontSize: 8,
                   fontWeight: pw.FontWeight.bold,
-                  color: primaryColor,
+                  // Rótulo sobre o preenchimento da cor principal: branco
+                  // suave (antes repetia a própria cor e desaparecia).
+                  color: PdfAccents.ice,
                 ),
               ),
             ),

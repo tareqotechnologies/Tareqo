@@ -20,10 +20,10 @@ import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_fr.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
-/// Total de membros do catálogo: 1183 (1048 getters + 135 métodos).
-const int kTotalMembers = 1183;
-const int kTotalGetters = 1048;
-const int kTotalMethods = 135;
+/// Total de membros do catálogo: 1188 (1052 getters + 136 métodos).
+const int kTotalMembers = 1188;
+const int kTotalGetters = 1052;
+const int kTotalMethods = 136;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
   'onboardingSuccess',
@@ -80,6 +80,7 @@ const Set<String> kMethodNames = <String>{
   'salesInsufficientStock',
   'salesStockFor',
   'salesProductNotFound',
+  'salesStockAvailable',
   'saleDetailId',
   'saleDetailCancelConfirmBody',
   'adminAwaitingCount',
@@ -1283,6 +1284,11 @@ void main() {
         'productionDeleteMessage': l.productionDeleteMessage,
         'productionNoProducibleTitle': l.productionNoProducibleTitle,
         'productionNoProducibleSubtitle': l.productionNoProducibleSubtitle,
+        'productionProductRequired': l.productionProductRequired,
+        'productionYieldRequired': l.productionYieldRequired,
+        'productionComponentRequired': l.productionComponentRequired,
+        'productionComponentQuantityRequired':
+            l.productionComponentQuantityRequired,
       };
       expect(getters, hasLength(kTotalGetters));
       final arb = _loadArb('pt');
@@ -1452,6 +1458,7 @@ void main() {
           'salesInsufficientStock': [(l) => l.salesInsufficientStock('X', 2)],
           'salesStockFor': [(l) => l.salesStockFor('X')],
           'salesProductNotFound': [(l) => l.salesProductNotFound('X')],
+          'salesStockAvailable': [(l) => l.salesStockAvailable('X')],
           'saleDetailId': [(l) => l.saleDetailId('X')],
           'saleDetailCancelConfirmBody': [
             (l) => l.saleDetailCancelConfirmBody('X'),
@@ -2751,6 +2758,11 @@ void main() {
         'productionDeleteMessage': l.productionDeleteMessage,
         'productionNoProducibleTitle': l.productionNoProducibleTitle,
         'productionNoProducibleSubtitle': l.productionNoProducibleSubtitle,
+        'productionProductRequired': l.productionProductRequired,
+        'productionYieldRequired': l.productionYieldRequired,
+        'productionComponentRequired': l.productionComponentRequired,
+        'productionComponentQuantityRequired':
+            l.productionComponentQuantityRequired,
       };
       expect(getters, hasLength(kTotalGetters));
       final arb = _loadArb('en');
@@ -2920,6 +2932,7 @@ void main() {
           'salesInsufficientStock': [(l) => l.salesInsufficientStock('X', 2)],
           'salesStockFor': [(l) => l.salesStockFor('X')],
           'salesProductNotFound': [(l) => l.salesProductNotFound('X')],
+          'salesStockAvailable': [(l) => l.salesStockAvailable('X')],
           'saleDetailId': [(l) => l.saleDetailId('X')],
           'saleDetailCancelConfirmBody': [
             (l) => l.saleDetailCancelConfirmBody('X'),
@@ -4219,6 +4232,11 @@ void main() {
         'productionDeleteMessage': l.productionDeleteMessage,
         'productionNoProducibleTitle': l.productionNoProducibleTitle,
         'productionNoProducibleSubtitle': l.productionNoProducibleSubtitle,
+        'productionProductRequired': l.productionProductRequired,
+        'productionYieldRequired': l.productionYieldRequired,
+        'productionComponentRequired': l.productionComponentRequired,
+        'productionComponentQuantityRequired':
+            l.productionComponentQuantityRequired,
       };
       expect(getters, hasLength(kTotalGetters));
       final arb = _loadArb('fr');
@@ -4388,6 +4406,7 @@ void main() {
           'salesInsufficientStock': [(l) => l.salesInsufficientStock('X', 2)],
           'salesStockFor': [(l) => l.salesStockFor('X')],
           'salesProductNotFound': [(l) => l.salesProductNotFound('X')],
+          'salesStockAvailable': [(l) => l.salesStockAvailable('X')],
           'saleDetailId': [(l) => l.saleDetailId('X')],
           'saleDetailCancelConfirmBody': [
             (l) => l.saleDetailCancelConfirmBody('X'),

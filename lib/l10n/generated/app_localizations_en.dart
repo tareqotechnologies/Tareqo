@@ -596,6 +596,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count items',
       one: '1 item',
+      zero: '0 items',
     );
     return '$_temp0';
   }
@@ -1905,6 +1906,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get salesNoSellableSubtitle =>
       'Raw materials and packaging are not sold at the counter. Change the product type to resale, manufactured or composite to sell it.';
+
+  @override
+  String salesStockAvailable(String quantity) {
+    return 'In stock: $quantity';
+  }
 
   @override
   String get salesConfirm => 'Confirm sale';
@@ -4205,6 +4211,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get productionNoProducibleSubtitle =>
       'Set a product type to \"Manufactured\" or \"Composite\" to create a recipe.';
+
+  @override
+  String get productionProductRequired => 'Select the finished product.';
+
+  @override
+  String get productionYieldRequired => 'Enter a yield greater than zero.';
+
+  @override
+  String get productionComponentRequired => 'Add at least one component.';
+
+  @override
+  String get productionComponentQuantityRequired =>
+      'Enter a quantity greater than zero.';
 
   @override
   String productionInsufficientProduct(String product) {

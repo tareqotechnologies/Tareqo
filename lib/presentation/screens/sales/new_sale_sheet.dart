@@ -34,6 +34,7 @@ import '../../widgets/dialogs.dart';
 import '../../widgets/barcode_scan_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/payment_method_picker.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/product_image.dart';
 import '../../widgets/product_type_badge.dart';
 import '../../widgets/search_field.dart';
@@ -506,7 +507,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       MediaQuery.sizeOf(context).width,
     );
     final scannerZone = Padding(
-      padding: EdgeInsets.fromLTRB(hPad, AppSpacing.xxs, hPad, AppSpacing.sm),
+      padding: EdgeInsets.fromLTRB(hPad, AppSpacing.md, hPad, AppSpacing.xs),
       child: _ScannerZone(
         barcodeController: _barcodeController,
         barcodeError: _barcodeError,
@@ -515,7 +516,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       ),
     );
     final searchField = Padding(
-      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, AppSpacing.sm),
+      padding: EdgeInsets.fromLTRB(hPad, 0, hPad, 0),
       child: SearchField(
         controller: _searchController,
         focusNode: _searchFocus,
@@ -608,13 +609,36 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
               final roleOnly =
                   active.isEmpty && all.any((product) => product.isActive);
 
-              // Corpo rolável único: scanner + busca + conteúdo (estado
-              // vazio OU catálogo) — em ecrãs baixos tudo rola junto, o
-              // rodapé fica fixo e nada estoura.
+              // Corpo rolável único: scanner + busca + carrinho + catálogo —
+              // em ecrãs baixos tudo rola junto, o rodapé fica fixo e nada
+              // estoura. O carrinho vive ACIMA do catálogo e continua
+              // visível mesmo quando a busca não devolve resultados (a venda
+              // em progresso nunca desaparece por causa de um filtro).
               return CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(child: focusDim(scannerZone)),
                   SliverToBoxAdapter(child: searchField),
+                  // Venda em progresso: UM grupo (cabeçalho + linhas) lido
+                  // como um recibo. Nunca esmaece no modo foco: é o que está
+                  // a ser construído.
+                  if (_cart.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          hPad,
+                          AppSpacing.sm,
+                          hPad,
+                          0,
+                        ),
+                        child: _CartPanel(
+                          entries: [
+                            for (final entry in _cart.entries)
+                              if (_productById(entry.key) case final product?)
+                                (product: product, quantity: entry.value),
+                          ],
+                        ),
+                      ),
+                    ),
                   if (filtered.isEmpty)
                     // SliverFillRemaining: o estado vazio ocupa o espaço
                     // restante e fica centralizado — SEMPRE construído (não
@@ -622,59 +646,50 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                     // overflow em ecrãs baixos.
                     SliverFillRemaining(
                       hasScrollBody: false,
-                      child: EmptyState(
-                        icon: roleOnly
-                            ? Icons.category_outlined
-                            : Icons.search_off,
-                        title: roleOnly
-                            ? l10n.salesNoSellableTitle
-                            : l10n.salesNoProductsTitle,
-                        subtitle: roleOnly
-                            ? l10n.salesNoSellableSubtitle
-                            : l10n.salesNoProductsSubtitle,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.md),
+                        child: EmptyState(
+                          icon: roleOnly
+                              ? Icons.category_outlined
+                              : Icons.search_off,
+                          title: roleOnly
+                              ? l10n.salesNoSellableTitle
+                              : l10n.salesNoProductsTitle,
+                          subtitle: roleOnly
+                              ? l10n.salesNoSellableSubtitle
+                              : l10n.salesNoProductsSubtitle,
+                        ),
                       ),
                     )
                   else
-                    SliverList(
-                      delegate: SliverChildListDelegate([
-                        // Venda em progresso: UM grupo (cabeçalho + linhas)
-                        // lido como um recibo — o catálogo continua a ser a
-                        // única superfície para adicionar produtos. O grupo
-                        // nunca esmaece no modo foco: é o que está a ser
-                        // construído.
-                        if (_cart.isNotEmpty)
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              hPad,
-                              AppSpacing.xxs,
-                              hPad,
-                              AppSpacing.sm,
+                    // Catálogo em cartões separados: 8px entre linhas — o
+                    // respiro que faltava (antes as linhas encostavam umas às
+                    // outras e liam-se como um bloco único).
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        hPad,
+                        AppSpacing.sm,
+                        hPad,
+                        AppSpacing.lg,
+                      ),
+                      sliver: SliverList.separated(
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: AppSpacing.xs),
+                        itemBuilder: (context, index) {
+                          final product = filtered[index];
+                          return focusDim(
+                            _CartProductRow(
+                              product: product,
+                              quantity: _cart[product.id] ?? 0,
+                              onAdd: () => _add(product),
+                              onAddFraction: () => _addFraction(product),
+                              onRemove: () => _remove(product),
+                              onEdit: () => _editQuantity(product),
                             ),
-                            child: _CartPanel(
-                              entries: [
-                                for (final entry in _cart.entries)
-                                  if (_productById(entry.key)
-                                      case final product?)
-                                    (product: product, quantity: entry.value),
-                              ],
-                            ),
-                          ),
-                        for (final product in filtered)
-                          focusDim(
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: hPad),
-                              child: _CartProductRow(
-                                product: product,
-                                quantity: _cart[product.id] ?? 0,
-                                onAdd: () => _add(product),
-                                onAddFraction: () => _addFraction(product),
-                                onRemove: () => _remove(product),
-                                onEdit: () => _editQuantity(product),
-                              ),
-                            ),
-                          ),
-                        const SizedBox(height: AppSpacing.lg),
-                      ]),
+                          );
+                        },
+                      ),
                     ),
                 ],
               );
@@ -723,51 +738,50 @@ class _ScannerZone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.sm,
-        AppSpacing.xxs,
-        AppSpacing.xxs,
-        AppSpacing.xxs,
-      ),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: AppRadius.mdAll,
-        border: Border.all(color: scheme.outlineVariant, width: 0.8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: AppTextField(
-              controller: barcodeController,
-              textInputAction: TextInputAction.done,
-              onSubmitted: onSubmitted,
-              isDense: true,
-              label: l10n.salesBarcodeLabel,
-              hintText: '20 12345 00175',
-              prefixIcon: Icons.qr_code_scanner,
-              errorText: barcodeError,
+    // Barra de leitura sem caixa dentro de caixa: o campo já tem contorno
+    // próprio — a moldura extra anterior duplicava bordas e pesava o topo
+    // do balcão. A câmera fica ao lado, alinhada ao topo do campo (o erro
+    // inline cresce para baixo sem deslocar a ação).
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: AppTextField(
+            controller: barcodeController,
+            textInputAction: TextInputAction.done,
+            onSubmitted: onSubmitted,
+            isDense: true,
+            label: l10n.salesBarcodeLabel,
+            hintText: '20 12345 00175',
+            prefixIcon: Icons.qr_code_scanner,
+            errorText: barcodeError,
+          ),
+        ),
+        if (onScan != null) ...[
+          const SizedBox(width: AppSpacing.xs),
+          // 48dp de alvo de toque (androidTapTargetGuideline) — a ação
+          // de câmera é o segundo caminho de entrada da venda. O estilo
+          // explícito garante o glifo claro sobre o azul: o
+          // `iconButtonTheme` global fixa `foregroundColor` em tinta e
+          // sobrescreveria o `onPrimary` padrão do `IconButton.filled`.
+          IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: scheme.primary,
+              foregroundColor: scheme.onPrimary,
+            ),
+            tooltip: l10n.salesBarcodeScan,
+            onPressed: onScan,
+            icon: Icon(
+              Icons.photo_camera_outlined,
+              size: AppSizes.iconMd,
+              color: scheme.onPrimary,
             ),
           ),
-          if (onScan != null) ...[
-            const SizedBox(width: AppSpacing.xxs),
-            // 48dp de alvo de toque (androidTapTargetGuideline) — a ação
-            // de câmera é o segundo caminho de entrada da venda.
-            IconButton.filled(
-              tooltip: l10n.salesBarcodeScan,
-              onPressed: onScan,
-              icon: const Icon(
-                Icons.photo_camera_outlined,
-                size: AppSizes.iconMd,
-              ),
-            ),
-          ],
         ],
-      ),
+      ],
     );
   }
 }
@@ -808,23 +822,34 @@ class _CartProductRow extends StatelessWidget {
         product.stockQuantity <
             Quantity.lowStockThresholdUnits * Quantity.milliFactor;
 
-    // Linha densa (mesma linguagem da lista de Produtos): superfície
-    // limpa, borda de cabelo e sombra discreta — o catálogo é uma lista
-    // de trabalho, não uma galeria. O esgotado recua para o fundo neutro.
+    final scheme = theme.colorScheme;
+    final active = quantity > 0;
+    final metaColor = scheme.onSurfaceVariant;
+
+    // Cartão do catálogo: imagem + nome + preço + meta (papel · stock) e o
+    // stepper à direita. O preço usa o papel monetário de linha
+    // ([AppTypography.amountInRow]) — o mesmo das listas de negócio — e o
+    // cartão com quantidade ganha um contorno azul discreto que o liga ao
+    // carrinho. O esgotado recua para o fundo neutro.
+    final stockLabel = Quantity.format(
+      product.stockQuantity,
+      unitLabel: isWeight ? product.unitLabel : null,
+      language: Formatters.currentLanguage,
+    );
+
     return AppCard(
       borderRadius: AppRadius.lgAll,
+      borderColor: active ? scheme.primary.withValues(alpha: 0.35) : null,
       color: outOfStock
-          ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+          ? scheme.surfaceContainerHighest.withValues(alpha: 0.5)
           : null,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Foto do produto (fallback: ícone) — imagem cadastrada,
           // URL do Supabase Storage ou arquivo local.
-          ProductImage(imagePath: product.imagePath),
+          ProductImage(imagePath: product.imagePath, size: 56, radius: 14),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
@@ -836,42 +861,69 @@ class _CartProductRow extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelLarge.copyWith(
-                    color: outOfStock
-                        ? theme.colorScheme.outline
-                        : theme.colorScheme.onSurface,
+                    color: outOfStock ? scheme.outline : scheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.micro),
+                // Preço em destaque — é o número que o operador lê em voz
+                // alta ao balcão.
                 Text(
-                  outOfStock
-                      ? l10n.commonSoldOut
-                      : '${Formatters.currency(product.salePriceCents)} · '
-                            '${Quantity.format(product.stockQuantity, unitLabel: isWeight ? product.unitLabel : null, language: Formatters.currentLanguage)}'
-                            '${isWeight ? '' : ' ${l10n.commonUnits}'}'
-                            '${lowStock ? ' · ${l10n.dashboardLowStock}' : ''}',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                // Papel do produto no balcão — como TEXTO na linha de
-                // metadados (mesma linguagem da lista de Produtos): o
-                // operador vê o tipo sem abrir o cadastro, e o selo
-                // colorido deixa de disputar atenção com o preço.
-                const SizedBox(height: AppSpacing.micro),
-                Text(
-                  productTypeLabel(context, product.type),
+                  Formatters.currency(product.salePriceCents),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  style: AppTypography.amountInRow(
+                    outOfStock ? scheme.outline : scheme.onSurface,
                   ),
+                ),
+                const SizedBox(height: AppSpacing.micro),
+                // Papel + stock numa única linha de metadados. Wrap: com
+                // escala de texto 2.0 a linha cresce em vez de cortar.
+                Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.micro,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      productTypeLabel(context, product.type),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodySmall.copyWith(color: metaColor),
+                    ),
+                    const _MetaDot(),
+                    if (outOfStock)
+                      Text(
+                        l10n.commonSoldOut,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: metaColor,
+                        ),
+                      )
+                    else ...[
+                      Text(
+                        l10n.salesStockAvailable(
+                          isWeight
+                              ? stockLabel
+                              : '$stockLabel ${l10n.commonUnits}',
+                        ),
+                        style: AppTypography.bodySmall.copyWith(
+                          color: metaColor,
+                        ),
+                      ),
+                      if (lowStock) ...[
+                        const _MetaDot(),
+                        Text(
+                          l10n.dashboardLowStock,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: metaColor,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(width: AppSpacing.xs),
+          const SizedBox(width: AppSpacing.sm),
           if (!outOfStock)
             _Stepper(
               quantity: quantity,
@@ -884,6 +936,26 @@ class _CartProductRow extends StatelessWidget {
               onEdit: onEdit,
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Separador discreto entre metadados ("Revenda · 10 un.").
+///
+/// Excluído da semântica: é pontuação visual, não conteúdo para o leitor
+/// de ecrã (que anuncia cada texto separadamente).
+class _MetaDot extends StatelessWidget {
+  const _MetaDot();
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Text(
+        '·',
+        style: AppTypography.bodySmall.copyWith(
+          color: Theme.of(context).colorScheme.outline,
+        ),
       ),
     );
   }
@@ -923,10 +995,14 @@ class _Stepper extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: active
-            ? scheme.primaryContainer
-            : scheme.surfaceContainerHighest,
+        color: active ? scheme.primaryContainer : scheme.surfaceContainer,
         borderRadius: BorderRadius.circular(AppRadius.full),
+        border: Border.all(
+          color: active
+              ? scheme.primary.withValues(alpha: 0.28)
+              : PremiumDecor.hairline(scheme),
+          width: 0.8,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -994,18 +1070,18 @@ class _CartPill extends StatelessWidget {
     final isWeight = product.vendaPorFracao;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       child: Row(
         children: [
           // Bolha de quantidade: "2×" em unidades; "1,75 kg" por peso —
           // largura mínima fixa para os dois formatos alinharem em coluna.
           Container(
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 32),
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: scheme.primary,
-              borderRadius: BorderRadius.circular(AppRadius.full),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
             child: Text(
               isWeight
@@ -1036,21 +1112,24 @@ class _CartPill extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.micro),
-                Row(
+                Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.micro,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Flexible(
-                      child: Text(
-                        productTypeLabel(context, product.type),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
+                    Text(
+                      productTypeLabel(context, product.type),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.xs),
+                    const _MetaDot(),
                     Text(
                       Formatters.currency(product.salePriceCents),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodySmall.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -1088,15 +1167,15 @@ class _CartPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
-        AppSpacing.xs,
+        AppSpacing.sm,
         AppSpacing.md,
-        AppSpacing.xxs,
+        AppSpacing.sm,
       ),
       decoration: BoxDecoration(
         color: scheme.primaryContainer,
         borderRadius: AppRadius.lgAll,
         border: Border.all(
-          color: scheme.primary.withValues(alpha: 0.22),
+          color: scheme.primary.withValues(alpha: 0.18),
           width: 0.8,
         ),
       ),
@@ -1104,6 +1183,10 @@ class _CartPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _CartSummary(itemCount: entries.length),
+          const SizedBox(height: AppSpacing.xs),
+          // Fio de separação entre o rótulo e as linhas — o painel lê-se
+          // como um recibo, não como uma pilha de widgets.
+          Container(height: 1, color: scheme.primary.withValues(alpha: 0.12)),
           const SizedBox(height: AppSpacing.xxs),
           for (final entry in entries)
             _CartPill(product: entry.product, quantity: entry.quantity),
@@ -1180,7 +1263,7 @@ class _Footer extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         border: Border(
-          top: BorderSide(color: scheme.outlineVariant, width: 0.5),
+          top: BorderSide(color: PremiumDecor.hairline(scheme), width: 0.5),
         ),
       ),
       padding: EdgeInsets.fromLTRB(hPad, AppSpacing.sm, hPad, AppSpacing.md),
@@ -1197,19 +1280,35 @@ class _Footer extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: Text(
-                  l10n.dashboardSaleItems(itemCount),
-                  style: AppTypography.bodySmall.copyWith(
-                    color: scheme.onSurfaceVariant,
+                child: Padding(
+                  // Alinha a contagem com a base do valor, sem competir
+                  // com o número que fecha a venda.
+                  padding: const EdgeInsets.only(bottom: AppSpacing.micro),
+                  child: Text(
+                    l10n.dashboardSaleItems(itemCount),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
               // Total em tinta (AA nos dois temas); o azul fica para a
               // ação de confirmar. É o número que fecha a venda.
-              Text(
-                Formatters.currency(totalCents),
-                style: AppTypography.heroAmount(scheme.onSurface),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.commonTotal,
+                    style: AppTypography.eyebrow(scheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(height: AppSpacing.micro),
+                  Text(
+                    Formatters.currency(totalCents),
+                    style: AppTypography.heroAmount(scheme.onSurface),
+                  ),
+                ],
               ),
             ],
           ),

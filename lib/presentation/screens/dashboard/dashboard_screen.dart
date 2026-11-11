@@ -1064,6 +1064,14 @@ class _ActivityRow extends StatelessWidget {
                   : scheme.primary)
             : item.badgeColor);
 
+    // Pílula sólida (ex.: "Alerta"): o texto acompanha o fundo — branco
+    // suave sobre o azul saturado, tinta apenas sobre preenchimentos
+    // claros (regra do sistema: texto claro em fundo azul).
+    final badgeForeground =
+        (item.badgeBackground?.computeLuminance() ?? 1) > 0.45
+        ? AppColors.brandInk
+        : AppColors.softWhite;
+
     final row = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -1118,7 +1126,7 @@ class _ActivityRow extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: item.badgeBackground != null
                     // Pílula sólida (ex.: "Alerta") — fundo colorido com
-                    // texto escuro, igual ao canvas.
+                    // texto de contraste calculado (claro sobre o azul).
                     ? Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.sm,
@@ -1137,7 +1145,7 @@ class _ActivityRow extends StatelessWidget {
                           child: Text(
                             item.badge!,
                             style: AppTypography.labelSmall.copyWith(
-                              color: AppColors.brandInk,
+                              color: badgeForeground,
                             ),
                           ),
                         ),

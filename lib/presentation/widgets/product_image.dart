@@ -43,22 +43,22 @@ class ProductImage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    // Placeholder padrão: azul saturado da marca com o glifo em branco
+    // suave — a regra do sistema (conteúdo claro sobre azul) também vale
+    // para a imagem padrão do produto, que antes usava o tom pálido com
+    // ícone escuro.
     Widget fallbackOf(double width, double height) => Container(
       width: width,
       height: height,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer,
+        color: theme.colorScheme.primary,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.4),
-          width: 1.2,
-        ),
       ),
       child: Icon(
         Icons.inventory_2_outlined,
         size: iconSize,
-        color: theme.colorScheme.onPrimaryContainer,
+        color: theme.colorScheme.onPrimary,
       ),
     );
 

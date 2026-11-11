@@ -605,6 +605,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count articles',
       one: '1 article',
+      zero: '0 article',
     );
     return '$_temp0';
   }
@@ -1937,6 +1938,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get salesNoSellableSubtitle =>
       'Les matières premières et les emballages ne sont pas vendus au comptoir. Changez le type du produit en revente, fabriqué ou composé pour le vendre.';
+
+  @override
+  String salesStockAvailable(String quantity) {
+    return 'En stock : $quantity';
+  }
 
   @override
   String get salesConfirm => 'Confirmer la vente';
@@ -4271,6 +4277,20 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get productionNoProducibleSubtitle =>
       'Définissez le type d\'un produit sur \"Produit\" ou \"Composé\" pour créer une fiche technique.';
+
+  @override
+  String get productionProductRequired => 'Sélectionnez le produit fini.';
+
+  @override
+  String get productionYieldRequired =>
+      'Indiquez un rendement supérieur à zéro.';
+
+  @override
+  String get productionComponentRequired => 'Ajoutez au moins un composant.';
+
+  @override
+  String get productionComponentQuantityRequired =>
+      'Indiquez une quantité supérieure à zéro.';
 
   @override
   String productionInsufficientProduct(String product) {

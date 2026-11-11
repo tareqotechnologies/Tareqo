@@ -134,6 +134,7 @@ class _ProductPhotoPicker extends StatelessWidget {
                       icon: Icons.photo_camera_outlined,
                       tooltip: l10n.productsPhotoTake,
                       onTap: onTakePhoto,
+                      isPrimary: true,
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     _PhotoActionButton(
@@ -178,6 +179,7 @@ class _PhotoActionButton extends StatelessWidget {
     required this.tooltip,
     required this.onTap,
     this.isDestructive = false,
+    this.isPrimary = false,
   });
 
   final IconData icon;
@@ -185,10 +187,18 @@ class _PhotoActionButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDestructive;
 
+  /// Ação principal (câmera): preenchimento azul saturado com glifo branco
+  /// suave — mesma regra de contraste das demais superfícies cheias da marca.
+  final bool isPrimary;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final color = isDestructive ? scheme.error : scheme.onSurfaceVariant;
+    final color = isPrimary
+        ? scheme.onPrimary
+        : isDestructive
+        ? scheme.error
+        : scheme.onSurfaceVariant;
 
     return Tooltip(
       message: tooltip,
@@ -201,12 +211,16 @@ class _PhotoActionButton extends StatelessWidget {
           height: AppSizes.touchTarget,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: isDestructive
+            color: isPrimary
+                ? scheme.primary
+                : isDestructive
                 ? scheme.error.withValues(alpha: 0.08)
                 : scheme.surface,
             borderRadius: BorderRadius.circular(AppRadius.sm),
             border: Border.all(
-              color: isDestructive
+              color: isPrimary
+                  ? scheme.primary
+                  : isDestructive
                   ? scheme.error.withValues(alpha: 0.2)
                   : scheme.outlineVariant.withValues(alpha: 0.5),
             ),

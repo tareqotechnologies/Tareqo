@@ -276,7 +276,7 @@
     }
   },
   "dashboardAlertBadge": "Alerta",
-  "dashboardSaleItems": "{count, plural, =1{1 item} other{{count} itens}}",
+  "dashboardSaleItems": "{count, plural, =0{0 itens} =1{1 item} other{{count} itens}}",
   "@dashboardSaleItems": {
     "placeholders": {
       "count": {
@@ -939,6 +939,15 @@
   "salesNoProductsSubtitle": "Cadastre produtos para registar vendas.",
   "salesNoSellableTitle": "Nenhum produto vendável",
   "salesNoSellableSubtitle": "Matéria-prima e embalagem não são vendidas no balcão. Mude o tipo do produto para revenda, produzido ou composto para o vender.",
+  "salesStockAvailable": "Em stock: {quantity}",
+  "@salesStockAvailable": {
+    "description": "Stock restante na linha do produto do catálogo do PDV",
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
   "salesConfirm": "Confirmar venda",
   "saleDetailTitle": "Detalhes da venda",
   "saleDetailId": "Venda {id}",
@@ -1869,6 +1878,22 @@
   },
   "productionNoProducibleTitle": "Nenhum produto produzível",
   "productionNoProducibleSubtitle": "Classifique um produto como \"Produzido\" ou \"Composto\" no cadastro para criar uma ficha técnica.",
+  "productionProductRequired": "Selecione o produto acabado.",
+  "@productionProductRequired": {
+    "description": "Validação do formulário de ficha técnica: produto acabado obrigatório"
+  },
+  "productionYieldRequired": "Indique um rendimento maior que zero.",
+  "@productionYieldRequired": {
+    "description": "Validação do formulário de ficha técnica: rendimento inválido"
+  },
+  "productionComponentRequired": "Adicione pelo menos um componente.",
+  "@productionComponentRequired": {
+    "description": "Validação do formulário de ficha técnica: sem componentes"
+  },
+  "productionComponentQuantityRequired": "Indique uma quantidade maior que zero.",
+  "@productionComponentQuantityRequired": {
+    "description": "Validação do formulário de ficha técnica: quantidade de componente inválida"
+  },
   "productionInsufficientProduct": "Estoque insuficiente para {product}",
   "@productionInsufficientProduct": {
     "placeholders": {

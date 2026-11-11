@@ -1099,7 +1099,7 @@ abstract class AppLocalizations {
   /// No description provided for @dashboardSaleItems.
   ///
   /// In pt, this message translates to:
-  /// **'{count, plural, =1{1 item} other{{count} itens}}'**
+  /// **'{count, plural, =0{0 itens} =1{1 item} other{{count} itens}}'**
   String dashboardSaleItems(int count);
 
   /// No description provided for @weekdayMonday.
@@ -3393,6 +3393,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Matéria-prima e embalagem não são vendidas no balcão. Mude o tipo do produto para revenda, produzido ou composto para o vender.'**
   String get salesNoSellableSubtitle;
+
+  /// Stock restante na linha do produto do catálogo do PDV
+  ///
+  /// In pt, this message translates to:
+  /// **'Em stock: {quantity}'**
+  String salesStockAvailable(String quantity);
 
   /// No description provided for @salesConfirm.
   ///
@@ -7213,6 +7219,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Classifique um produto como \"Produzido\" ou \"Composto\" no cadastro para criar uma ficha técnica.'**
   String get productionNoProducibleSubtitle;
+
+  /// Validação do formulário de ficha técnica: produto acabado obrigatório
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione o produto acabado.'**
+  String get productionProductRequired;
+
+  /// Validação do formulário de ficha técnica: rendimento inválido
+  ///
+  /// In pt, this message translates to:
+  /// **'Indique um rendimento maior que zero.'**
+  String get productionYieldRequired;
+
+  /// Validação do formulário de ficha técnica: sem componentes
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicione pelo menos um componente.'**
+  String get productionComponentRequired;
+
+  /// Validação do formulário de ficha técnica: quantidade de componente inválida
+  ///
+  /// In pt, this message translates to:
+  /// **'Indique uma quantidade maior que zero.'**
+  String get productionComponentQuantityRequired;
 
   /// No description provided for @productionInsufficientProduct.
   ///

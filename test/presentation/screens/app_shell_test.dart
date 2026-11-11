@@ -331,6 +331,11 @@ void main() {
     await tester.tap(find.byTooltip('Nova ação'));
     await tester.pumpAndSettle();
 
+    // O cabeçalho do menu pergunta diretamente o que fazer — o antigo
+    // título "Nova ação" não aparece dentro do sheet.
+    expect(find.text('O que deseja fazer?'), findsOneWidget);
+    expect(find.text('Nova ação'), findsNothing);
+
     // A Home do canvas V3 não tem ações rápidas — as 4 acções do menu do
     // FAB são exclusivas dele (findsOneWidget). 'Registar despesa' e
     // 'Cancelar' também são exclusivos do menu.
