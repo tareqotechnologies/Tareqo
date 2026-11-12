@@ -3136,13 +3136,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get quotationTemplatePreviewBadge => 'Preview';
 
   @override
-  String get paletteBlue => 'Azul';
+  String get paletteBlue => 'Grafite';
 
   @override
-  String get paletteBeige => 'Bege';
+  String get paletteBeige => 'Branco neve';
 
   @override
-  String get paletteWarmGray => 'Cinza quente';
+  String get paletteWarmGray => 'Cinza claro';
 
   @override
   String get paletteSoftBlack => 'Preto suave';

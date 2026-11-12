@@ -155,7 +155,7 @@ Widget _buildApp({
     ],
     child: testApp(
       home: AdminDashboardScreen(onNavigateToTab: onNavigateToTab),
-      // Fonte de teste (Ahem) mais larga que a Outfit — clamp sem afetar
+      // Fonte de teste (Ahem) mais larga que a Inter — clamp sem afetar
       // as asserções de texto.
       builder: (context, child) =>
           MediaQuery.withClampedTextScaling(maxScaleFactor: 0.8, child: child!),

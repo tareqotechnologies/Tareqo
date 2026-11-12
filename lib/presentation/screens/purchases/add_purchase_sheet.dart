@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/ui/haptics.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
@@ -635,8 +636,10 @@ class _CartProductRow extends StatelessWidget {
                           // Alvo de toque ≥ 48dp (a11y — guideline).
                           icon: const Icon(Icons.remove, size: 18),
                           tooltip: l10n.a11yDecreaseQuantity,
+                          // Glifo em tinta nos dois estados: a tinta
+                          // sobre o véu claro não atinge 3:1.
                           color: inCart
-                              ? scheme.primary
+                              ? scheme.onSurface
                               : scheme.onSurfaceVariant,
                           onPressed: quantity == 0 ? null : onRemove,
                         ),
@@ -667,7 +670,7 @@ class _CartProductRow extends StatelessWidget {
                           tooltip: isWeight
                               ? l10n.a11yAddFraction
                               : l10n.a11yIncreaseQuantity,
-                          color: scheme.primary,
+                          color: AppColors.accentOn(theme.brightness),
                           onPressed: isWeight ? onAddFraction : onAdd,
                         ),
                       ],

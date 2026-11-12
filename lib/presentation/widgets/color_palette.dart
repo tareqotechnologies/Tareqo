@@ -3,21 +3,23 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/generated/app_localizations.dart';
 
-/// Paleta de cores OFICIAL do sistema (identidade Outfit):
-/// Azul #0067FF, Cinza de superfície #E7E5E5, Branco suave #F9F9F9,
-/// Tinta escura #232323.
+/// Paleta de cores OFICIAL do sistema (identidade 2026 — "Shades of gray"):
+/// Preto 100 #0A0E15, Preto 60 #667085, Branco 90 #F0F1F5, Branco 100
+/// #FFFFFF. Sem laranja.
 ///
 /// Usada pelos modelos de factura personalizada e cotação. As chaves são
 /// estáveis (pt) — o nome exibido ao usuário vem de [paletteColorName].
 ///
 /// Nota: as cores de template são escolha DO UTILIZADOR para o documento
 /// impresso (identidade própria da empresa dele) — todas derivam da
-/// paleta oficial (`AppColors.brandBlue/surfaceGray/softWhite/brandInk`).
+/// escala neutra (`AppColors`).
 const kColorPalettes = <String, Color>{
-  'Preto': AppColors.brandInk,
-  'Cinza': AppColors.surfaceGray,
-  'Azul': AppColors.brandBlue,
-  'Branco gelo': AppColors.softWhite,
+  'Preto': AppColors.black100,
+  'Cinza': AppColors.lightSurfaceSecondary,
+  // Chave legada ('Azul'/'Laranja' em versões anteriores): mantida para
+  // não invalidar templates guardados; o valor é o cinza Preto 60.
+  'Azul': AppColors.black60,
+  'Branco gelo': AppColors.white100,
 };
 
 /// Nome localizado da cor da paleta (chave interna → texto visível).

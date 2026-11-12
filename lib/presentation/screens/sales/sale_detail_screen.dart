@@ -69,7 +69,7 @@ class _SaleDetailSheet extends StatelessWidget {
                   vertical: AppSpacing.xxs,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.accentBlue,
+                  color: AppColors.darkVoid,
                   borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
                 child: FittedBox(
@@ -84,7 +84,7 @@ class _SaleDetailSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            // Itens expandidos — mesmo padrão do feed: ícone circular azul,
+            // Itens expandidos — mesmo padrão do feed: ícone circular tinta,
             // título + quantidade × preço à esquerda, subtotal à direita.
             for (var i = 0; i < sale.items.length; i++) ...[
               if (i > 0)
@@ -99,7 +99,7 @@ class _SaleDetailSheet extends StatelessWidget {
   }
 }
 
-/// Linha de sale no feed — ícone circular azul à esquerda, título, data e
+/// Linha de sale no feed — ícone circular tinta à esquerda, título, data e
 /// quantidade de itens ao centro, valor total à direita, seguindo o mesmo
 /// padrão do _ActivityRow do dashboard.
 class _SaleFeedRow extends StatelessWidget {
@@ -125,12 +125,13 @@ class _SaleFeedRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Container circular do ícone (40px) — padrão do feed, cor azul.
+          // Container circular do ícone (40px) — padrão do feed: tinta
+          // (Preto 100) com glifo Branco 100.
           Container(
             width: 40,
             height: 40,
             decoration: const BoxDecoration(
-              color: AppColors.accentBlue,
+              color: AppColors.darkVoid,
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -175,7 +176,7 @@ class _SaleFeedRow extends StatelessWidget {
                     Formatters.signedAmount(subtotal),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.amountInRow(AppColors.accentBlue),
+                    style: AppTypography.amountInRow(theme.colorScheme.onSurface),
                   ),
             ),
           ),
@@ -186,7 +187,7 @@ class _SaleFeedRow extends StatelessWidget {
 }
 
 /// Linha de item de venda no padrão do feed de atividade — ícone circular
-/// azul à esquerda, título e quantidade × preço ao centro, valor à direita.
+/// tinta à esquerda, título e quantidade × preço ao centro, valor à direita.
 
 /// Tela de detalhes de uma venda — layout clean Google-style.
 /// Quando a venda está ativa e o usuário tem acesso gerencial,
@@ -359,7 +360,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   )
                 : StatusChip(
                     label: sale.paymentMethod.labelFor(context.l10n),
-                    color: AppColors.accentBlue,
+                    color: theme.colorScheme.onSurfaceVariant,
                     icon: sale.paymentMethod.icon,
                   ),
           ),
@@ -376,7 +377,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
 
           // ── Items ──
           // Usa o mesmo padrão de linhas do feed de atividade da Home,
-          // com recuo alinhado ao avatar e ícone circular em azul.
+          // com recuo alinhado ao avatar e ícone circular em tinta.
           for (var i = 0; i < sale.items.length; i++) ...[
             if (i > 0)
               Divider(
@@ -390,7 +391,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           const SizedBox(height: AppSpacing.md),
 
           // ── Total ──
-          // Feed row de total: ícone circular azul + label + valor em
+          // Feed row de total: ícone circular tinta + label + valor em
           // destaque à direita — mesmo chrome do "Atividade de hoje".
           _SaleFeedRow(sale: sale),
           const SizedBox(height: AppSpacing.md),
@@ -428,7 +429,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
 }
 
 /// Linha de item de venda no padrão do feed de atividade — ícone circular
-/// azul à esquerda, título e quantidade × preço ao centro, valor à direita.
+/// tinta à esquerda, título e quantidade × preço ao centro, valor à direita.
 class _SaleItemRow extends ConsumerWidget {
   const _SaleItemRow({required this.item});
 
@@ -445,12 +446,12 @@ class _SaleItemRow extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          // Ícone circular azul — padrão do feed.
+          // Ícone circular neutro — padrão do feed.
           Container(
             width: 40,
             height: 40,
             decoration: const BoxDecoration(
-              color: AppColors.accentBlue,
+              color: AppColors.darkVoid,
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -491,7 +492,7 @@ class _SaleItemRow extends ConsumerWidget {
                 Formatters.currency(subtotal),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTypography.amountInRow(AppColors.accentBlue),
+                style: AppTypography.amountInRow(theme.colorScheme.onSurface),
               ),
             ),
           ),

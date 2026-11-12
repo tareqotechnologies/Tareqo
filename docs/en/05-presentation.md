@@ -84,13 +84,13 @@ Canvas V3 "day view" — the Home tab has no avatar (sign out lives in the **Men
 - **3 compact metric cards** (no icons, reference layout):
  - **Vendas** — sales of the period selected in the pill with the **delta vs the previous period** as colored subtext (green `+N%` / red `-N%`);
  - **Caixa** — period-scoped cash balance (`dashboardCashFlowProvider`); negative balance renders the value in red; subtext = currency code (`MZN`);
- - **A receber** — pending credit total with the **fiado count** subtext in orange (e.g. `4 fiados`);
+ - **A receber** — pending credit total with the **fiado count** subtext in Black 70 (e.g. `4 fiados`);
 - **Activity feed** ("Atividade de hoje" + event count on the right) in a single card with tinted circular icons and an anchor value/badge on the right:
  - **Sales** (green `north_east` icon, `+value` in green) — tap opens `SaleDetailScreen`;
  - **Stock entries** (grey box icon, `+qty` in white) — purchases of today, one row per item;
- - **Fiado payments** (amber `payments` icon inside a **dashed circle**, `+value` in green) — settled debts paid today;
+ - **Fiado payments** (neutral `payments` icon inside a **dashed circle**, `+value` in green) — settled debts paid today;
  - **Expenses** (red `south_west` icon, `-value` in red) — paid expenses of today;
- - **Low-stock** (orange warning icon + solid orange **"Alerta"** pill) — active products with `stockQuantity < 5` units (`Quantity.lowStockThresholdUnits`);
+ - **Low-stock** (ink warning icon + solid neutral **"Alerta"** pill) — active products with `stockQuantity < 5` units (`Quantity.lowStockThresholdUnits`);
  - **Expiry (W11)** via `expiryAlertsProvider`: **red** for **expired** lots with stock, **yellow** for lots expiring in **< 30 days** (`expiryWarningDays`), sorted by urgency (expired first);
 - **Pending sync banner** (SaaS outbox) when the offline queue is non-empty, with a "Sync" action;
 - KPI load error shows a compact inline warning with retry (`InlineErrorCard`) instead of fake zeros.
@@ -148,7 +148,7 @@ Canvas V3 "day view" — the Home tab has no avatar (sign out lives in the **Men
 ### 5. `DebtsScreen` + `AddDebtSheet` (Credit)
 
 - **Tabs:** "Pendentes" (Pending) and "Quitadas" (Settled) (local `_DebtView` SegmentedButton);
-- **Pending:** "Total a receber" (Total receivable) summary card (orange) + debt list with initial avatar, due-date chip (`Atrasada` red / `Vence hoje` yellow / `Em N dias` green) and **"Quitar dívida" (Settle debt)** button (confirmation dialog → `SettleDebtUseCase` → invalidates credit, history, cash and balance);
+- **Pending:** "Total a receber" (Total receivable) summary card (neutral) + debt list with initial avatar, due-date chip (`Atrasada` red / `Vence hoje` yellow / `Em N dias` green) and **"Quitar dívida" (Settle debt)** button (confirmation dialog → `SettleDebtUseCase` → invalidates credit, history, cash and balance);
 - **Settled:** "Total quitado" (Total settled) summary card (green) + history with `paidAt` ("Quitada em 25/07/2026");
 - **`AddDebtSheet`:** customer name, amount, due date (DatePicker) → `AddDebtUseCase` (records the debt + linked financial pending entry); catches `InvalidDebtAmountException` and handles `PendingEntryRegistrationException` specially (informs that the credit was recorded and asks to check Finance — without suggesting a retry).
 
@@ -174,7 +174,7 @@ Canvas V3 "day view" — the Home tab has no avatar (sign out lives in the **Men
 `lib/core/theme/app_theme.dart`:
 
 - **Seed:** deep emerald green `#0E6B5A`; `ColorScheme.fromSeed` for light/dark;
-- **Semantic colors (`AppColors`):** `income` green `#189A5E`, `expense` red `#D64550`, `warning` orange `#E08F2B`;
+- **Semantic colors (`AppColors`):** `income` green `#2E7D32`, `expense` red `#C62828`, `warning` neutral (Black 70 `#4E576A` light / White 60 `#BFC5D4` dark) — no orange;
 - **Visual guidelines:** neutral surfaces, cards with subtle border without heavy shadow (`elevation: 0`), rounded corners (14–20px), **filled fields without outline**, `FilledButton`s 52px tall;
 - **Navigation:** `NavigationBar` (68px height, `primaryContainer` indicator) and `NavigationRail` (`groupAlignment: -0.9`);
 - **Typography:** modular scale (Apple HIG/SF Pro): **34** (Large Title — login/welcome) → **28** (page titles) → **24** (KPIs/totals) → **22** (cards/modals/AppBar) → **20** (subtitles/sections) → **17/15/14/13/12/11** (body large/body/line highlights/note/labels/caption); hierarchy by size + weight (w300 display, w400 body, w600+ values), **`tabularFigures`** on the numeric styles (MZN prices and kg/un quantities align digit by digit), and **three precision axes** like SF Pro: (1) **optical axis `opsz`** — Inter is variable (14–32) and titles ≥20px use the *Display* cut (opsz 24–32) while body stays on the *Text* cut; (2) **negative tracking** on titles (−0.15 to −0.6), neutral on body, slight positive on captions; (3) **line height** at the SF Pro ratio (~1.2 titles, ~1.4 body); the full decision (scale table, roles and golden rules) is in [chapter 12 — Architecture Decisions](12-architecture-decisions.md);

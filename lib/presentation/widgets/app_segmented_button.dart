@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_tokens.dart';
 
 /// SegmentedButton no padrão do anexo: pílula em repouso com contorno
-/// azul `#0067FF`, segmento ativo preenchido (preto no claro, suave
-/// no escuro) e alvo de toque ≥ 48dp. As cores vêm do
-/// [SegmentedButtonTheme] — este widget só garante o formato e o alvo.
+/// Dusty, segmento ativo preenchido em tinta com rótulo Void e alvo de
+/// toque ≥ 48dp. As cores vêm do [SegmentedButtonTheme] — este widget só
+/// garante o formato e o alvo.
 ///
 /// Unifica o estilo que estava copiado em 4 telas (financeiro, relatórios,
 /// fiado e sheet de transação). O [FittedBox] fica no call site: nos

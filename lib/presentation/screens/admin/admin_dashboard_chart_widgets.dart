@@ -171,10 +171,12 @@ class _PendingBanner extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
+    // Banner de atenção: superfície neutra + hairline; o alerta vive no
+    // ícone (semântico, >=3:1) e no texto em tinta (AA de texto).
     return AppCard(
       borderRadius: AppRadius.mdAll,
-      color: scheme.tertiaryContainer,
-      borderColor: AppColors.statusWarning.withValues(alpha: 0.3),
+      color: scheme.surfaceContainerHighest,
+      borderColor: scheme.outlineVariant,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
@@ -185,18 +187,22 @@ class _PendingBanner extends StatelessWidget {
           Icon(
             Icons.notifications_active_outlined,
             size: AppSizes.iconMd,
-            color: scheme.tertiary,
+            color: theme.warning,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               l10n.adminPendingActionRequired(totalPending),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.tertiary,
+                color: scheme.onSurface,
               ),
             ),
           ),
-          Icon(Icons.chevron_right, size: AppSizes.iconMd, color: scheme.tertiary),
+          Icon(
+            Icons.chevron_right,
+            size: AppSizes.iconMd,
+            color: scheme.onSurfaceVariant,
+          ),
         ],
       ),
     );
@@ -683,11 +689,13 @@ class _DistributionCard extends StatelessWidget {
     final sorted = planCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     final maxPlanCount = sorted.isNotEmpty ? sorted.first.value : 1;
+    // Rampa neutra (10 passos da escala) — barras legíveis nos dois temas
+    // sem introduzir cores fora da paleta.
     final planColors = [
-      scheme.primary,
-      AppColors.accentBlue,
-      AppColors.statusWarning,
-      AppColors.accentBlue,
+      scheme.onSurface,
+      AppColors.black70,
+      AppColors.black60,
+      AppColors.white60,
       scheme.secondary,
     ];
 

@@ -165,9 +165,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                       _StatItem(
                         value: '$activeTenants',
                         label: l10n.adminDashboardActiveTenants,
-                        // Acento verde do tema (AA sobre superfícies claras) —
-                        // Colors.green dava ~2.5:1 no modo claro.
-                        color: Theme.of(context).accent,
+                        // Estatística em tinta (o acento não colore dados).
+                        color: scheme.onSurface,
                       ),
                       _StatItem(
                         value: '$pendingTenants',
@@ -286,7 +285,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                           icon: Icons.upgrade_outlined,
                           label: l10n.adminPlanUpgrades,
                           badge: pendingUpgrades.length,
-                          color: AppColors.accentBlue,
+                          color: scheme.onSurface,
                           onTap: () => onNavigateToTab?.call(3),
                         ),
                         _QuickAction(

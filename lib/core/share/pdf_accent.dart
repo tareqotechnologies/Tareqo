@@ -1,30 +1,31 @@
 import 'package:pdf/pdf.dart';
 
-/// Acentos de PDF alinhados à paleta OFICIAL (identidade 2026-11-09):
-/// Azul #0067FF, Cinza de superfície #E7E5E5, Branco suave #F9F9F9,
-/// Preto #232323 — estados semânticos mapeados aos tons oficiais.
+/// Acentos de PDF alinhados à paleta OFICIAL (identidade Tareqo 2026 —
+/// "Shades of gray"): Preto 100 #0A0E15, Preto 60 #667085,
+/// Branco 100 #FFFFFF e Branco 90 #F0F1F5 — estados semânticos com
+/// verde/vermelho AA. Sem laranja.
 ///
 /// O pacote `pdf` não depende de Flutter, então `AppColors` não pode ser
 /// importada — estes tokens são os MESMOS valores, expressos em `PdfColor`.
 ///
-/// Contraste medido (WCAG, papel branco suave):
-/// * `black` como texto: 17.6:1 — valores de KPI/total.
-/// * `black` como fundo com texto suave: 17.6:1 — cabeçalhos de tabela.
+/// Contraste medido (WCAG, papel branco):
+/// * `black` como texto: 19:1 — valores de KPI/total.
+/// * `black` como fundo com texto `ice`: 19:1 — cabeçalhos de tabela.
 /// * `gray` como texto secundário: 1.2:1 — evitar em texto; usar `black`.
-/// * `brandBlue` como fundo com texto preto: 6.1:1 (AA texto).
+/// * `brandBlue` como fundo com texto `ice`: 19:1 (AA/AAA texto).
 abstract final class PdfAccents {
   /// Paleta oficial expressa em PdfColor (sem `AppColors` — `pdf` não
   /// depende de Flutter).
-  static const black = PdfColor.fromInt(0xFF232323);
-  static const gray = PdfColor.fromInt(0xFFE7E5E5);
-  static const brandBlue = PdfColor.fromInt(0xFF0067FF);
-  static const ice = PdfColor.fromInt(0xFFF9F9F9);
-  static const alertSuccess = brandBlue;
-  static const alertError = black;
-  static const alertWarning = PdfColor.fromInt(0xFF6E7174);
+  static const black = PdfColor.fromInt(0xFF0A0E15);
+  static const gray = PdfColor.fromInt(0xFFE0E4EB);
+  static const brandBlue = PdfColor.fromInt(0xFF0A0E15);
+  static const ice = PdfColor.fromInt(0xFFFFFFFF);
+  static const alertSuccess = PdfColor.fromInt(0xFF2E7D32);
+  static const alertError = PdfColor.fromInt(0xFFC62828);
+  static const alertWarning = PdfColor.fromInt(0xFF667085);
 
   /// Estrutura primária — cabeçalhos de tabela, selos, faixas. É o mesmo
-  /// papel do `ColorScheme.primary` do modo claro do app (azul).
+  /// papel do `ColorScheme.primary` do modo claro do app (tinta).
   static const slate = brandBlue;
 
   /// Texto de VALOR (KPI, total) sobre fundo claro — preto oficial.
@@ -37,7 +38,7 @@ abstract final class PdfAccents {
   /// Fundo de cartão KPI — branco suave oficial.
   static const warmBeige = ice;
 
-  /// Acento da cotação — azul oficial (destaque RESERVADO).
+  /// Acento da cotação — tinta oficial (destaque RESERVADO).
   /// Alias de `brandBlue` por compatibilidade de API.
   static const brandBlueAccent = brandBlue;
   // Nota: cotação usa diretamente `brandBlue` (ver quotation_pdf_exporter).
@@ -51,6 +52,6 @@ abstract final class PdfAccents {
   static const paymentText = black;
 
   /// Texto secundário da caixa de pagamento — preto oficial
-  /// (cinza #E7E5E5 sobre suave é 1.2:1 — ilegível).
+  /// (o cinza de superfície claríssimo sobre papel seria ilegível).
   static const paymentTextMuted = black;
 }

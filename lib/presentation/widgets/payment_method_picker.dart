@@ -145,7 +145,9 @@ class _CollapsedSummary extends StatelessWidget {
               Icon(
                 icon,
                 size: AppSizes.iconMd,
-                color: theme.colorScheme.primary,
+                // Glifo em tinta: a tinta sobre Branco 90 não atinge 3:1.
+                // O estado de seleção fica no contorno e no radio.
+                color: theme.colorScheme.onSurface,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -217,7 +219,7 @@ class _PrimaryTab extends StatelessWidget {
                 icon,
                 size: AppSizes.iconSm,
                 color: selected
-                    ? theme.colorScheme.primary
+                    ? theme.colorScheme.onSurface
                     : theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: AppSpacing.xxs),
@@ -290,7 +292,9 @@ class _SecondaryTile extends StatelessWidget {
               Icon(
                 icon,
                 size: AppSizes.iconMd,
-                color: selected ? primary : theme.colorScheme.onSurfaceVariant,
+                color: selected
+                    ? theme.colorScheme.onSurface
+                    : theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -304,13 +308,16 @@ class _SecondaryTile extends StatelessWidget {
                   ),
                 ),
               ),
-              // Radio de seleção: círculo cheio verde quando ativo.
+              // Radio de seleção: círculo cheio em tinta quando ativo (o
+              // contorno tinta da cápsula já sinaliza a seleção, com AA).
               Icon(
                 selected
                     ? Icons.radio_button_checked
                     : Icons.radio_button_unchecked,
                 size: AppSizes.navIcon,
-                color: selected ? primary : theme.colorScheme.outline,
+                color: selected
+                    ? theme.colorScheme.onSurface
+                    : theme.colorScheme.outline,
               ),
             ],
           ),

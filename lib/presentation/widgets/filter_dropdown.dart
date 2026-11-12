@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 
@@ -64,7 +65,7 @@ class FilterDropdown<T> extends StatelessWidget {
                       : Icons.circle_outlined,
                   size: 16,
                   color: option == selected
-                      ? theme.accent
+                      ? AppColors.accentOn(theme.brightness)
                       : scheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 12),

@@ -3,7 +3,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/support_config.dart';
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../navigation/app_routes.dart';
@@ -99,8 +98,8 @@ class _SupportScreenState extends State<SupportScreen> {
   // ── Tiles ────────────────────────────────────────────────────────────────
 
   /// Tile premium da referência: card elevado (cantos 16), ícone em círculo
-  /// pleno VERDE escuro com glifo claro, título w600 e hint discreto,
-  /// chevron à direita.
+  /// de tinta com glifo claro, título w600 e hint discreto, chevron à
+  /// direita.
   Widget _tile(
     BuildContext context, {
     required IconData icon,
@@ -109,8 +108,8 @@ class _SupportScreenState extends State<SupportScreen> {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    final accent = theme.accent;
     final scheme = theme.colorScheme;
+    final accent = scheme.onSurface;
     return AppCard(
       elevated: true,
       padding: const EdgeInsets.all(AppSpacing.md),

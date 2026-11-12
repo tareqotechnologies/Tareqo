@@ -116,9 +116,11 @@ class _EmptyHalo extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
+                // Halo neutro: a tinta fica nos CTAs. O estado vazio é
+                // conteúdo, não acento — tinta esbatida em vez de marca.
                 colors: [
-                  scheme.primary.withValues(alpha: dark ? 0.16 : 0.10),
-                  scheme.primary.withValues(alpha: 0),
+                  scheme.onSurface.withValues(alpha: dark ? 0.08 : 0.05),
+                  scheme.onSurface.withValues(alpha: 0),
                 ],
               ),
             ),
@@ -130,7 +132,7 @@ class _EmptyHalo extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: scheme.surface,
-              gradient: PremiumDecor.iconTint(scheme.primary, dark: dark),
+              gradient: PremiumDecor.iconTint(scheme.onSurface, dark: dark),
               border: Border.all(color: PremiumDecor.hairline(scheme)),
               boxShadow: PremiumDecor.softShadow(scheme),
             ),

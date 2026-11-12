@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/app_typography.dart';
 import 'app_card.dart';
@@ -43,7 +42,9 @@ class KpiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dark = theme.brightness == Brightness.dark;
-    final foreground = iconColor ?? theme.accent;
+    // Ícone do indicador em tinta (neutro): o acento fica reservado a
+    // CTA, foco e selecção — KPIs são informação, não acção.
+    final foreground = iconColor ?? theme.colorScheme.onSurface;
 
     return AppCard(
       borderRadius:

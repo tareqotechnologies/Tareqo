@@ -294,20 +294,22 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 // HELPERS — Cores do tipo no tile e na sheet
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/// Texto do selo sobre o tint do tipo: azul → tinta; alertas → as
-/// variantes AA de sucesso/erro do tema.
+/// Texto do selo sobre o tint do tipo: neutro (informação) → tinta;
+/// alertas → as variantes AA de sucesso/erro do tema.
 Color _typeTextColor(Color base, ThemeData theme) {
-  if (base == AppColors.accentBlue) return theme.colorScheme.onSurface;
+  if (base == AppColors.neutralInfo || base == AppColors.accentBlue) {
+    return theme.colorScheme.onSurface;
+  }
   if (base == AppColors.successNeutral) return theme.income;
   return theme.expense;
 }
 
 /// Glifo sobre o fundo do ícone, só com as cores do anexo.
-/// Azul: preto no claro (tint pálido) e suave no escuro (tint escuro).
-/// Alertas: o próprio tom no claro e o tint AA no escuro.
+/// Neutro: tinta no claro e branco no escuro. Alertas: o próprio tom no
+/// claro e o tint AA no escuro.
 Color _deriveFg(Color base, Brightness brightness) {
   final light = brightness == Brightness.light;
-  if (base == AppColors.accentBlue) {
+  if (base == AppColors.neutralInfo || base == AppColors.accentBlue) {
     return light ? AppColors.brandInk : AppColors.softWhite;
   }
   if (base == AppColors.alertError) {
@@ -862,10 +864,10 @@ abstract final class _AdminMessageTypeLabel {
   };
 
   static Color color(AdminMessageType type) => switch (type) {
-    AdminMessageType.billingQuote => AppColors.accentBlue,
-    AdminMessageType.planExpiryChange => AppColors.accentBlue,
-    AdminMessageType.planExpiringSoon => AppColors.accentBlue,
-    AdminMessageType.general => AppColors.accentBlue,
+    AdminMessageType.billingQuote => AppColors.neutralInfo,
+    AdminMessageType.planExpiryChange => AppColors.neutralInfo,
+    AdminMessageType.planExpiringSoon => AppColors.neutralInfo,
+    AdminMessageType.general => AppColors.neutralInfo,
   };
 
   static String label(
@@ -890,11 +892,11 @@ abstract final class _InvoiceTypeLabel {
   };
 
   static Color color(InvoiceNotificationType type) => switch (type) {
-    InvoiceNotificationType.invoiceGenerated => AppColors.accentBlue,
-    InvoiceNotificationType.invoiceDueSoon => AppColors.accentBlue,
+    InvoiceNotificationType.invoiceGenerated => AppColors.neutralInfo,
+    InvoiceNotificationType.invoiceDueSoon => AppColors.neutralInfo,
     InvoiceNotificationType.invoiceExpired => AppColors.errorNeutral,
     InvoiceNotificationType.invoicePaid => AppColors.successNeutral,
-    InvoiceNotificationType.addOnExpiringSoon => AppColors.accentBlue,
+    InvoiceNotificationType.addOnExpiringSoon => AppColors.neutralInfo,
     InvoiceNotificationType.addOnExpired => AppColors.errorNeutral,
   };
 

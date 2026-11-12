@@ -119,7 +119,7 @@ class MenuScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               // Grelha responsiva — 2 colunas no telemóvel, 3 no tablet e
-              // 4 no desktop; tiles com ícone azul padronizado.
+              // 4 no desktop; tiles com ícone tinta padronizado.
               Wrap(
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
@@ -217,7 +217,7 @@ class MenuScreen extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-              // Terminar sessão — botão Apple style: ícone azul, texto elegante.
+              // Terminar sessão — botão Apple style: ícone tinta, texto elegante.
               _SignOutButton(onTap: confirmSignOut, label: l10n.commonSignOut),
             ],
           );
@@ -235,7 +235,7 @@ int _menuColumns(double contentWidth) {
   return 2;
 }
 
-/// Tile de módulo — ícone circular azul oficial, texto pequeno.
+/// Tile de módulo — ícone circular tinta oficial, texto pequeno.
 class _MenuTile extends StatelessWidget {
   const _MenuTile({
     required this.icon,
@@ -262,18 +262,16 @@ class _MenuTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Ícone circular oficial (U-24): fundo azul #0067FF padrão
-          // de ícones em toda a app (nunca HSL derivado, nunca cor fora
-          // da paleta). O tile inteiro é o alvo (≥48).
+          // Ícone circular da escala neutra: tinta #0A0E15 com glifo
+          // Branco 100 (19:1). O acento não decora o menu — fica para
+          // CTA, foco e selecção. O tile inteiro é o alvo (≥48).
           Container(
             width: AppSizes.avatarSm,
             height: AppSizes.avatarSm,
             decoration: const BoxDecoration(
-              color: AppColors.brandBlue,
+              color: AppColors.darkVoid,
               shape: BoxShape.circle,
             ),
-            // Glifo em branco suave sobre o azul saturado — a regra do
-            // sistema é texto/ícone claro em fundo azul, nunca tinta.
             child: Icon(
               icon,
               size: AppSizes.iconMd,
@@ -298,7 +296,7 @@ class _MenuTile extends StatelessWidget {
   }
 }
 
-/// Botão "Sair" no estilo Apple — minimalista, ícone azul, texto discreto.
+/// Botão "Sair" no estilo Apple — minimalista, ícone tinta, texto discreto.
 class _SignOutButton extends StatelessWidget {
   const _SignOutButton({required this.onTap, required this.label});
 
@@ -330,13 +328,13 @@ class _SignOutButton extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Ícone circular oficial (U-24): fundo azul #0067FF —
-            // padrão de ícones em toda a app.
+            // Ícone circular neutro (tinta + glifo Branco 100) — mesma
+            // linguagem dos tiles da lista.
             Container(
               width: AppSizes.avatarSm,
               height: AppSizes.avatarSm,
               decoration: const BoxDecoration(
-                color: AppColors.brandBlue,
+                color: AppColors.darkVoid,
                 shape: BoxShape.circle,
               ),
               child: const Icon(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 
@@ -95,7 +96,7 @@ class AppMenuOption<T> extends StatelessWidget {
                         : Icons.circle_outlined,
                     size: 16,
                     color: option.checked
-                        ? theme.accent
+                        ? AppColors.accentOn(theme.brightness)
                         : theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 12),

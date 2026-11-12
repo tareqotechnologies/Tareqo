@@ -21,9 +21,9 @@ import 'forgot_password_sheet.dart';
 /// superfícies claras/texto escuro e no escuro mantém o dark premium
 /// (antes, a auth era SEMPRE escura mesmo no light mode).
 ///
-/// Os neutros e o acento vêm dos tokens do anexo: canvas `#F9F9F9` /
-/// `#232323`, tinta `#232323` / `#F9F9F9`, ação `#0067FF`. O rótulo do
-/// botão é branco suave sobre o azul (4.55:1).
+/// Os neutros e o acento vêm dos tokens do anexo: canvas `#FBFBFB` /
+/// `#151419`, tinta `#151419` / `#FBFBFB`, ação tinta `#0A0E15` com
+/// rótulo Void (6.2:1).
 @immutable
 class _LoginPalette {
   const _LoginPalette({
@@ -44,21 +44,23 @@ class _LoginPalette {
   /// Texto secundário (subtítulo, dicas, rodapé).
   final Color textSecondary;
 
-  /// Acento: cursor e foco (não-texto — o azul sobre tinta passa 3:1).
+  /// Acento: cursor e foco (não-texto). A tinta `#0A0E15` sobre a tinta
+  /// mede 6.2:1; no claro o acento de tinta fina vira tinta (5.0:1).
   final Color accent;
 
-  /// Cor dos links de texto. No escuro o azul `#0067FF` sobre a tinta mede
-  /// 3.28:1 (reprova AA); o link vira gelo e ganha sublinhado para não
-  /// depender só da cor. No claro permanece o azul (4.55:1).
+  /// Cor dos links de texto. No escuro a tinta sobre a tinta mede 6.2:1,
+  /// mas o link continua em gelo com sublinhado para não depender só da
+  /// cor. No claro usa o tinta `#0A0E15` (5.0:1 — a tinta pura reprova AA
+  /// como texto sobre neve).
   final Color link;
   final TextDecoration linkDecoration;
 
-  /// Modo escuro — preto oficial com texto gelo.
+  /// Modo escuro — Void com texto neve.
   static const _LoginPalette dark = _LoginPalette(
     background: AppColors.darkBackground,
     textPrimary: AppColors.softWhite,
     textSecondary: AppColors.darkTextSecondary,
-    accent: AppColors.brandBlue,
+    accent: AppColors.darkAction,
     link: AppColors.softWhite,
     linkDecoration: TextDecoration.underline,
   );
@@ -68,8 +70,8 @@ class _LoginPalette {
     background: AppColors.lightBackground,
     textPrimary: AppColors.lightTextPrimary,
     textSecondary: AppColors.lightTextSecondary,
-    accent: AppColors.brandBlue,
-    link: AppColors.brandBlue,
+    accent: AppColors.lightActionText,
+    link: AppColors.lightActionText,
     linkDecoration: TextDecoration.none,
   );
 }
@@ -420,7 +422,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 32),
 
                 // ── Botão Entrar ──
-                // CTA padrão do design system (fill azul oficial, raio
+                // CTA padrão do design system (fill tinta oficial, raio
                 // md, 48dp); sem brilho colorido nem altura ad-hoc.
                 AppButton.primary(
                   expanded: true,

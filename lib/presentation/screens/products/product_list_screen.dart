@@ -215,7 +215,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       useSafeArea: false,
       // CTA único: sem produtos, o FAB some — o estado vazio traz o botão
       // de cadastro centralizado (mantendo a regra canManageProducts).
-      // FAB sólido oficial: azul #0067FF com ícone preto.
+      // FAB sólido oficial: tinta #0A0E15 com ícone Void.
       floatingActionButton: canManageProducts
           ? FloatingActionButton(
               heroTag: 'fab-products',
@@ -536,7 +536,9 @@ class _CompactFilterChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 13,
-                color: isSelected ? color : scheme.onSurfaceVariant,
+                // Ícone em tinta no ativo: a seleção já vem do tint e do
+                // aro tinta; o glifo pequeno precisa de AA.
+                color: isSelected ? scheme.onSurface : scheme.onSurfaceVariant,
               ),
               const SizedBox(width: AppSpacing.xxs),
             ],

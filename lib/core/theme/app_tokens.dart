@@ -186,12 +186,11 @@ abstract final class AppCurves {
   static const Curve emphasized = Curves.easeInOutCubic;
 }
 
-/// Elevação — sombras discretas baseadas em #232323 (preto do anexo),
-/// nunca coloridas.
-///
-/// No escuro a elevação é sobretudo contorno; as sombras são mais fortes
-/// para separar superfícies pretas. Os valores centrais ficam aqui para
-/// que cartões, sheets, diálogos e menus partilhem a mesma física.
+/// Elevação — sombras discretas baseadas em Preto 100 (#0A0E15), nunca
+/// coloridas. No escuro a elevação é sobretudo contorno; as sombras são
+/// mais fortes para separar superfícies Preto 90/80. Os valores centrais
+/// ficam aqui para que cartões, sheets, diálogos e menus partilhem a mesma
+/// física.
 abstract final class AppElevation {
   static const double e0 = 0;
   static const double e1 = 1;
@@ -200,29 +199,29 @@ abstract final class AppElevation {
   static const double e4 = 24;
 
   static const List<BoxShadow> light1 = [
-    BoxShadow(color: Color(0x0F232323), blurRadius: 2, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x0F0A0E15), blurRadius: 2, offset: Offset(0, 1)),
   ];
   static const List<BoxShadow> light2 = [
-    BoxShadow(color: Color(0x14232323), blurRadius: 12, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x140A0E15), blurRadius: 12, offset: Offset(0, 4)),
   ];
   static const List<BoxShadow> light3 = [
-    BoxShadow(color: Color(0x1F232323), blurRadius: 28, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x1F0A0E15), blurRadius: 28, offset: Offset(0, 12)),
   ];
   static const List<BoxShadow> light4 = [
-    BoxShadow(color: Color(0x29232323), blurRadius: 48, offset: Offset(0, 24)),
+    BoxShadow(color: Color(0x290A0E15), blurRadius: 48, offset: Offset(0, 24)),
   ];
 
   static const List<BoxShadow> dark1 = [
-    BoxShadow(color: Color(0x66232323), blurRadius: 1, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x660A0E15), blurRadius: 1, offset: Offset(0, 1)),
   ];
   static const List<BoxShadow> dark2 = [
-    BoxShadow(color: Color(0x73232323), blurRadius: 16, offset: Offset(0, 6)),
+    BoxShadow(color: Color(0x730A0E15), blurRadius: 16, offset: Offset(0, 6)),
   ];
   static const List<BoxShadow> dark3 = [
-    BoxShadow(color: Color(0x8C232323), blurRadius: 32, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x8C0A0E15), blurRadius: 32, offset: Offset(0, 12)),
   ];
   static const List<BoxShadow> dark4 = [
-    BoxShadow(color: Color(0x99232323), blurRadius: 56, offset: Offset(0, 24)),
+    BoxShadow(color: Color(0x990A0E15), blurRadius: 56, offset: Offset(0, 24)),
   ];
 }
 
@@ -237,73 +236,70 @@ abstract final class DashedBorders {
 
 /// Cores de módulo — conjunto fechado para tiles do Menu.
 ///
-/// A diferenciação entre módulos vem da paleta oficial: azul
-/// (#0067FF) para produtos/vendas, preto (#232323) para neutros,
-/// cinza de superfície (#E7E5E5) e branco suave (#F9F9F9) para contraste.
+/// Monocromático por decisão de marca: a diferenciação entre módulos vem
+/// da escala neutra (tinta e cinzas). O acento tinta não é usado como
+/// decoração de módulo — fica para CTA, foco e selecção.
 abstract final class ModuleColors {
-  /// Produtos — azul oficial (destaque de módulo).
-  static const Color products = Color(0xFF0067FF);
+  /// Produtos — tinta.
+  static const Color products = AppColors.black100;
 
-  /// Clientes — tinta oficial.
-  static const Color customers = Color(0xFF232323);
+  /// Clientes — tinta.
+  static const Color customers = AppColors.black100;
 
-  /// Crédito/Fiado — azul oficial (atenção).
-  static const Color credit = Color(0xFF0067FF);
+  /// Crédito/Fiado — Preto 70 (o cinza médio sinaliza "atenção").
+  static const Color credit = AppColors.black70;
 
-  /// Compras — cinza de superfície.
-  static const Color purchases = Color(0xFFE7E5E5);
+  /// Compras — tinta.
+  static const Color purchases = AppColors.black100;
 
-  /// Relatórios — tinta oficial.
-  static const Color reports = Color(0xFF232323);
+  /// Relatórios — tinta.
+  static const Color reports = AppColors.black100;
 
-  /// Lojas — cinza de superfície.
-  static const Color stores = Color(0xFFE7E5E5);
+  /// Lojas — tinta.
+  static const Color stores = AppColors.black100;
 
-  /// Produção — azul oficial.
-  static const Color production = Color(0xFF0067FF);
+  /// Produção — tinta.
+  static const Color production = AppColors.black100;
 }
 
-/// Ícones com fundo SOLID oficial — paleta nova (nunca HSL derivado).
+/// Ícones com fundo SÓLIDO oficial — escala neutra (nunca HSL derivado).
 ///
-/// **Regra (auditoria de ícones):** nenhum ícone pode usar cores fora da
-/// paleta oficial como fundo. `darkBackground`/`lightForeground` com HSL
-/// criavam tons roxos/azuis na UI. Agora ambos devolvem o par
-/// oficial (azul/tinta/suave) sem mistura — sem HSL, sem tint.
+/// **Regra (auditoria de ícones):** nenhum ícone usa cor fora da paleta
+/// como fundo. Os círculos usam a tinta (Preto 100) com glifo Branco 100
+/// — 19:1 nos dois temas; o acento fica reservado a CTA, foco e selecção.
 abstract final class IconTone {
-  /// Fundo do ícone: azul oficial em módulo de destaque, tinta em
-  /// neutro — resolve por identidade do chamador (tokens por cor).
+  /// Fundo do ícone — tinta (neutro) nos dois temas.
   static Color darkBackground(Color color) {
-    // Gelo oficial sobre o fundo escuro — contraste 14.9:1.
-    return const Color(0xFF232323);
+    return AppColors.black100;
   }
 
-  /// Foreground do ícone: gelo oficial sobre fundo escuro.
+  /// Foreground do ícone: Branco 100 sobre tinta (19:1).
   static Color lightForeground(Color color) {
-    return const Color(0xFFF9F9F9);
+    return AppColors.white100;
   }
 
-  /// Azul oficial — fundo padrão de ícones de destaque (U-24).
-  static const Color accentBlue = Color(0xFF0067FF);
+  /// Tinta — fundo de ícones de destaque (uso pontual, não decorativo).
+  static const Color accentBlue = AppColors.accentBlue;
 
-  /// Azul oficial (gradiente do botão Confirmar no POS).
-  static const Color accentBlueDark = Color(0xFF0067FF);
+  /// Tinta no escuro (Branco 100) para ícones de destaque.
+  static const Color accentBlueDark = AppColors.accentBlueDark;
 
-  /// Cinza de superfície para ícones secundários.
-  static const Color slate = Color(0xFFE7E5E5);
+  /// Branco 90 para ícones secundários.
+  static const Color slate = AppColors.white90;
 
-  /// Preto oficial para fundos de ícones.
-  static const Color slateDark = Color(0xFF232323);
+  /// Tinta para fundos de ícones.
+  static const Color slateDark = AppColors.black100;
 
   /// Erro semântico, com ícone e rótulo para além da cor.
-  static const Color errorNeutral = AppColors.brandInk;
-  static const Color errorNeutralDark = AppColors.softWhite;
+  static const Color errorNeutral = AppColors.alertError;
+  static const Color errorNeutralDark = AppColors.darkErrorNeutral;
 
-  /// Atenção na interface — cinza médio oficial. Estados também têm ícone
-  /// e rótulo para não depender apenas da cor.
-  static const Color blue = Color(0xFF0067FF);
-  static const Color blueDark = Color(0xFF0067FF);
+  /// Acento de atenção — tinta. Estados também têm ícone e rótulo para não
+  /// depender apenas da cor; não existe laranja.
+  static const Color blue = AppColors.accentBlue;
+  static const Color blueDark = AppColors.accentBlueDark;
 
-  /// Textos em modo claro/escuro sobre ícones (paleta oficial).
-  static const Color onBackgroundLight = Color(0xFF232323);
-  static const Color onBackgroundDark = Color(0xFFF9F9F9);
+  /// Textos em modo claro/escuro sobre ícones (escala oficial).
+  static const Color onBackgroundLight = AppColors.black100;
+  static const Color onBackgroundDark = AppColors.white100;
 }

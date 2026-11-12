@@ -23,7 +23,7 @@ class AppCard extends StatefulWidget {
     this.color,
     this.gradient,
     this.elevated = false,
-    this.borderRadius = const BorderRadius.all(Radius.circular(AppRadius.md)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(AppRadius.lg)),
     required this.child,
   });
 
@@ -37,8 +37,8 @@ class AppCard extends StatefulWidget {
 
   final bool elevated;
 
-  /// Cantos do card — telas "premium" passam raios maiores (ex.: 20) para
-  /// o visual Apple; o default segue o design system (12).
+  /// Cantos do card — telas "premium" passam raios maiores (ex.: 22) para
+  /// o visual Apple; o default segue o design system (18).
   final BorderRadius borderRadius;
 
   final Widget child;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../domain/entities/tenant.dart';
@@ -32,20 +31,22 @@ class TenantPendingScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Estado "a aguardar": azul oficial em véu — o mesmo
-                  // ícone-em-superfície usado nas telas de estado.
+                  // Estado "a aguardar": ícone-em-superfície neutro — o
+                  // mesmo padrão das telas de estado, sem cor de acção.
                   Container(
                     width: 72,
                     height: 72,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: theme.accent.withValues(alpha: 0.10),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.06,
+                      ),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.hourglass_top,
                       size: 32,
-                      color: theme.accent,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),

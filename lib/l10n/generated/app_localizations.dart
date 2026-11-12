@@ -5381,19 +5381,19 @@ abstract class AppLocalizations {
   /// No description provided for @paletteBlue.
   ///
   /// In pt, this message translates to:
-  /// **'Azul'**
+  /// **'Grafite'**
   String get paletteBlue;
 
   /// No description provided for @paletteBeige.
   ///
   /// In pt, this message translates to:
-  /// **'Bege'**
+  /// **'Branco neve'**
   String get paletteBeige;
 
   /// No description provided for @paletteWarmGray.
   ///
   /// In pt, this message translates to:
-  /// **'Cinza quente'**
+  /// **'Cinza claro'**
   String get paletteWarmGray;
 
   /// No description provided for @paletteSoftBlack.

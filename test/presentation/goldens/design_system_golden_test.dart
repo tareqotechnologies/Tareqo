@@ -30,7 +30,7 @@ import 'package:tareqo/presentation/widgets/status_chip.dart';
 ///   da captura não é reproduzível.
 /// * Indicadores de progresso usam `value` determinado (não indeterminado).
 ///
-/// Fontes reais carregadas no setUpAll (`loadGoldenFonts`): sem Outfit e
+/// Fontes reais carregadas no setUpAll (`loadGoldenFonts`): sem Inter e
 /// MaterialIcons o framework renderiza a fonte de teste (Ahem) — texto em
 /// blocos e ícones em quadrados — e o golden não representa o app.
 void main() {
@@ -84,7 +84,9 @@ void main() {
                     children: [
                       StatusChip(
                         label: 'Pago',
-                        color: theme.colorScheme.primary,
+                        // Pago é estado de sucesso (verde), não marca: o
+                        // primário fica para CTAs e seleção.
+                        color: theme.income,
                         icon: Icons.check_circle_outline,
                       ),
                       StatusChip(

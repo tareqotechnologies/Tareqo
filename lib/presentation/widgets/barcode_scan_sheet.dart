@@ -9,8 +9,8 @@ import '../../../core/theme/app_tokens.dart';
 /// Abre a câmera de leitura de código de barras em um bottom sheet e
 /// devolve o primeiro código lido (ou `null` se o usuário cancelar).
 ///
-/// Paleta do anexo: fundo preto #232323 (a mira precisa de contraste com a
-/// imagem da câmera), moldura e textos no suave #F9F9F9.
+/// Paleta do anexo: fundo Void #151419 (a mira precisa de contraste com a
+/// imagem da câmera), moldura e textos em Snow #FBFBFB.
 Future<String?> showBarcodeScanner(BuildContext context) {
   return showModalBottomSheet<String>(
     context: context,

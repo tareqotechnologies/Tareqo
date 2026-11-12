@@ -5,9 +5,9 @@ import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 import 'package:tareqo/presentation/widgets/color_palette.dart';
 
-/// Trava a paleta OFICIAL (4 cores) usada pelas facturas personalizadas
-/// e cotações: Azul #0067FF, Cinza de superfície #E7E5E5,
-/// Branco suave #F9F9F9, Preto #232323.
+/// Trava a paleta neutra (4 opções) usada pelas facturas personalizadas
+/// e cotações: Preto 100 #0A0E15, Branco 90 #F0F1F5, Preto 60 #667085,
+/// Branco 100 #FFFFFF. Sem laranja.
 void main() {
   group('kColorPalettes', () {
     test('expõe as 4 cores oficiais', () {
@@ -15,18 +15,18 @@ void main() {
     });
 
     test('valores são exatamente a paleta oficial', () {
-      expect(kColorPalettes['Preto'], AppColors.brandInk);
-      expect(kColorPalettes['Cinza'], AppColors.surfaceGray);
-      expect(kColorPalettes['Azul'], AppColors.brandBlue);
-      expect(kColorPalettes['Branco gelo'], AppColors.softWhite);
+      expect(kColorPalettes['Preto'], AppColors.black100);
+      expect(kColorPalettes['Cinza'], AppColors.lightSurfaceSecondary);
+      expect(kColorPalettes['Azul'], AppColors.black60);
+      expect(kColorPalettes['Branco gelo'], AppColors.white100);
     });
 
     test('nenhuma cor fora da paleta oficial é permitida', () {
       final allowed = {
-        AppColors.brandBlue,
-        AppColors.surfaceGray,
-        AppColors.softWhite,
-        AppColors.brandInk,
+        AppColors.black100,
+        AppColors.lightSurfaceSecondary,
+        AppColors.black60,
+        AppColors.white100,
       };
       for (final color in kColorPalettes.values) {
         expect(allowed, contains(color));

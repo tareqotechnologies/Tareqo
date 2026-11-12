@@ -10,8 +10,8 @@
 
 | Token | Arquivo | Conteúdo |
 | --- | --- | --- |
-| `AppColors` | `lib/core/theme/app_colors.dart` | Paleta OFICIAL (fonte única dos hex): azul `#0067FF`, cinza médio `#6E7174`, cinza de superfície `#E7E5E5`, branco suave `#F9F9F9`, tinta `#232323` — mais os alertas semânticos `#2E7D32`/`#C62828`/`#F9A825` (só alertas) e os tints de TEXTO desses alertas no escuro `#66BB6A`/`#FF6B66` (AA sobre tinta). Cores semânticas por brilho (`income`, `expense`, `warning`) e neutros derivam destas 5. Toda cor nova nasce aqui |
-| `AppStatusColors` | idem | `ThemeExtension` com pares claro/escuro; acessado por `Theme.of(context).income/expense/warning/accent`. No escuro `income`/`expense` entregam os tints de texto AA (6.65:1 / 5.65:1 sobre `#232323`); os tons base ficam para preenchimentos e chips |
+| `AppColors` | `lib/core/theme/app_colors.dart` | Paleta OFICIAL (fonte única dos hex): escala neutra Preto `#0A0E15`/`#212631`/`#373F4E`/`#4E576A`/`#667085` e Branco `#FFFFFF`/`#F0F1F5`/`#E0E4EB`/`#D1D6E0`/`#BFC5D4` — mais os alertas semânticos `#2E7D32`/`#C62828` (só alertas; o aviso é neutro) e os tints de TEXTO desses alertas no escuro `#66BB6A`/`#FF8A80` (AA). **Não existe laranja na identidade.** Toda cor nova nasce aqui |
+| `AppStatusColors` | idem | `ThemeExtension` com pares claro/escuro; acessado por `Theme.of(context).income/expense/warning/accent`. No escuro `income`/`expense` entregam os tints de texto AA (`#66BB6A`/`#FF8A80` sobre `#212631`); os tons base ficam para preenchimentos e chips. O aviso no escuro é Branco 60 `#BFC5D4` |
 | `AppBreakpoints` | `lib/core/theme/app_tokens.dart` | Quebras de layout: `compactMax`=599, `mediumMin`=600, `expandedMin`=1024, `sidebarRail`=880 |
 | `AppStateOpacity` | idem | Véus de interação: `hover`=4%, `pressed`=8%, `focus`=12%, `disabled`=38% |
 | `AppSpacing` | `lib/core/theme/app_tokens.dart` | Grelha de 4px (`xxs`=4 … `huge`=48) + `pagePaddingForWidth` (720px quebra mobile/tablet) |
@@ -19,9 +19,9 @@
 | `AppDurations` | idem | `fast`=120ms, `normal`=240ms, `slow`=320ms — teto do plano para QUALQUER animação |
 | `AppCurves` | idem | `standard` (easeOutCubic), `decelerate`, `emphasized` (easeInOutCubic) |
 | `AppSizes` | idem | `touchTarget`=48dp (mínimo WCAG), ícones, avatares, `contentMaxWidth` |
-| `ModuleColors` | idem | Conjunto FECHADO na paleta: Produtos=laranja, Clientes=preto, Fiado=laranja, Compras=cinza, Relatórios=preto, Lojas=cinza, Produção=laranja |
+| `ModuleColors` | idem | Conjunto FECHADO na escala neutra: Produtos/Clientes/Compras/Relatórios/Lojas/Produção=tinta (Preto 100), Fiado=Preto 70 |
 | `PdfAccents` | `lib/core/share/pdf_accent.dart` | Acentos de PDF (`PdfColor`) espelhando a paleta oficial para os exporters (factura/cotação/relatórios). O pacote `pdf` não depende de Flutter, então não importa `AppColors` — os tokens duplicam os valores |
-| `IconTone` | `lib/core/theme/app_tokens.dart` | Fundo/foreground sólidos da paleta (laranja/preto/suave), sem HSL |
+| `IconTone` | `lib/core/theme/app_tokens.dart` | Fundo tinta (Preto 100) com glifo Branco 100 (19:1), sem HSL e sem laranja |
 
 **Regra:** cor nova → `AppColors`; nunca `Color(0x…)` inline. A paleta é
 protegida pelo CI em `test/core/theme/palette_guard_test.dart` (qualquer HEX

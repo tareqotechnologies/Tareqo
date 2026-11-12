@@ -192,12 +192,17 @@ class DashboardScreen extends ConsumerWidget {
         _ActivityItem.lowStock(
           product: product,
           l10n: l10n,
+          // Pílula invertida: tinta no claro, Branco 100 no escuro (o
+          // rótulo é calculado pela luminância do fundo).
+          badgeBackground: theme.colorScheme.onSurface,
           onTap: () => AppNavigator.pushSection(context, AppSection.products),
         ),
       for (final alert in expiryAlerts)
         _ActivityItem.expiry(
           alert: alert,
           l10n: l10n,
+          warningColor: theme.warning,
+          dangerColor: theme.expense,
           onTap: () => AppNavigator.pushSection(context, AppSection.products),
         ),
     ];
@@ -462,7 +467,7 @@ class _BalanceHero extends StatelessWidget {
 
     // Acabamento: superfície elevada do design system — sem gradiente
     // decorativo nem sombra colorida; o destaque vem da hierarquia
-    // tipográfica e do azul oficial na pílula da métrica.
+    // tipográfica e da tinta oficial na pílula da métrica.
     return AppCard(
       elevated: true,
       borderRadius: AppRadius.xlAll,
@@ -726,9 +731,9 @@ class _ActivityItem {
           '${_timeLabel(sale.dateTime, l10n)}',
       dateTime: sale.dateTime,
       icon: Icons.north_east_rounded,
-      // Ícone padronizado (U-24): fundo sólido azul #0067FF
-      // oficial + ícone gelo — nunca HSL derivado.
-      iconBackground: AppColors.brandBlue,
+      // Ícone padronizado (U-24): círculo de tinta (Preto 100) com
+      // glifo Branco 100 — o acento fica para CTA/foco.
+      iconBackground: AppColors.darkVoid,
       iconColor: AppColors.softWhite,
       amount: Formatters.signedAmount(sale.totalAmountCents),
       // amountColor resolvido como scheme.primary em _ActivityRow
@@ -750,8 +755,8 @@ class _ActivityItem {
     ),
     dateTime: purchase.dateTime,
     icon: Icons.inventory_2_outlined,
-    // Ícone padronizado (U-24): fundo azul oficial.
-    iconBackground: AppColors.brandBlue,
+    // Ícone padronizado (U-24): círculo de tinta + glifo Branco 100.
+    iconBackground: AppColors.darkVoid,
     iconColor: AppColors.softWhite,
     amount: '+${Quantity.format(item.quantity)}',
     // Antes Colors.white incondicional — invisível sobre surface clara
@@ -769,8 +774,8 @@ class _ActivityItem {
       details: '${debt.personName} · ${_timeLabel(paidAt, l10n)}',
       dateTime: paidAt,
       icon: Icons.payments_outlined,
-      // Ícone padronizado (U-24): fundo azul oficial.
-      iconBackground: AppColors.brandBlue,
+      // Ícone padronizado (U-24): círculo de tinta + glifo Branco 100.
+      iconBackground: AppColors.darkVoid,
       iconColor: AppColors.softWhite,
       amount: Formatters.signedAmount(debt.amountCents),
       // amountColor null → scheme.primary em _ActivityRow (U-02).
@@ -787,8 +792,8 @@ class _ActivityItem {
     details: _timeLabel(transaction.date, l10n),
     dateTime: transaction.date,
     icon: Icons.south_west_rounded,
-    // Ícone padronizado (U-24): fundo azul oficial.
-    iconBackground: AppColors.brandBlue,
+    // Ícone padronizado (U-24): círculo de tinta + glifo Branco 100.
+    iconBackground: AppColors.darkVoid,
     iconColor: AppColors.softWhite,
     amount: Formatters.signedAmount(-transaction.amountCents),
     // amountColor null → scheme.expense via _ActivityRow (U-02).
@@ -797,6 +802,7 @@ class _ActivityItem {
   factory _ActivityItem.lowStock({
     required Product product,
     required AppLocalizations l10n,
+    required Color badgeBackground,
     VoidCallback? onTap,
   }) => _ActivityItem(
     title: l10n.dashboardLowStock,
@@ -806,21 +812,22 @@ class _ActivityItem {
     ),
     dateTime: AppClock.now(),
     icon: Icons.warning_amber_rounded,
-    // Ícone padronizado (U-24): fundo azul oficial.
-    iconBackground: AppColors.brandBlue,
+    // Ícone padronizado (U-24): círculo de tinta + glifo Branco 100.
+    iconBackground: AppColors.darkVoid,
     iconColor: AppColors.softWhite,
     badge: l10n.dashboardAlertBadge,
-    badgeColor: IconTone.blue,
-    badgeBackground: IconTone.blue,
+    badgeBackground: badgeBackground,
     onTap: onTap,
   );
   factory _ActivityItem.expiry({
     required ExpiryAlert alert,
     required AppLocalizations l10n,
+    required Color warningColor,
+    required Color dangerColor,
     VoidCallback? onTap,
   }) {
     final expired = alert.isExpired;
-    final color = expired ? IconTone.errorNeutral : IconTone.blue;
+    final color = expired ? dangerColor : warningColor;
     return _ActivityItem(
       title: alert.product.name,
       details: expired
@@ -1064,11 +1071,12 @@ class _ActivityRow extends StatelessWidget {
                   : scheme.primary)
             : item.badgeColor);
 
-    // Pílula sólida (ex.: "Alerta"): o texto acompanha o fundo — branco
-    // suave sobre o azul saturado, tinta apenas sobre preenchimentos
-    // claros (regra do sistema: texto claro em fundo azul).
+    // Pílula sólida (ex.: "Alerta"): o texto acompanha a luminância do
+    // fundo — tinta sobre preenchimentos claros (tinta: 6.2:1) e neve
+    // sobre fundos escuros (erro: 5.4:1). O limite 0.18 separa a tinta
+    // (≈0.31) do vermelho de erro (≈0.14), onde branco puro reprovaria.
     final badgeForeground =
-        (item.badgeBackground?.computeLuminance() ?? 1) > 0.45
+        (item.badgeBackground?.computeLuminance() ?? 1) > 0.18
         ? AppColors.brandInk
         : AppColors.softWhite;
 
@@ -1126,7 +1134,7 @@ class _ActivityRow extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: item.badgeBackground != null
                     // Pílula sólida (ex.: "Alerta") — fundo colorido com
-                    // texto de contraste calculado (claro sobre o azul).
+                    // texto de contraste calculado (tinta sobre a tinta).
                     ? Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.sm,

@@ -1,256 +1,334 @@
 import 'package:flutter/material.dart';
 
-/// Paleta OFICIAL do sistema (identidade Outfit, guia em anexo):
+/// Paleta OFICIAL do sistema (identidade Tareqo 2026 — "Shades of gray"):
 ///
-/// **Paleta principal (interface geral — só estas 5 cores sólidas):**
-/// 1. **Azul** `#0067FF` — ações primárias, links ativos, indicadores,
-///    destaques, estados ativos, navegação.
-/// 2. **Cinza médio** `#6E7174` — texto secundário (claro), bordas e
-///    divisores no escuro, estados desativados.
-/// 3. **Cinza de superfície** `#E7E5E5` — superfícies secundárias, campos,
-///    divisores suaves, fundos alternativos (claro), texto secundário (escuro).
-/// 4. **Branco suave** `#F9F9F9` — fundo principal claro, superfícies,
-///    texto claro em fundos escuros, rótulo sobre o azul.
-/// 5. **Tinta escura** `#232323` — texto principal (claro), fundo principal
-///    escuro, ícones principais, bordas estruturais.
+/// **Escala neutra oficial (10 passos, do anexo):**
+/// * Preto: [black100] `#0A0E15`, [black90] `#212631`, [black80]
+///   `#373F4E`, [black70] `#4E576A`, [black60] `#667085`.
+/// * Branco: [white100] `#FFFFFF`, [white90] `#F0F1F5`, [white80]
+///   `#E0E4EB`, [white70] `#D1D6E0`, [white60] `#BFC5D4`.
 ///
-/// Estados semânticos reutilizam exclusivamente os cinco tons oficiais;
-/// ícone e rótulo acompanham a cor para não depender apenas de matiz.
+/// **Acento único — tinta monocromática:** não existe laranja na
+/// identidade. O acento é o próprio Preto 100 (claro) / Branco 100
+/// (escuro): CTA primário, foco, selecção e marca. Tudo o resto é
+/// neutro (superfícies, ícones, segmentos, selos informativos).
 ///
-/// Acessibilidade (WCAG, medido sobre os pares da paleta nativa):
-/// - Tinta sobre suave: `#232323` vs `#F9F9F9` ≈ **14.9:1** (AAA).
-/// - Suave sobre tinta: ≈ **14.9:1** (AAA).
-/// - Cinza de superfície sobre tinta: `#E7E5E5` vs `#232323` ≈ **12.5:1**
-///   — texto secundário no escuro.
-/// - Cinza médio sobre suave: `#6E7174` vs `#F9F9F9` ≈ **4.7:1** (AA texto).
-/// - Azul sobre suave: `#0067FF` vs `#F9F9F9` ≈ **4.55:1** (AA texto — pode
-///   ser usado em links e texto de ação).
-/// - Suave sobre azul: ≈ **4.55:1** (AA texto — rótulo do botão primário).
+/// **Sem tints derivados de marca:** os únicos valores fora da escala
+/// são os alertas semânticos (verde/vermelho), sempre acompanhados de
+/// ícone e rótulo.
+///
+/// **Alertas semânticos** (exceção controlada à paleta, sempre acompanhados
+/// de ícone e rótulo): sucesso `#2E7D32`, erro `#C62828`; aviso usa a
+/// escala neutra (Preto 70/Branco 60) — sem laranja. No escuro os valores
+/// de TEXTO usam tints AA (`#66BB6A`/`#FF8A80`).
+///
+/// Acessibilidade (WCAG, medido sobre os pares nativos):
+/// - Preto 100 sobre branco 100 ≈ **19:1** (AAA) e branco sobre preto 100
+///   ≈ **19:1**.
+/// - Branco 80 sobre preto 90 ≈ **15:1**; branco 60 sobre preto 90 ≈
+///   **8.8:1** (AA texto).
+/// - Preto 70 sobre branco 90 ≈ **6.4:1** (AA) — texto secundário claro.
+/// - Branco 100 sobre Preto 100 ≈ **19:1** — rótulo do botão primário.
+/// - Preto 60 sobre branco 90 ≈ **4.4:1** (bordas de controlo ≥ 3:1).
 abstract final class AppColors {
   // ─────────────────────────────────────────────────────────────────────
-  // 0. Base oficial (únicas cores sólidas permitidas)
+  // 0. Escala neutra oficial (únicas cores sólidas permitidas)
   // ─────────────────────────────────────────────────────────────────────
 
-  /// Azul principal #0067FF.
-  static const Color brandBlue = Color(0xFF0067FF);
+  /// Preto 100 `#0A0E15` — tinta máxima (claro) e canvas profundo (escuro).
+  static const Color black100 = Color(0xFF0A0E15);
 
-  /// Cinza médio #6E7174.
-  static const Color grayMid = Color(0xFF6E7174);
+  /// Preto 90 `#212631` — superfície (cartões, listas, barras) no escuro.
+  static const Color black90 = Color(0xFF212631);
 
-  /// Cinza de superfície #E7E5E5.
-  static const Color surfaceGray = Color(0xFFE7E5E5);
+  /// Preto 80 `#373F4E` — superfície elevada/agrupada no escuro.
+  static const Color black80 = Color(0xFF373F4E);
 
-  /// Branco suave #F9F9F9.
-  static const Color softWhite = Color(0xFFF9F9F9);
+  /// Preto 70 `#4E576A` — bordas fortes e texto secundário no claro.
+  static const Color black70 = Color(0xFF4E576A);
 
-  /// Tinta escura #232323.
-  static const Color brandInk = Color(0xFF232323);
+  /// Preto 60 `#667085` — bordas de controlo, ícones e texto terciário.
+  static const Color black60 = Color(0xFF667085);
 
-  /// Sucesso: azul oficial (estado indicado também por ícone e rótulo).
-  static const Color alertSuccess = brandBlue;
+  /// Branco 100 `#FFFFFF` — canvas/cartões claros e texto no escuro.
+  static const Color white100 = Color(0xFFFFFFFF);
 
-  /// Erro: tinta escura oficial (estado indicado também por ícone e rótulo).
-  static const Color alertError = brandInk;
+  /// Branco 90 `#F0F1F5` — canvas claro e zonas agrupadas/campos.
+  static const Color white90 = Color(0xFFF0F1F5);
 
-  /// Aviso: cinza médio oficial (estado indicado também por ícone e rótulo).
-  static const Color alertWarning = grayMid;
+  /// Branco 80 `#E0E4EB` — divisores e contornos decorativos no claro.
+  static const Color white80 = Color(0xFFE0E4EB);
+
+  /// Branco 70 `#D1D6E0` — contorno estrutural suave no claro.
+  static const Color white70 = Color(0xFFD1D6E0);
+
+  /// Branco 60 `#BFC5D4` — estado desactivado no claro.
+  static const Color white60 = Color(0xFFBFC5D4);
+
+  // ── Aliases da escala (nomes curtos usados nos papéis) ────────────────
+
+  /// Alias de [black100] — tinta e canvas escuro.
+  static const Color darkVoid = black100;
+
+  /// Alias de [black90] — superfície no escuro.
+  static const Color gluonGrey = black90;
+
+  /// Alias de [black80] — superfície elevada no escuro.
+  static const Color slateGrey = black80;
+
+  /// Alias de [black60] — bordas e texto não essencial.
+  static const Color dustyGrey = black60;
+
+  /// Alias de [white100] — canvas claro e texto sobre o escuro.
+  static const Color snow = white100;
+
+  /// Alias de [black70] — texto secundário no tema claro.
+  static const Color ashText = black70;
+
+  /// Alias de [white60] — texto secundário no escuro.
+  static const Color ashDark = white60;
+
+  /// Zona agrupada / fundo de campo no claro (Branco 90).
+  static const Color snowMist = white90;
+
+  /// Contorno decorativo no claro (Branco 80).
+  static const Color smokeBorder = white80;
+
+  /// Selos informativos neutros — tinta (nunca acento).
+  static const Color neutralInfo = black100;
+
+  // ── Alertas semânticos (excepção controlada) ─────────────────────────
+
+  /// Sucesso `#2E7D32` (texto AA no claro, 4.96:1 sobre Snow).
+  static const Color alertSuccess = Color(0xFF2E7D32);
+
+  /// Erro `#C62828` (texto AA no claro, 5.4:1 sobre Snow).
+  static const Color alertError = Color(0xFFC62828);
+
+  /// Aviso: Preto 70 (estado indicado também por ícone e rótulo).
+  static const Color alertWarning = black70;
+
+  // ── Aliases legados dos nomes da paleta anterior ─────────────────────
+  // Mantidos para não tocar em centenas de call sites; todos apontam para
+  // a paleta nova. Não usar em código novo.
+
+  /// LEGADO: acção/marca (agora tinta).
+  static const Color brandBlue = black100;
+
+  /// LEGADO: Dusty (borda de controlo no claro).
+  static const Color grayMid = dustyGrey;
+
+  /// LEGADO: SnowMist (zona agrupada no claro).
+  static const Color surfaceGray = snowMist;
+
+  /// LEGADO: Snow (canvas claro / texto sobre escuro).
+  static const Color softWhite = snow;
+
+  /// LEGADO: Void (tinta e canvas escuro).
+  static const Color brandInk = darkVoid;
 
   // ─────────────────────────────────────────────────────────────────────
   // 0.1 Tints semânticos de TEXTO no escuro (WCAG AA)
   // ─────────────────────────────────────────────────────────────────────
 
-  /// Texto de estado no escuro usa branco suave da paleta oficial.
-  static const Color successTextDark = softWhite;
-  static const Color errorTextDark = softWhite;
+  /// Sucesso como texto no escuro (≈7.3:1 sobre Gluon).
+  static const Color successTextDark = Color(0xFF66BB6A);
+
+  /// Erro como texto no escuro (≈7.5:1 sobre Gluon; ≥3:1 no selo a 22%).
+  static const Color errorTextDark = Color(0xFFFF8A80);
 
   // ─────────────────────────────────────────────────────────────────────
   // 1. Tema claro (paleta oficial)
   // ─────────────────────────────────────────────────────────────────────
 
-  /// canvas — fundo da aplicação (#F9F9F9).
-  static const Color lightBackground = softWhite;
+  /// canvas — fundo da aplicação (Branco 90, deixa os cartões brancos
+  /// "flutuar" sem sombra pesada).
+  static const Color lightBackground = white90;
 
-  /// surface — cartões, listas, sheets, campos.
-  static const Color lightSurface = softWhite;
+  /// surface — cartões, listas, sheets (Branco 100).
+  static const Color lightSurface = white100;
 
-  /// surfaceSunken — zonas agrupadas e fundo de inputs (#E7E5E5).
-  static const Color lightSurfaceSecondary = surfaceGray;
+  /// surfaceSunken — zonas agrupadas e fundo de inputs (Branco 90).
+  static const Color lightSurfaceSecondary = white90;
 
-  /// surfaceRaised — superfície com elevação.
-  static const Color lightSurfaceElevated = softWhite;
+  /// surfaceRaised — superfície com elevação (Branco 100).
+  static const Color lightSurfaceElevated = white100;
 
-  /// textPrimary — 14.9:1 sobre suave.
-  static const Color lightTextPrimary = brandInk;
+  /// textPrimary — Preto 100 sobre Branco 100 (19:1).
+  static const Color lightTextPrimary = black100;
 
-  /// textSecondary — cinza médio #6E7174 (4.7:1, AA).
-  static const Color lightTextSecondary = grayMid;
+  /// textSecondary — Preto 70 ≈6.4:1 sobre o canvas (AA).
+  static const Color lightTextSecondary = black70;
 
-  /// textTertiary — cinza médio #6E7174.
-  static const Color lightTextTertiary = grayMid;
+  /// textTertiary — o mesmo cinza legível (AA).
+  static const Color lightTextTertiary = black70;
 
-  /// border — divisores e contornos decorativos (#E7E5E5).
-  static const Color lightBorder = surfaceGray;
+  /// border — hairlines e contornos decorativos (Branco 80).
+  static const Color lightBorder = white80;
 
-  /// borderStrong — contorno de controlos (tinta).
-  static const Color lightBorderStrong = brandInk;
+  /// borderStrong — contorno estrutural (Preto 100).
+  static const Color lightBorderStrong = black100;
 
-  /// Control border (outline buttons, fields).
-  static const Color controlBorder = brandInk;
+  /// Control border (outline buttons, fields) — Preto 60 (4.4:1 sobre o
+  /// canvas e o fill do campo; WCAG 1.4.11 exige ≥3:1).
+  static const Color controlBorder = black60;
 
   /// separator — linhas de lista e tabela.
-  static const Color lightDivider = surfaceGray;
+  static const Color lightDivider = white80;
 
-  /// textDisabled — cinza médio sobre suave.
-  static const Color lightTextDisabled = grayMid;
+  /// textDisabled — Branco 60 sobre o canvas (estado desactivado).
+  static const Color lightTextDisabled = white60;
 
-  /// actionFill — fundo de botão primário (azul).
-  /// Rótulo sobre ele = branco suave (4.55:1, AA texto).
-  static const Color lightPrimary = brandBlue;
+  /// actionFill — fundo de botão primário (Preto 100).
+  /// Rótulo sobre ele = Branco 100 (19:1, AAA texto).
+  static const Color lightPrimary = black100;
 
-  /// textOnAction — branco suave sobre azul.
-  static const Color lightOnPrimary = softWhite;
+  /// textOnAction — Branco 100 sobre Preto 100.
+  static const Color lightOnPrimary = white100;
 
   /// Botão secundário: superfície com contorno.
-  static const Color lightSecondaryAction = softWhite;
+  static const Color lightSecondaryAction = snow;
 
   /// Texto do botão secundário.
-  static const Color lightOnSecondary = brandInk;
+  static const Color lightOnSecondary = darkVoid;
 
-  /// action — ícones, foco, seleção (azul).
-  static const Color lightAction = brandBlue;
+  /// action — ícones, foco e selecção no claro (Preto 100, 19:1).
+  static const Color lightAction = black100;
 
-  /// actionText — links e texto de ação (azul, 4.55:1 AA).
-  static const Color lightActionText = brandBlue;
+  /// actionText — links e texto de acção (Preto 100, AA).
+  static const Color lightActionText = black100;
 
-  /// actionPressed — estado premido (azul).
-  static const Color lightActionPressed = brandBlue;
+  /// actionPressed — estado premido.
+  static const Color lightActionPressed = black80;
 
-  /// actionSoft — fundo de chip selecionado (azul a 10%).
-  static const Color lightActionSoft = brandBlue;
+  /// actionSoft — fonte do véu de selecção (Preto 100, alfa no chamador).
+  static const Color lightActionSoft = black100;
 
-  /// actionBorder — contorno de seleção.
-  static const Color lightActionBorder = brandBlue;
+  /// actionBorder — contorno de selecção (Preto 100 ≥3:1).
+  static const Color lightActionBorder = black100;
 
-  /// Acento da marca — azul do guia (#0067FF).
-  /// Avisos usam cinza médio, mantendo a paleta oficial.
-  static const Color accentBlue = brandBlue;
+  /// Acento da marca — tinta Preto 100.
+  static const Color accentBlue = black100;
+
+  /// Acento de TRAÇO no claro — Preto 100; no escuro, Branco 100.
+  static Color accentOn(Brightness brightness) =>
+      brightness == Brightness.light ? black100 : darkAction;
 
   /// Fonte do véu de acento (quem pinta aplica o alfa).
-  static const Color accentBlueSoft = brandBlue;
+  static const Color accentBlueSoft = black100;
 
-  /// warning — texto de alerta (tinta sobre véu de aviso).
-  static const Color warningText = brandInk;
+  /// warning — texto de alerta no claro (Preto 70, ≈6.4:1 AA).
+  static const Color warningText = black70;
 
   /// Alias para `of(...)` e testes de contraste.
   static const Color warning = warningText;
 
-  /// warningLight — fundo suave de aviso.
-  static const Color warningLight = accentBlueSoft;
+  /// warningLight — fundo suave de aviso (véu neutro).
+  static const Color warningLight = warningText;
 
-  /// success — ícone/badge usando azul oficial.
+  /// success — verde semântico (ícone/fundo AA).
   static const Color successNeutral = alertSuccess;
 
-  /// successText — texto de sucesso usando azul oficial.
+  /// successText — verde semântico (texto AA).
   static const Color successText = alertSuccess;
 
-  /// successSoft — fundo de badge de sucesso (a 10%).
+  /// successSoft — fundo de badge de sucesso (alfa no chamador).
   static const Color successSoft = alertSuccess;
 
-  /// error — erro e ações destrutivas usando tinta oficial.
+  /// error — vermelho semântico (texto/ícone AA).
   static const Color errorNeutral = alertError;
 
-  /// errorSoft — fundo de badge de erro (a 10%).
+  /// errorSoft — fundo de badge de erro (alfa no chamador).
   static const Color lightErrorSoft = alertError;
 
-  /// info — informação (azul).
-  static const Color info = brandBlue;
+  /// info — informação (Preto 70, AA no claro).
+  static const Color info = black70;
 
-  /// infoSoft — fundo suave de informação.
-  static const Color infoSoft = brandBlue;
+  /// infoSoft — fundo suave de informação (véu neutro).
+  static const Color infoSoft = info;
 
   // ─────────────────────────────────────────────────────────────────────
   // 2. Tema escuro (paleta oficial — não é inversão)
   // ─────────────────────────────────────────────────────────────────────
 
-  /// canvas escuro — tinta escura oficial.
-  static const Color darkBackground = brandInk;
+  /// canvas escuro — Preto 100 (camada mais profunda).
+  static const Color darkBackground = darkVoid;
 
-  /// surface escuro — tinta escura oficial.
-  static const Color darkSurface = brandInk;
+  /// surface escuro — Preto 90 (cartões e listas).
+  static const Color darkSurface = gluonGrey;
 
-  /// surfaceSunken escuro.
-  static const Color darkSurfaceSecondary = brandInk;
+  /// surfaceSunken escuro — Preto 80 (campos e zonas agrupadas).
+  static const Color darkSurfaceSecondary = slateGrey;
 
-  /// surfaceRaised escuro — tinta escura oficial.
-  static const Color darkSurfaceElevated = brandInk;
+  /// surfaceRaised escuro — Preto 80.
+  static const Color darkSurfaceElevated = slateGrey;
 
-  /// textPrimary escuro — suave sobre tinta 14.9:1.
-  static const Color darkTextPrimary = softWhite;
+  /// textPrimary escuro — Branco 100 sobre Preto 90 (15.6:1).
+  static const Color darkTextPrimary = snow;
 
-  /// textSecondary escuro — cinza de superfície sobre tinta 12.5:1.
-  static const Color darkTextSecondary = surfaceGray;
+  /// textSecondary escuro — Branco 60 ≈8.8:1 sobre Preto 90 (AA).
+  static const Color darkTextSecondary = ashDark;
 
-  /// textTertiary escuro.
-  static const Color darkTextTertiary = surfaceGray;
+  /// textTertiary escuro — Branco 60 ≈8.8:1 sobre Preto 90 (AA).
+  static const Color darkTextTertiary = ashDark;
 
-  /// border escuro — decorativo (cinza médio sobre tinta).
-  static const Color darkBorder = grayMid;
+  /// border escuro — Dusty (não-texto ≥3:1).
+  static const Color darkBorder = dustyGrey;
 
   /// borderStrong escuro.
-  static const Color darkBorderStrong = softWhite;
+  static const Color darkBorderStrong = snow;
 
-  /// separator escuro.
-  static const Color darkDivider = grayMid;
+  /// separator escuro — Slate (divisor subtil).
+  static const Color darkDivider = slateGrey;
 
   /// textDisabled escuro.
-  static const Color darkTextDisabled = grayMid;
+  static const Color darkTextDisabled = dustyGrey;
 
-  /// Botão primário escuro: azul com rótulo BRANCO SUAVE (4.55:1).
-  static const Color darkPrimary = brandBlue;
+  /// Botão primário escuro: Branco 100 com rótulo Preto 100 (19:1).
+  static const Color darkPrimary = white100;
 
-  /// Rótulo branco suave sobre azul no escuro.
-  static const Color darkOnPrimary = softWhite;
+  /// Rótulo Preto 100 sobre Branco 100 no escuro.
+  static const Color darkOnPrimary = black100;
 
   /// Botão secundário escuro.
-  static const Color darkSecondaryAction = brandInk;
+  static const Color darkSecondaryAction = gluonGrey;
 
   /// Texto do botão secundário escuro.
-  static const Color darkOnSecondary = softWhite;
+  static const Color darkOnSecondary = snow;
 
-  /// action escuro — azul sobre tinta.
-  static const Color darkAction = brandBlue;
+  /// action escuro — Branco 100 sobre Preto 90 (15.6:1, AAA texto).
+  static const Color darkAction = white100;
 
   /// actionPressed escuro.
-  static const Color darkActionPressed = brandBlue;
+  static const Color darkActionPressed = white80;
 
-  /// actionSoft escuro — fundo de seleção (azul a 12%).
-  static const Color darkActionSoft = brandBlue;
+  /// actionSoft escuro — fonte do véu de selecção (Branco 100).
+  static const Color darkActionSoft = white100;
 
-  /// Acento no escuro — o mesmo azul #0067FF (rótulo sobre ele = suave).
-  static const Color darkAccentBlue = brandBlue;
-  static const Color accentBlueDark = brandBlue;
+  /// Acento no escuro — Branco 100.
+  static const Color darkAccentBlue = white100;
+  static const Color accentBlueDark = white100;
 
   /// Fonte do véu de acento no escuro.
-  static const Color darkAccentBlueSoft = brandBlue;
+  static const Color darkAccentBlueSoft = white100;
 
-  /// Texto de alerta escuro (suave sobre tinta — aviso é ícone/borda).
-  static const Color darkWarningText = softWhite;
+  /// Texto de alerta escuro — Branco 60 (≈8.8:1 sobre Preto 90).
+  static const Color darkWarningText = ashDark;
 
-  /// error escuro — branco suave (tinta sobre tinta daria 1:1: texto e
-  /// bordas de erro invisíveis no canvas escuro).
-  static const Color darkErrorNeutral = softWhite;
+  /// error escuro — vermelho claro (≈7.5:1 sobre Gluon).
+  static const Color darkErrorNeutral = errorTextDark;
 
   /// Fundo suave de erro escuro.
   static const Color darkErrorSoft = alertError;
 
-  /// success escuro — azul oficial.
-  static const Color successNeutralDark = alertSuccess;
+  /// success escuro — tint de texto AA.
+  static const Color successNeutralDark = successTextDark;
 
-  /// info escuro (azul).
-  static const Color darkInfo = brandBlue;
+  /// info escuro (Branco 60).
+  static const Color darkInfo = ashDark;
 
   /// Rótulo sobre preenchimentos semânticos no escuro.
-  static const Color onSemanticDark = softWhite;
+  static const Color onSemanticDark = snow;
 
   // ─────────────────────────────────────────────────────────────────────
   // 3. Alertas (semânticos) — mantidos por compatibilidade
@@ -294,10 +372,11 @@ abstract final class AppColors {
     return lightTextSecondary;
   }
 
-  /// Cores das etiquetas de categoria de produto (paleta oficial).
-  static const Color categoryResale = brandInk; // revenda: tinta
-  static const Color categoryProduzido = brandBlue; // produzido: azul
-  static const Color categoryComposto = surfaceGray; // composto: cinza
+  /// Cores das etiquetas de categoria de produto (escala neutra — o
+  /// acento fica reservado a CTA/foco/selecção).
+  static const Color categoryResale = black100; // revenda: Preto 100
+  static const Color categoryProduzido = black70; // produzido: Preto 70
+  static const Color categoryComposto = white90; // composto: Branco 90
   static Color getIncomeLight(ColorScheme scheme, Brightness brightness) {
     return brightness == Brightness.light
         ? lightSurfaceSecondary
@@ -306,7 +385,7 @@ abstract final class AppColors {
 
   // ── Aliases de migração ──
   static const Color statusError = errorNeutral;
-  static const Color statusWarning = accentBlue;
+  static const Color statusWarning = warning;
   static const Color statusSuccess = successNeutral;
   static const Color petrol = darkBackground;
   static const Color backgroundDark = darkBackground;

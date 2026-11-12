@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// como blocos e os ícones como quadrados vazios — o master deixa de ser
 /// uma prova visual fiel da tela. Carregamos:
 ///
-/// * **Outfit** (`assets/fonts/Outfit-Variable.ttf`) — família do app;
+/// * **Inter** (`assets/fonts/Inter-Variable.ttf`) — família do app;
 /// * **MaterialIcons** (`materialicons-regular.otf` do SDK) — todos os
 ///   `Icon`/`IconData` do Material.
 ///
@@ -21,7 +21,7 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> loadGoldenFonts() async {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  await _loadFile('Outfit', 'assets/fonts/Outfit-Variable.ttf');
+  await _loadFile('Inter', 'assets/fonts/Inter-Variable.ttf');
 
   final root = _flutterRoot();
   if (root == null) {

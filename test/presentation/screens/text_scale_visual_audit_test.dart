@@ -187,7 +187,7 @@ Widget _stores(Tenant tenant) => ProviderScope(
 );
 
 void main() {
-  // Fontes reais (Outfit + MaterialIcons) também nesta auditoria: sem isso
+  // Fontes reais (Inter + MaterialIcons) também nesta auditoria: sem isso
   // os PNGs mostram o texto em blocos Ahem e os ícones em quadrados.
   setUpAll(loadGoldenFonts);
 

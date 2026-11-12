@@ -234,7 +234,7 @@ Key widgets (all with design system consistency):
 ### 4.5 Known Theme Issues
 - `always_use_package_imports` excluded by design convention (relative imports used)
 - Font weight mapping: `FontWeight.w600` maps to eixo `wght` ~400-500 in Inter variable
-- Palette is closed: only `#FF6A2A`, `#F0F0F0`, `#F9F9F9`, `#0C0B0A` — alerts `#2E7D32`/`#C62828`/`#F9A825` are the only exception (enforced by `test/core/theme/palette_guard_test.dart`)
+- Palette is closed: only the official gray scale `#0A0E15`/`#212631`/`#373F4E`/`#4E576A`/`#667085` and `#FFFFFF`/`#F0F1F5`/`#E0E4EB`/`#D1D6E0`/`#BFC5D4` — alerts `#2E7D32`/`#C62828` (plus dark text tints `#66BB6A`/`#FF8A80`) are the only exception. No orange (enforced by `test/core/theme/palette_guard_test.dart`)
 - `OutlineInputBorder` radius consistency: `AppRadius.mdAll` (12) used everywhere
 
 ---

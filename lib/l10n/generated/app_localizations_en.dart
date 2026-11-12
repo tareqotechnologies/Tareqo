@@ -3092,13 +3092,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quotationTemplatePreviewBadge => 'Preview';
 
   @override
-  String get paletteBlue => 'Blue';
+  String get paletteBlue => 'Graphite';
 
   @override
-  String get paletteBeige => 'Beige';
+  String get paletteBeige => 'Snow white';
 
   @override
-  String get paletteWarmGray => 'Warm gray';
+  String get paletteWarmGray => 'Light gray';
 
   @override
   String get paletteSoftBlack => 'Soft black';

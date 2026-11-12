@@ -84,13 +84,13 @@ Vue du jour du canvas V3 — l'onglet Accueil n'a PAS d'avatar (le bouton **Se d
 - **3 cartes de métrique compactes** (sans icônes, disposition de l'app de référence) :
  - **Ventes** — ventes de la période sélectionnée dans la pilule avec le **delta vs la période précédente** en sous-texte coloré (vert `+N%` / rouge `-N%`) ;
  - **Caisse** — solde de caisse cadencé à la période (`dashboardCashFlowProvider`) ; un solde négatif rend la valeur en rouge ; sous-texte = code devise (`MZN`) ;
- - **À recevoir** — total de crédit en attente avec le **compteur de fiados** en orange dans le sous-texte (ex. `4 fiados`) ;
+ - **À recevoir** — total de crédit en attente avec le **compteur de fiados** en Noir 70 dans le sous-texte (ex. `4 fiados`) ;
 - **Flux d'activité** (« Atividade de hoje » + compteur d'événements à droite) dans une carte unique avec icônes circulaires teintées et ancre (valeur/badge) à droite :
  - **Ventes** (icône `north_east` verte, `+valeur` en vert) — toucher ouvre `SaleDetailScreen` ;
  - **Entrées de stock** (icône boîte grise, `+qty` en blanc) — achats du jour, une ligne par article ;
- - **Paiements de fiado** (icône `payments` ambre dans un **cercle en pointillés**, `+valeur` en vert) — dettes soldées payées aujourd'hui ;
+ - **Paiements de fiado** (icône `payments` neutre dans un **cercle en pointillés**, `+valeur` en vert) — dettes soldées payées aujourd'hui ;
  - **Dépenses** (icône `south_west` rouge, `-valeur` en rouge) — dépenses payées du jour ;
- - **Stock faible** (icône d'alerte orange + pilule orange pleine **« Alerta »**) — produits actifs avec `stockQuantity < 5` unités (`Quantity.lowStockThresholdUnits`) ;
+ - **Stock faible** (icône d'alerte encre + pilule neutre pleine **« Alerta »**) — produits actifs avec `stockQuantity < 5` unités (`Quantity.lowStockThresholdUnits`) ;
  - **Péremption (W11)** via `expiryAlertsProvider` : **rouges** pour les lots **périmés** avec du stock et **jaunes** pour les lots expirant dans **< 30 jours** (`expiryWarningDays`), triées par urgence (périmés d'abord) ;
 - **Bannière de synchronisation en attente** (outbox du mode SaaS) quand la file hors-ligne n'est pas vide, avec action « Sincronizar » ;
 - Une erreur de chargement des KPI affiche un avertissement compact avec réessai (`InlineErrorCard`) au lieu de faux zéros.
@@ -148,7 +148,7 @@ Vue du jour du canvas V3 — l'onglet Accueil n'a PAS d'avatar (le bouton **Se d
 ### 5. `DebtsScreen` + `AddDebtSheet` (Crédit)
 
 - **Onglets :** « Pendentes » (En attente) et « Quitadas » (Soldées) (SegmentedButton local `_DebtView`) ;
-- **En attente :** carte résumé « Total à recevoir » (orange) + liste des dettes avec avatar initial, chip d'échéance (`En retard` rouge / `Échoit aujourd'hui` jaune / `Dans N jours` vert) et bouton **« Soldé la dette »** (dialogue de confirmation → `SettleDebtUseCase` → invalide crédit, historique, caisse et solde) ;
+- **En attente :** carte résumé « Total à recevoir » (neutre) + liste des dettes avec avatar initial, chip d'échéance (`En retard` rouge / `Échoit aujourd'hui` jaune / `Dans N jours` vert) et bouton **« Soldé la dette »** (dialogue de confirmation → `SettleDebtUseCase` → invalide crédit, historique, caisse et solde) ;
 - **Soldées :** carte résumé « Total quitado » (Total soldé) (verte) + historique avec `paidAt` (« Quitada em 25/07/2026 ») ;
 - **`AddDebtSheet` :** nom du client, montant, échéance (DatePicker) → `AddDebtUseCase` (enregistre la dette + l'entrée en attente liée) ; attrape `InvalidDebtAmountException` et gère `PendingEntryRegistrationException` spécialement (informe que le crédit a été enregistré et demande de vérifier Finances — sans suggérer de réessayer).
 
@@ -174,7 +174,7 @@ Vue du jour du canvas V3 — l'onglet Accueil n'a PAS d'avatar (le bouton **Se d
 `lib/core/theme/app_theme.dart` :
 
 - **Seed :** vert émeraude profond `#0E6B5A` ; `ColorScheme.fromSeed` pour clair/sombre ;
-- **Couleurs sémantiques (`AppColors`) :** `income` vert `#189A5E`, `expense` rouge `#D64550`, `warning` orange `#E08F2B` ;
+- **Couleurs sémantiques (`AppColors`) :** `income` vert `#2E7D32`, `expense` rouge `#C62828`, `warning` neutre (Noir 70 `#4E576A` clair / Blanc 60 `#BFC5D4` sombre) — sans orange ;
 - **Directives visuelles :** surfaces neutres, cartes avec bordure subtile sans ombre lourde (`elevation: 0`), coins arrondis (14–20px), **champs remplis sans contour**, `FilledButton`s de 52px de haut ;
 - **Navigation :** `NavigationBar` (68px de haut, indicateur `primaryContainer`) et `NavigationRail` (`groupAlignment: -0.9`) ;
 - **Typographie :** échelle modulaire (Apple HIG/SF Pro) : **34** (Large Title — login/bienvenue) → **28** (titres de page) → **24** (KPI/totaux) → **22** (cartes/modales/AppBar) → **20** (sous-titres/sections) → **17/15/14/13/12/11** (corps large/corps/surbrillances de ligne/note/libellés/légende) ; hiérarchie par taille + poids (w300 display, w400 corps, w600+ valeurs), **`tabularFigures`** sur les styles numériques (les prix MZN et les quantités kg/un s'alignent chiffre à chiffre), et **trois axes de précision** comme SF Pro : (1) **axe optique `opsz`** — Inter est variable (14–32) et les titres ≥20px utilisent la coupe *Display* (opsz 24–32) tandis que le corps reste sur la coupe *Text* ; (2) **tracking négatif** sur les titres (−0.15 à −0.6), neutre sur le corps, légèrement positif sur les légendes ; (3) **hauteur de ligne** au ratio SF Pro (~1.2 titres, ~1.4 corps) ; la décision complète (tableau d'échelle, rôles et règles d'or) est dans [chapitre 12 — Décisions d'architecture](12-architecture-decisions.md) ;

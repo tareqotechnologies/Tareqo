@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/app_typography.dart';
@@ -160,7 +161,7 @@ class AppIconBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final fg = color ?? theme.accent;
+    final fg = color ?? theme.colorScheme.onSurface;
     final bg = backgroundColor ?? IconTone.darkBackground(fg);
     final iconFg = IconTone.lightForeground(fg);
     final radius =
@@ -329,7 +330,9 @@ class AppPill extends StatelessWidget {
             Icon(
               icon,
               size: 14,
-              color: selected ? theme.accent : scheme.onSurfaceVariant,
+              color: selected
+                  ? AppColors.accentOn(theme.brightness)
+                  : scheme.onSurfaceVariant,
             ),
             const SizedBox(width: 8),
           ],

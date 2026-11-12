@@ -183,8 +183,8 @@ class _PhotoActionButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool isDestructive;
 
-  /// Ação principal (câmera): preenchimento azul saturado com glifo branco
-  /// suave — mesma regra de contraste das demais superfícies cheias da marca.
+  /// Ação principal (câmera): preenchimento tinta com glifo Void — mesma
+  /// regra de contraste das demais superfícies cheias da marca (6.2:1).
   final bool isPrimary;
 
   @override
@@ -606,9 +606,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
               language: Formatters.currentLanguage,
             );
             if (quantity < 0 ||
-                (value != null &&
-                    value.trim().isNotEmpty &&
-                    quantity == 0)) {
+                (value != null && value.trim().isNotEmpty && quantity == 0)) {
               return l10n.productsStockError;
             }
             return null;

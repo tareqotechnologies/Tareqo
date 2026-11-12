@@ -9,14 +9,14 @@ import 'app_typography.dart';
 // `AppStatusColors` acessíveis para quem importa apenas `app_theme.dart`.
 export 'app_colors.dart';
 
-/// Tema central TAREQO — Material 3 sobre a paleta Outfit (guia em anexo).
+/// Tema central TAREQO — Material 3 sobre a escala "Shades of gray" (2026).
 ///
-/// Cinco cores sólidas: azul `#0067FF` (ação, foco, seleção), cinza médio
-/// `#6E7174` (texto secundário claro), cinza `#E7E5E5` (campos e
-/// divisores), suave `#F9F9F9` (canvas claro) e tinta `#232323`
-/// (tinta e canvas escuro). O botão primário é azul com rótulo branco
-/// suave. A pílula selecionada é preenchida de tinta no claro e de suave
-/// no escuro, com contorno azul no estado em repouso.
+/// Escala neutra de 10 passos (Preto 100→60 / Branco 100→60), sem
+/// nenhum laranja. O acento é a própria tinta: Preto 100 no claro e
+/// Branco 100 no escuro, reservados a CTA primário, foco, selecção e
+/// marca. A linguagem é minimalista: canvas em camada, cartões brancos
+/// sobre canvas cinza (claro), superfícies Preto 90/80 (escuro), sombras
+/// neutras difusas, campos preenchidos e foco a acender a borda na tinta.
 ///
 /// Arquitetura:
 /// * `AppTheme.light` / `AppTheme.dark` — dois [ThemeData] construídos
@@ -27,17 +27,17 @@ export 'app_colors.dart';
 ///   movimento em `AppTokens`.
 ///
 /// Papéis do [ColorScheme] (contrato):
-/// * `primary` = azul `#0067FF`. `onPrimary` = suave `#F9F9F9` (4.55:1, AA).
-/// * `primaryContainer` = o mesmo azul em véu sobre a superfície.
-///   `errorContainer` guarda o alerta de erro.
+/// * `primary` = Preto 100 no claro, Branco 100 no escuro (19:1).
+/// * `primaryContainer` = tinta em véu sobre a superfície.
+/// * `secondary` = texto secundário AA; `outline` = borda não-texto.
 ///
-/// Contraste auditado (WCAG): texto de corpo ≥ 4.5:1 sobre as superfícies.
-/// Suave sobre azul passa AA de texto; azul sobre suave também (4.55:1).
+/// Contraste auditado (WCAG): texto de corpo ≥ 4.5:1 sobre as superfícies;
+/// ícones/foco usam a tinta (19:1 no claro, 15.6:1 no escuro).
 abstract final class AppTheme {
-  /// Tema claro — canvas #F9F9F9, campos #E7E5E5, tinta #232323, ação #0067FF.
+  /// Tema claro — canvas Branco 90, cartões Branco 100, tinta Preto 100.
   static final ThemeData light = _base(Brightness.light);
 
-  /// Tema escuro — canvas #232323, texto #F9F9F9, ação #0067FF.
+  /// Tema escuro — canvas Preto 100, cartões Preto 90, elevadas Preto 80.
   static final ThemeData dark = _base(Brightness.dark);
 
   static ThemeData _base(Brightness brightness) {
@@ -65,20 +65,29 @@ abstract final class AppTheme {
 
     // ── Bordas ───────────────────────────────────────────────────────
     final border = isLight ? AppColors.lightBorder : AppColors.darkBorder;
-    final separator = isLight ? AppColors.lightDivider : AppColors.darkDivider;
-    // Borda de campo: `border` (cinza de superfície no claro) sumiria dentro
-    // do próprio fill `#E7E5E5`. O cinza médio mede 3.9:1 sobre o fill no
-    // claro; no escuro `darkBorder` mede 3.2:1 sobre a tinta (WCAG 1.4.11).
-    final fieldBorder = isLight ? AppColors.grayMid : AppColors.darkBorder;
+    // Divisor Apple: Branco 80 no claro; Preto 70 a 55% no escuro (Preto
+    // 80 puro ficaria pesado sobre os cartões Preto 90).
+    final separator = isLight
+        ? AppColors.lightDivider
+        : AppColors.black70.withValues(alpha: 0.55);
+    // Borda de campo: Preto 60 nos dois temas. No claro mede 4.4:1 sobre o
+    // fill/canvas Branco 90; no escuro 3.05:1 sobre Preto 90 (WCAG 1.4.11
+    // exige >=3:1). A tinta ficaria pesada para a linguagem minimalista.
+    final fieldBorder = AppColors.controlBorder;
 
     // ── Ação / Primária ──────────────────────────────────────────────
-    // `action` = azul #0067FF nos dois temas. `onAction` = branco suave
-    // sobre o azul (4.55:1).
+    // `action` = tinta (Preto 100 no claro, Branco 100 no escuro).
+    // `onAction` = Branco 100 / Preto 100 (19:1).
     final action = isLight ? AppColors.lightPrimary : AppColors.darkPrimary;
     final onAction = isLight
         ? AppColors.lightOnPrimary
         : AppColors.darkOnPrimary;
-    // Véu do azul sobre a superfície: 7% no claro, 12% no escuro.
+    // Acento de TEXTO/ícone: a mesma tinta (19:1 no claro; branco sobre
+    // Preto 90 no escuro) — sem laranja.
+    final actionText = isLight
+        ? AppColors.lightActionText
+        : AppColors.darkAction;
+    // Véu da tinta sobre a superfície: 7% no claro, 12% no escuro.
     final actionTint = Color.alphaBlend(
       action.withValues(alpha: isLight ? 0.07 : 0.12),
       surface,
@@ -93,16 +102,14 @@ abstract final class AppTheme {
         : AppColors.darkAccentBlueSoft;
 
     // ── Semântica ────────────────────────────────────────────────────
-    // No claro o erro é tinta sobre canvas suave; no escuro é o inverso
-    // (suave sobre tinta). Antes o papel `error` valia `#232323` nos dois
-    // temas e sumia no canvas escuro (1:1).
+    // Erro AA nos dois temas: #C62828 no claro (5.4:1) e #FF8A80 no
+    // escuro (7.5:1 sobre Gluon).
     final error = isLight ? AppColors.errorNeutral : AppColors.darkErrorNeutral;
     final errorSoft = isLight
         ? AppColors.lightErrorSoft
         : AppColors.darkErrorSoft;
-    // Rótulo sobre o preenchimento de erro: suave sobre tinta no claro,
-    // tinta sobre suave no escuro.
-    final onError = isLight ? AppColors.softWhite : AppColors.brandInk;
+    // Rótulo sobre o preenchimento de erro: Snow no claro, Void no escuro.
+    final onError = isLight ? AppColors.snow : AppColors.darkVoid;
 
     // ── ColorScheme (papéis explícitos) ──────────────────────────────
     final scheme = ColorScheme(
@@ -112,43 +119,47 @@ abstract final class AppTheme {
       primaryContainer: actionTint,
       onPrimaryContainer: textPrimary,
       secondary: textSecondary,
-      onSecondary: isLight ? AppColors.softWhite : AppColors.brandInk,
+      onSecondary: isLight ? AppColors.snow : AppColors.darkVoid,
       secondaryContainer: surfaceSecondary,
       onSecondaryContainer: textPrimary,
       tertiary: warningText,
-      onTertiary: isLight ? AppColors.softWhite : AppColors.brandInk,
+      onTertiary: isLight ? AppColors.snow : AppColors.darkVoid,
       tertiaryContainer: warningSoft,
       onTertiaryContainer: warningText,
       surface: surface,
       onSurface: textPrimary,
       onSurfaceVariant: textSecondary,
       surfaceContainerLowest: isLight
-          ? AppColors.softWhite
+          ? AppColors.snow
           : AppColors.darkBackground,
-      surfaceContainerLow: isLight ? AppColors.softWhite : surface,
+      surfaceContainerLow: isLight ? AppColors.snow : surface,
+      // Zonas agrupadas: SnowMist no claro, Slate no escuro.
       surfaceContainer: surfaceSecondary,
       surfaceContainerHigh: surfaceElevated,
-      surfaceContainerHighest: canvas,
-      outline: border,
-      outlineVariant: border,
+      surfaceContainerHighest: surfaceSecondary,
+      // Outline = borda não-texto AA (Dusty); outlineVariant = hairline.
+      outline: AppColors.controlBorder,
+      outlineVariant: isLight
+          ? AppColors.lightBorder
+          : AppColors.black70.withValues(alpha: 0.6),
       error: error,
       onError: onError,
-      // `errorSoft` é a tinta oficial: o rótulo sobre ela é suave nos dois
-      // temas (no escuro `error` é suave — texto sobre texto sumiria).
+      // `errorSoft` (#C62828) nos dois temas; o rótulo é Snow.
       errorContainer: errorSoft,
-      onErrorContainer: AppColors.softWhite,
+      onErrorContainer: AppColors.snow,
       inverseSurface: textPrimary,
-      onInverseSurface: isLight ? AppColors.softWhite : AppColors.brandInk,
+      onInverseSurface: isLight ? AppColors.snow : AppColors.darkVoid,
       // Sobre `inverseSurface` (snackbar): o oposto da ação do tema.
       inversePrimary: isLight ? AppColors.darkPrimary : AppColors.lightPrimary,
-      shadow: Colors.transparent,
-      // Scrim = preto oficial em ambos os temas (modalBarrierColor).
-      scrim: AppColors.brandInk,
+      // Preto 100: as sombras premium (PremiumDecor) finalmente visíveis.
+      shadow: AppColors.darkVoid,
+      // Scrim = Void em ambos os temas (modalBarrierColor).
+      scrim: AppColors.darkVoid,
       surfaceTint: Colors.transparent,
     );
 
     // ── Overlays de interação (neutros, paleta oficial) ──────────────
-    final stateVeil = isLight ? AppColors.brandInk : AppColors.softWhite;
+    final stateVeil = isLight ? AppColors.darkVoid : AppColors.snow;
     WidgetStateProperty<Color?> surfaceOverlay() =>
         WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) return null;
@@ -164,9 +175,9 @@ abstract final class AppTheme {
           return null;
         });
 
-    // Botão preenchido: o véu vai na direção OPOSTA ao preenchimento (clareia
-    // o preto no claro, escurece o gelo no escuro) para o press ser visível.
-    final filledVeil = AppColors.brandInk;
+    // Botão preenchido: o véu escurece a tinta no press/hover (o rótulo Void
+    // mantém contraste AA; escurecer também lê como "afundar").
+    final filledVeil = AppColors.darkVoid;
     WidgetStateProperty<Color?> filledOverlay() =>
         WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled)) return null;
@@ -187,13 +198,11 @@ abstract final class AppTheme {
         return BorderSide(color: separator);
       }
       if (states.contains(WidgetState.focused)) {
-        return BorderSide(color: action, width: 1.5);
+        return BorderSide(color: actionText, width: 2);
       }
-      // Contorno forte da paleta: preto no claro, suave no escuro (o preto
-      // sobre canvas preto daria 1:1 — borda invisível).
-      return BorderSide(
-        color: isLight ? AppColors.controlBorder : AppColors.darkBorderStrong,
-      );
+      // Contorno não-texto AA: Dusty nos dois temas (3.5:1 no claro,
+      // 4.8:1 sobre Gluon no escuro).
+      return const BorderSide(color: AppColors.controlBorder);
     });
 
     // ── ThemeData ────────────────────────────────────────────────────
@@ -231,16 +240,16 @@ abstract final class AppTheme {
         },
       ),
 
-      // Cursor e seleção de texto na cor de ação (antes herdavam um primary
-      // sem contraste).
+      // Cursor e seleção de texto no acento AA (tinta no claro, tinta no
+      // escuro) — a tinta pura mede 2.85:1 sobre Snow.
       textSelectionTheme: TextSelectionThemeData(
-        cursorColor: action,
-        selectionColor: action.withValues(alpha: 0.22),
-        selectionHandleColor: action,
+        cursorColor: actionText,
+        selectionColor: actionText.withValues(alpha: 0.22),
+        selectionHandleColor: actionText,
       ),
 
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: action,
+        color: actionText,
         linearTrackColor: separator,
         circularTrackColor: Colors.transparent,
       ),
@@ -277,30 +286,29 @@ abstract final class AppTheme {
       ),
 
       // ── Campos de formulário ────────────────────────────────────────
+      // Linguagem Apple: campo preenchido (SnowMist/Slate), sem contorno
+      // pesado; o foco acende a borda no acento AA com 2 px.
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceSecondary,
+        // Campo preenchido: Branco 90 no claro; no escuro o próprio cartão
+        // (Preto 90) — a borda Preto 60 desenha o limite (>=3:1 nos dois).
+        fillColor: isLight ? surfaceSecondary : surface,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.sm + 2,
         ),
         prefixIconColor: textSecondary,
         suffixIconColor: textSecondary,
-        // Rótulo: tinta/gelo. O cinza médio sobre o fill `#E7E5E5` media
-        // 3.91:1 (reprovava AA de texto pequeno) e o azul flutuante 3.82:1.
         labelStyle: AppTypography.labelMedium.copyWith(color: textPrimary),
         floatingLabelStyle: AppTypography.labelLarge.copyWith(
           color: textPrimary,
         ),
-        // Hint: tinta a 72% no claro (5.6:1 sobre o fill — ainda lê como
-        // dica, não como valor) e o texto secundário no escuro (12.5:1).
+        // Hint: texto secundário AA nos dois temas (lê como dica, nunca
+        // como valor).
         hintStyle: AppTypography.bodyMedium.copyWith(
-          color: isLight
-              ? AppColors.brandInk.withValues(alpha: 0.72)
-              : textSecondary,
+          color: isLight ? AppColors.black70 : AppColors.white60,
         ),
-        // Texto auxiliar do campo = 12 (metadado). Nunca 11: a instrução
-        // do campo é necessária para concluir a ação.
+        // Texto auxiliar do campo = 12 (metadado). Nunca 11.
         helperStyle: AppTypography.bodySmall.copyWith(color: textSecondary),
         errorStyle: AppTypography.labelMedium.copyWith(color: error),
         border: OutlineInputBorder(
@@ -313,7 +321,7 @@ abstract final class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppRadius.mdAll,
-          borderSide: BorderSide(color: action, width: 1.5),
+          borderSide: BorderSide(color: actionText, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: AppRadius.mdAll,
@@ -321,7 +329,7 @@ abstract final class AppTheme {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: AppRadius.mdAll,
-          borderSide: BorderSide(color: error, width: 1.5),
+          borderSide: BorderSide(color: error, width: 2),
         ),
       ),
 
@@ -358,7 +366,7 @@ abstract final class AppTheme {
               minimumSize: const Size(0, AppSizes.controlHeight),
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
               backgroundColor: surface,
-              foregroundColor: action,
+              foregroundColor: actionText,
               elevation: AppElevation.e0,
               shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
               textStyle: AppTypography.labelLarge,
@@ -408,9 +416,10 @@ abstract final class AppTheme {
       // ── Chips / badges ───────────────────────────────────────────────
       chipTheme: ChipThemeData(
         backgroundColor: surfaceSecondary,
-        selectedColor: actionTint,
+        // Seleccionado = véu neutro da tinta (o acento fica no CTA/foco).
+        selectedColor: textPrimary.withValues(alpha: 0.06),
         disabledColor: textPrimary.withValues(alpha: 0.08),
-        checkmarkColor: action,
+        checkmarkColor: actionText,
         showCheckmark: false,
         shape: const StadiumBorder(),
         side: BorderSide.none,
@@ -436,18 +445,18 @@ abstract final class AppTheme {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
             size: AppSizes.navIcon,
-            color: selected ? action : textSecondary,
+            color: selected ? actionText : textSecondary,
           );
         }),
         // Navegação = labelMedium (13/w500) - conforme especificação.
         // Ativo usa w600 para estado selecionado.
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          // Azul sobre a tinta mede 3.28:1 — o rótulo ativo usa texto
-          // primário no escuro; o estado continua no ícone azul e no
+          // No escuro o rótulo ativo usa texto primário (Snow); no claro
+          // usa o acento AA (tinta). O estado continua no ícone e no
           // indicador tintado.
           return AppTypography.navigationLabel(
-            selected ? (isLight ? action : textPrimary) : textSecondary,
+            selected ? (isLight ? actionText : textPrimary) : textSecondary,
             selected: selected,
           );
         }),
@@ -460,9 +469,12 @@ abstract final class AppTheme {
         indicatorShape: const StadiumBorder(),
         minWidth: 80,
         groupAlignment: -0.85,
-        selectedIconTheme: IconThemeData(color: action, size: AppSizes.navIcon),
+        selectedIconTheme: IconThemeData(
+          color: actionText,
+          size: AppSizes.navIcon,
+        ),
         selectedLabelTextStyle: AppTypography.navigationLabel(
-          isLight ? action : textPrimary,
+          isLight ? actionText : textPrimary,
           selected: true,
         ),
         unselectedIconTheme: IconThemeData(
@@ -473,11 +485,11 @@ abstract final class AppTheme {
       ),
 
       tabBarTheme: TabBarThemeData(
-        // Texto ativo: azul no claro (4.55:1); no escuro o azul só serve
-        // para o indicador (não-texto) — o rótulo usa o texto primário.
-        labelColor: isLight ? action : textPrimary,
+        // Texto ativo: tinta no claro (tinta mede 2.85:1); no escuro o
+        // rótulo usa texto primário e a tinta fica no indicador.
+        labelColor: isLight ? actionText : textPrimary,
         unselectedLabelColor: textSecondary,
-        indicatorColor: action,
+        indicatorColor: actionText,
         indicatorSize: TabBarIndicatorSize.label,
         dividerColor: separator,
         labelStyle: AppTypography.labelMedium.copyWith(
@@ -523,7 +535,7 @@ abstract final class AppTheme {
         backgroundColor: surfaceElevated,
         surfaceTintColor: Colors.transparent,
         elevation: AppElevation.e4,
-        shadowColor: Colors.transparent,
+        shadowColor: scheme.shadow,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.xlAll),
         titleTextStyle: AppTypography.titleMedium.copyWith(color: textPrimary),
         contentTextStyle: AppTypography.bodyMedium.copyWith(
@@ -535,10 +547,10 @@ abstract final class AppTheme {
         backgroundColor: surfaceElevated,
         surfaceTintColor: Colors.transparent,
         modalBackgroundColor: surfaceElevated,
-        modalBarrierColor: AppColors.brandInk.withValues(
-          alpha: isLight ? 0.40 : 0.60,
+        modalBarrierColor: AppColors.darkVoid.withValues(
+          alpha: isLight ? 0.45 : 0.65,
         ),
-        modalElevation: AppElevation.e3,
+        modalElevation: AppElevation.e4,
         elevation: AppElevation.e0,
         showDragHandle: false,
         shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetTop),
@@ -547,7 +559,7 @@ abstract final class AppTheme {
       popupMenuTheme: PopupMenuThemeData(
         color: surfaceElevated,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.transparent,
+        shadowColor: scheme.shadow,
         elevation: AppElevation.e3,
         shape: RoundedRectangleBorder(
           borderRadius: AppRadius.mdAll,
@@ -561,15 +573,16 @@ abstract final class AppTheme {
         behavior: SnackBarBehavior.floating,
         elevation: AppElevation.e3,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
-        // Fundo = azul da marca (feedback de ação) nos dois temas.
-        backgroundColor: action,
+        // Fundo = tinta elevada (Preto 90) nos dois temas: barra escura e
+        // silenciosa; a ação usa Branco 100 (15:1) com sublinhado de foco —
+        // sem qualquer laranja.
+        backgroundColor: AppColors.black90,
         contentTextStyle: AppTypography.bodyMedium.copyWith(
           fontWeight: FontWeight.w500,
-          color: onAction,
+          color: AppColors.white100,
         ),
-        // Ação e fecho = branco suave sobre o azul (4.55:1, AA texto).
-        actionTextColor: onAction,
-        closeIconColor: onAction.withValues(alpha: 0.7),
+        actionTextColor: AppColors.white100,
+        closeIconColor: AppColors.white100.withValues(alpha: 0.8),
       ),
 
       tooltipTheme: TooltipThemeData(
@@ -594,31 +607,25 @@ abstract final class AppTheme {
               vertical: AppSpacing.xs,
             ),
           ),
-          // Pílula do anexo: repouso com contorno azul; selecionado
-          // preenchido (preto no claro, suave no escuro).
+          // Pílula segmentada minimalista: repouso em superfície com
+          // hairline Preto 60; seleccionado preenchido de tinta com rótulo
+          // inverso (19:1) — o acento não se repete em cada controlo.
           shape: const WidgetStatePropertyAll(StadiumBorder()),
           backgroundColor: WidgetStateProperty.resolveWith((states) {
             final selected = states.contains(WidgetState.selected);
-            if (selected) {
-              return isLight ? AppColors.brandInk : AppColors.softWhite;
-            }
-            return isLight ? AppColors.softWhite : AppColors.brandInk;
+            if (selected) return textPrimary;
+            return isLight ? AppColors.white100 : surface;
           }),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
             final selected = states.contains(WidgetState.selected);
-            if (selected) {
-              return isLight ? AppColors.softWhite : AppColors.brandInk;
-            }
-            return isLight ? AppColors.brandInk : AppColors.softWhite;
+            if (selected) return isLight ? AppColors.white100 : canvas;
+            return textPrimary;
           }),
           side: WidgetStateProperty.resolveWith((states) {
             final selected = states.contains(WidgetState.selected);
-            if (selected) {
-              return BorderSide(
-                color: isLight ? AppColors.brandInk : AppColors.softWhite,
-              );
-            }
-            return const BorderSide(color: AppColors.brandBlue, width: 1.5);
+            return BorderSide(
+              color: selected ? textPrimary : AppColors.controlBorder,
+            );
           }),
           overlayColor: surfaceOverlay(),
           animationDuration: AppDurations.fast,
@@ -629,7 +636,7 @@ abstract final class AppTheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return onAction;
-          return isLight ? AppColors.softWhite : textSecondary;
+          return isLight ? AppColors.white100 : textSecondary;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) return action;

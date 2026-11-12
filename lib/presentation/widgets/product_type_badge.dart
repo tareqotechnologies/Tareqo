@@ -5,15 +5,16 @@ import '../../core/theme/app_colors.dart';
 import '../../domain/entities/product.dart';
 import 'status_chip.dart';
 
-/// Cores dos selos de categoria de produto — paleta oficial.
-/// Revenda: preto; Produzido: azul; Composto: cinza.
-/// Utilizadas nos selos/badges ao lado dos produtos.
+/// Cores dos selos de categoria de produto — escala neutra oficial.
+/// Matéria-prima: Preto 60; Revenda: Preto 100; Produzido: Preto 70;
+/// Composto: Branco 90; Embalagem: Branco 80. O acento não é usado em
+/// selos informativos (micro-acento só em CTA/foco/selecção).
 Color productTypeColor(ProductType type) => switch (type) {
-  ProductType.rawMaterial => AppColors.accentBlueSoft,
+  ProductType.rawMaterial => AppColors.black60,
   ProductType.resale => AppColors.categoryResale,
   ProductType.manufactured => AppColors.categoryProduzido,
   ProductType.composite => AppColors.categoryComposto,
-  ProductType.packaging => AppColors.lightSurfaceSecondary,
+  ProductType.packaging => AppColors.white80,
 };
 
 /// Rótulo localizado do tipo estrutural do produto (Fase 1).

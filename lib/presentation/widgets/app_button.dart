@@ -139,7 +139,7 @@ class _AppButtonState extends State<AppButton>
             ).merge(widget.style),
             child: Ink(
               decoration: BoxDecoration(
-                // Minimalista: cor sólida azul (paleta oficial). Sem
+                // Minimalista: cor sólida tinta (paleta oficial). Sem
                 // gradiente com tons fora da paleta.
                 color: scheme.primary,
                 borderRadius: BorderRadius.circular(AppRadius.md),

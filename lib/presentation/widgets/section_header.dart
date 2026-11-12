@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/app_typography.dart';
 
@@ -63,9 +64,9 @@ class SectionHeader extends StatelessWidget {
               children: [
                 Text(
                   actionLabel!,
-                  // Rótulo de ação em texto primário no escuro (o azul
-                  // #0067FF sobre a tinta mede 3.28:1); o chevron azul
-                  // preserva a leitura de "ação" (ícone ≥ 3:1).
+                  // Rótulo de ação em texto primário; o chevron usa o
+                  // acento de traço (tinta no claro 5.0:1, tinta no escuro
+                  // 6.2:1) — a tinta pura reprova como ícone sobre neve.
                   style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
@@ -75,7 +76,9 @@ class SectionHeader extends StatelessWidget {
                 Icon(
                   Icons.chevron_right_rounded,
                   size: 16,
-                  color: theme.colorScheme.primary,
+                  color: theme.brightness == Brightness.light
+                      ? AppColors.lightActionText
+                      : AppColors.darkAction,
                 ),
               ],
             ),

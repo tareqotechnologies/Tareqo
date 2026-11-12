@@ -99,12 +99,12 @@ class AppTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius;
-    // Mesma borda de campo do InputDecorationTheme global: o cinza de
-    // superfície no claro sumiria dentro do fill `#E7E5E5` (1:1).
-    final fieldBorder =
-        Theme.of(context).brightness == Brightness.light
-        ? AppColors.grayMid
-        : AppColors.darkBorder;
+    // Mesma borda de campo do InputDecorationTheme global: Dusty nos dois
+    // temas (não-texto AA sobre o fill SnowMist/Slate).
+    final fieldBorder = AppColors.controlBorder;
+    final focusColor = Theme.of(context).brightness == Brightness.light
+        ? AppColors.lightActionText
+        : AppColors.darkAction;
     return TextFormField(
       controller: controller,
       focusNode: focusNode,
@@ -152,10 +152,7 @@ class AppTextField extends StatelessWidget {
             ? null
             : OutlineInputBorder(
                 borderRadius: radius,
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 1.5,
-                ),
+                borderSide: BorderSide(color: focusColor, width: 2),
               ),
       ),
     );

@@ -19,7 +19,7 @@ class InvoiceTemplateConfig {
     this.businessAddress = '',
     this.businessPhone = '',
     this.businessTaxId = '',
-    // Paleta do anexo: default preto #232323.
+    // Paleta do anexo: default Void #151419.
     // O utilizado persiste nos prefs do utilizador.
     this.primaryColor = AppColors.brandInk,
     this.templateStyle = 'Classic',
@@ -73,7 +73,9 @@ class InvoiceTemplateConfig {
         businessPhone: json['phone'] is String ? json['phone'] as String : '',
         businessTaxId: json['taxId'] is String ? json['taxId'] as String : '',
         primaryColor: Color(
-          json['color'] is int ? json['color'] as int : 0xFF232323,
+          json['color'] is int
+              ? json['color'] as int
+              : AppColors.brandInk.toARGB32(),
         ),
         templateStyle: _knownStyles.contains(json['style'])
             ? json['style']! as String

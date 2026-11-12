@@ -17,14 +17,14 @@ import 'pdf_accent.dart';
 /// função é uma cópia VERBATIM de código que já renderizava os PDFs em
 /// produção: migrar aqui elimina a duplicação SEM alterar o desenho.
 
-/// Carrega as fontes Outfit e cria o documento PDF base (tema embutido).
+/// Carrega as fontes Inter e cria o documento PDF base (tema embutido).
 ///
 /// Base = instância ESTÁTICA Regular (w400): o package `pdf` não resolve o
-/// eixo `wght` da variável, cuja instância padrão é Thin (w100) — o corpo
-/// do PDF sairia fino demais.
+/// eixo `wght` da variável — o corpo do PDF sairia com o peso padrão da
+/// instância em vez do Regular.
 Future<pw.Document> newPdfDocument() async {
-  final data = await rootBundle.load('assets/fonts/Outfit-Regular.ttf');
-  final bold = await rootBundle.load('assets/fonts/Outfit-Bold.ttf');
+  final data = await rootBundle.load('assets/fonts/Inter-Regular.ttf');
+  final bold = await rootBundle.load('assets/fonts/Inter-Bold.ttf');
   return pw.Document(
     theme: pw.ThemeData.withFont(
       base: pw.Font.ttf(data),

@@ -8,7 +8,7 @@ import 'package:tareqo/presentation/screens/admin/admin_thin_theme.dart';
 /// **Especificação executável da tipografia do TAREQO.**
 ///
 /// Trava a escala global (tamanho / entrelinha / peso / tracking), a família
-/// Outfit, o `tabularFigures` dos valores financeiros e o mapeamento dos 15
+/// Inter, o `tabularFigures` dos valores financeiros e o mapeamento dos 15
 /// papéis do [TextTheme] — este último é o que impede um papel sem mapeamento
 /// de herdar a escala padrão do Material (outra família e outros tamanhos).
 ///
@@ -115,7 +115,7 @@ void main() {
         );
         expect(
           style.fontFamily,
-          'Outfit',
+          'Inter',
           reason: '${t.name}: família única do app',
         );
         // Valores financeiros alinham coluna a coluna em todos os papéis.
@@ -127,13 +127,13 @@ void main() {
       });
     }
 
-    test('família é o nome puro da Outfit (nunca um stack CSS)', () {
-      // Regressão: `'Outfit, -apple-system, …'` NÃO é resolvido pelo motor e
+    test('família é o nome puro da Inter (nunca um stack CSS)', () {
+      // Regressão: `'Inter, -apple-system, …'` NÃO é resolvido pelo motor e
       // caía silenciosamente na fonte padrão da plataforma.
-      expect(AppTypography.family, 'Outfit');
+      expect(AppTypography.family, 'Inter');
       expect(AppTypography.family.contains(','), isFalse);
       expect(AppTypography.familyFallback, isNotEmpty);
-      expect(AppTypography.familyFallback.contains('Outfit'), isFalse);
+      expect(AppTypography.familyFallback.contains('Inter'), isFalse);
     });
 
     test('pesos usados são apenas Regular 400 e Medium 500', () {
@@ -193,8 +193,8 @@ void main() {
           );
           expect(
             style.fontFamily,
-            'Outfit',
-            reason: '${entry.key}: precisa usar a Outfit',
+            'Inter',
+            reason: '${entry.key}: precisa usar a Inter',
           );
         }
       });

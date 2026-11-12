@@ -167,7 +167,7 @@ Widget _buildApp({
     ],
     child: testApp(
       home: const AdminInvoicesScreen(),
-      // A fonte de teste (Ahem) é quadrada e muito mais larga que a Outfit
+      // A fonte de teste (Ahem) é quadrada e muito mais larga que a Inter
       // de produção: os botões do card têm largura fixa (160px) e o rótulo
       // "Marcar como paga" estoura ~104px mesmo com viewport largo. Clamp
       // mais agressivo compensa sem afetar as asserções de texto.

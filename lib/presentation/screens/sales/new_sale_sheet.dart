@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
@@ -1012,7 +1013,7 @@ class _Stepper extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.remove, size: 18),
             tooltip: l10n.a11yDecreaseQuantity,
-            color: active ? scheme.primary : scheme.onSurfaceVariant,
+            color: active ? scheme.onSurface : scheme.onSurfaceVariant,
             onPressed: quantity == 0 ? null : onRemove,
           ),
           InkWell(
@@ -1046,7 +1047,7 @@ class _Stepper extends StatelessWidget {
             tooltip: isWeight
                 ? l10n.a11yAddFraction
                 : l10n.a11yIncreaseQuantity,
-            color: scheme.primary,
+            color: scheme.onSurface,
             onPressed: soldOut ? null : (isWeight ? onAddFraction : onAdd),
           ),
         ],
@@ -1213,7 +1214,7 @@ class _CartSummary extends StatelessWidget {
         Icon(
           Icons.shopping_cart_outlined,
           size: AppSizes.iconSm,
-          color: scheme.primary,
+          color: scheme.onSurface,
         ),
         const SizedBox(width: AppSpacing.xs),
         Expanded(

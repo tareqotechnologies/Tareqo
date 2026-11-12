@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gera os masters da marca TQ com a paleta OFICIAL do anexo (Outfit):
+"""Gera os masters da marca TQ com a paleta OFICIAL do anexo (Inter):
 tinta #232323 + branco suave #F9F9F9.
 
 - icon_official / icon_legacy / play_store_icon: tile tinta + monograma suave;

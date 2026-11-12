@@ -171,29 +171,29 @@ flutter:
     - docs/fr/GUIDE_DE_L_UTILISATEUR.md
     - docs/fr/DEPANNAGE.md
     # Instâncias estáticas para os PDFs — o package `pdf` NÃO resolve o
-    # eixo wght da variável (cuja instância padrão é Thin, w100).
+    # eixo wght da variável (a instância padrão cairia em w400).
     # Regular (w400) = corpo; Bold (w700) = títulos. A UI continua a usar
-    # a variável pelo family Outfit.
-    - assets/fonts/Outfit-Regular.ttf
-    - assets/fonts/Outfit-Bold.ttf
+    # a variável pelo family Inter.
+    - assets/fonts/Inter-Regular.ttf
+    - assets/fonts/Inter-Bold.ttf
 
-  # Fonte tipográfica do ERP: Outfit (variável, eixo wght) — a família do
-  # guia de identidade. Suporte nativo a pesos via eixo wght no Flutter
-  # (fontWeight mapeia o eixo).
+  # Fonte tipográfica do ERP: Inter (Google Fonts, variável, eixos wght e
+  # opsz) — suporte nativo a pesos via eixo wght no Flutter (fontWeight
+  # mapeia o eixo).
   fonts:
-    - family: Outfit
+    - family: Inter
       fonts:
-        # Instância variável oficial (OFL 1.1, ~110 KB) — eixo wght
+        # Instância variável oficial (OFL 1.1, ~880 KB) — eixo wght
         # 100–900. O texto da UI resolve os pesos pelo eixo variável;
-        # os PDFs usam as estáticas Outfit-Regular.ttf (corpo) e
-        # Outfit-Bold.ttf (títulos) declaradas em `assets:`.
-        - asset: assets/fonts/Outfit-Variable.ttf
+        # os PDFs usam as estáticas Inter-Regular.ttf (corpo) e
+        # Inter-Bold.ttf (títulos) declaradas em `assets:`.
+        - asset: assets/fonts/Inter-Variable.ttf
     # Mono — família 'monospace' (nome do PAPEL, não da fonte): todos os
     # `fontFamily: 'monospace'` do app (código MFA, IDs do painel admin,
     # snippets do leitor de ajuda) caem aqui. Política de fallback:
     # trocar a mono do app é editar SÓ este bloco — os 6 usos em código
     # permanecem estáveis. Variável Roboto Mono v3.001 (OFL, 180 KB) —
-    # pesos w400/w600 resolvidos pelo eixo wght (mesmo mecanismo da Outfit).
+    # pesos w400/w600 resolvidos pelo eixo wght (mesmo mecanismo da Inter).
     - family: monospace
       fonts:
         - asset: assets/fonts/RobotoMono-Variable.ttf

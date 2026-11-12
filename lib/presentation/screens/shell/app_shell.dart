@@ -393,7 +393,7 @@ class _ActionMenuSheet extends ConsumerWidget {
             icon: Icons.add_shopping_cart_rounded,
             title: l10n.fabMenuNewSale,
             hint: l10n.fabMenuNewSaleHint,
-            color: theme.accent,
+            color: theme.colorScheme.onSurface,
             onTap: () {
               close();
               showAppSheet<void>(

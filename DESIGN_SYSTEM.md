@@ -26,7 +26,7 @@
 
 **Paleta oficial (as únicas cores sólidas):** azul `#0067FF`, cinza médio
 `#6E7174`, cinza de superfície `#E7E5E5`, branco suave `#F9F9F9` e tinta
-`#232323` — o guia de identidade Outfit.
+`#232323` — o guia de identidade (Inter).
 
 | Proporção | Família | Onde |
 |---|---|---|
@@ -36,7 +36,7 @@
 
 Regras:
 - **Máximo 1 botão preenchido azul por viewport.** Ações secundárias são contornadas ou textuais.
-- **Semântica nunca é decoração.** Verde `#2E7D32` só significa sucesso/entrada; vermelho `#C62828` só erro/destrutivo; amarelo `#F9A825` só aviso.
+- **Semântica nunca é decoração.** Verde `#2E7D32` só significa sucesso/entrada; vermelho `#C62828` só erro/destrutivo; o aviso usa a escala neutra (`#4E576A` no claro, `#BFC5D4` no escuro) — não existe laranja na identidade.
 - **Nenhuma cor fora da paleta.** Qualquer HEX novo nasce em `AppColors` (ou `PdfAccents` no PDF) e é validado por `test/core/theme/palette_guard_test.dart`.
 - **Nunca usar duas cores semânticas no mesmo cartão** (exceto “diferença” em fecho de caixa, onde o par é o próprio conteúdo).
 - **Variações de alfa** (véus, sombras) são permitidas apenas sobre as cinco cores da paleta.
@@ -82,12 +82,12 @@ Regras:
 |---|---|---|---|
 | `success` | `#2E7D32` | Ícone/badge de sucesso | só em alertas |
 | `error` | `#C62828` | Erro, destrutivo | só em alertas |
-| `warning` | `#F9A825` | Ícone/borda de aviso (texto sobre ele = preto) | só em alertas |
+| `warning` | `#4E576A` | Ícone/rótulo de aviso (neutro, sem laranja) | 7.3:1 sobre `#FFFFFF` (AA) |
 
 > **No escuro**, os tons base `#2E7D32`/`#C62828` medem apenas 3.84:1/3.50:1
-> sobre `#232323` — servem para preenchimento, chip e ícone. Texto pequeno
-> (valores, deltas) usa os tints `#66BB6A`/`#FF6B66` (6.65:1/5.65:1), expostos
-> por `theme.income`/`theme.expense`.
+> sobre `#212631` — servem para preenchimento, chip e ícone. Texto pequeno
+> (valores, deltas) usa os tints `#66BB6A`/`#FF8A80` (AA), expostos
+> por `theme.income`/`theme.expense`. O aviso usa Branco 60 `#BFC5D4`.
 
 ---
 
@@ -114,9 +114,9 @@ O escuro **não é uma inversão**: usa o preto oficial como canvas e o branco s
 | `actionSoft` | `#0067FF` a 12% | Fundo de seleção | — |
 | `success` | `#2E7D32` | Sucesso (alerta; preenchimento) | só em alertas |
 | `successText` | `#66BB6A` | Sucesso como TEXTO | **6.65:1** sobre `#232323` |
-| `warning` | `#F9A825` | Aviso (alerta) | só em alertas |
+| `warning` | `#BFC5D4` | Aviso (alerta, neutro) | 8.8:1 sobre `#212631` (AA) |
 | `error` | `#C62828` | Erro (alerta; preenchimento) | só em alertas |
-| `errorText` | `#FF6B66` | Erro como TEXTO | **5.65:1** sobre `#232323` |
+| `errorText` | `#FF8A80` | Erro como TEXTO | **6.6:1** sobre `#212631` (AA) |
 | `onSemantic` | `#F9F9F9` | Rótulo sobre preenchimentos semânticos | — |
 
 **Regra do escuro:** o preenchimento primário mantém o rótulo **suave** (`#F9F9F9`, 4.55:1). A superfície e o canvas coincidem na tinta; a separação vem de contorno e tipografia, não de mais tonalidades.
@@ -129,12 +129,12 @@ O escuro **não é uma inversão**: usa o preto oficial como canvas e o branco s
 
 | Uso | Família | Justificação |
 |---|---|---|
-| Interface e dados | **Outfit** (variável, eixo `wght` 100–900) | Identidade do guia, algarismos tabulares, licença aberta (OFL) |
+| Interface e dados | **Inter** (variável, eixos `wght` 100–900 e `opsz`; Google Fonts) | Identidade do guia, algarismos tabulares, licença aberta (OFL) |
 | Números e código | **Roboto Mono** (`monospace`) | Códigos MFA, IDs, séries de fatura |
 | Fallback de plataforma | Roboto (Android), Segoe UI (Windows), Helvetica Neue (iOS/macOS), `sans-serif` (Web) | Rede de segurança de glifos via `fontFamilyFallback`; nunca se distribuí fontes proprietárias |
 
-> **Regra de resolução:** `fontFamily` recebe o nome **exato** registado no `pubspec` (`Outfit`).
-> Uma lista no estilo CSS (`'Outfit, -apple-system, …'`) **não** é resolvida pelo motor e cai
+> **Regra de resolução:** `fontFamily` recebe o nome **exato** registado no `pubspec` (`Inter`).
+> Uma lista no estilo CSS (`'Inter, -apple-system, …'`) **não** é resolvida pelo motor e cai
 > silenciosamente na fonte padrão da plataforma. O fallback vive em
 > `AppTypography.familyFallback`.
 

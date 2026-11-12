@@ -13,7 +13,7 @@ import '../../../core/theme/app_typography.dart';
 /// Recibo de venda VISUAL — a cara de um recibo térmico impresso.
 ///
 /// Exceção de documento (U-13): cores de papel/tinta fixas, mas a
-/// **família tipográfica é a Outfit do app** (antes caía na fonte da
+/// **família tipográfica é a Inter do app** (antes caía na fonte da
 /// plataforma — recibo diferente por Android/iOS).
 /// Cores fixas (papel branco + tinta escura), independentes do tema do app:
 /// é este widget que vira a IMAGEM partilhada (capturada via

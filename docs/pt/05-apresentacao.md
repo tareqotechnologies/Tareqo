@@ -84,13 +84,13 @@ Visão do dia do canvas V3 — a aba Início NÃO tem avatar (o **Sair** vive na
 - **3 cards compactos de métrica** (sem ícones, layout do app de referência):
  - **Vendas** — vendas do período selecionado na pílula com o **delta vs o período anterior** como subtexto colorido (verde `+N%` / vermelho `-N%`);
  - **Caixa** — saldo de caixa escopado ao período (`dashboardCashFlowProvider`); saldo negativo renderiza o valor em vermelho; subtexto = código da moeda (`MZN`);
- - **A receber** — total de fiado pendente com o **contador de fiados** em laranja no subtexto (ex.: `4 fiados`);
+ - **A receber** — total de fiado pendente com o **contador de fiados** em Preto 70 no subtexto (ex.: `4 fiados`);
 - **Feed "Atividade de hoje"** (título + contagem de eventos à direita) num card único com ícones circulares tingidos e âncora (valor/badge) à direita:
  - **Vendas** (ícone `north_east` verde, `+valor` em verde) — toque abre o `SaleDetailScreen`;
  - **Entradas de estoque** (ícone caixa cinza, `+qtd` em branco) — compras de hoje, uma linha por item;
- - **Pagamentos de fiado** (ícone `payments` âmbar dentro de **borda tracejada**, `+valor` em verde) — baixas quitadas hoje;
+ - **Pagamentos de fiado** (ícone `payments` neutro dentro de **borda tracejada**, `+valor` em verde) — baixas quitadas hoje;
  - **Despesas** (ícone `south_west` vermelho, `-valor` em vermelho) — despesas pagas de hoje;
- - **Estoque baixo** (ícone de alerta laranja + pílula sólida laranja **"Alerta"**) — produtos ativos com `stockQuantity < 5` unidades (`Quantity.lowStockThresholdUnits`);
+ - **Estoque baixo** (ícone de alerta na tinta + pílula sólida neutra **"Alerta"**) — produtos ativos com `stockQuantity < 5` unidades (`Quantity.lowStockThresholdUnits`);
  - **Validade (W11)** via `expiryAlertsProvider`: **vermelho** para lotes **vencidos** com estoque e **amarelo** para vencimento em **menos de 30 dias** (`expiryWarningDays`), ordenados por urgência (vencidos primeiro);
 - **Banner de sincronização pendente** (outbox do modo SaaS) quando a fila offline não está vazia, com ação "Sincronizar";
 - Erro ao carregar KPIs mostra aviso inline compacto com retry (`InlineErrorCard`) em vez de zeros falsos.
@@ -148,7 +148,7 @@ Visão do dia do canvas V3 — a aba Início NÃO tem avatar (o **Sair** vive na
 ### 5. `DebtsScreen` + `AddDebtSheet` (Crédito)
 
 - **Abas:** "Pendentes" e "Quitadas" (SegmentedButton local `_DebtView`);
-- **Pendentes:** card resumo "Total a receber" (laranja) + lista de dívidas com avatar da inicial, chip de vencimento (`Atrasada` vermelho / `Vence hoje` amarelo / `Em N dias` verde) e botão **"Quitar dívida"** (diálogo de confirmação → `SettleDebtUseCase` → invalida fiado, histórico, caixa e saldo);
+- **Pendentes:** card resumo "Total a receber" (neutro) + lista de dívidas com avatar da inicial, chip de vencimento (`Atrasada` vermelho / `Vence hoje` amarelo / `Em N dias` verde) e botão **"Quitar dívida"** (diálogo de confirmação → `SettleDebtUseCase` → invalida fiado, histórico, caixa e saldo);
 - **Quitadas:** card resumo "Total quitado" (verde) + histórico com `paidAt` ("Quitada em 25/07/2026");
 - **`AddDebtSheet`:** nome do cliente, valor, vencimento (DatePicker) → `AddDebtUseCase` (registra dívida + pendência financeira vinculada); captura `InvalidDebtAmountException` e trata `PendingEntryRegistrationException` de forma especial (informa que o fiado foi registrado e pede conferência no Financeiro — sem sugerir nova tentativa).
 
@@ -174,7 +174,7 @@ Visão do dia do canvas V3 — a aba Início NÃO tem avatar (o **Sair** vive na
 `lib/core/theme/app_theme.dart`:
 
 - **Seed:** verde-esmeralda profundo `#0E6B5A`; `ColorScheme.fromSeed` para claro/escuro;
-- **Cores semânticas (`AppColors`):** `income` verde `#189A5E`, `expense` vermelho `#D64550`, `warning` laranja `#E08F2B`;
+- **Cores semânticas (`AppColors`):** `income` verde `#2E7D32`, `expense` vermelho `#C62828`, `warning` neutro (Preto 70 `#4E576A` no claro / Branco 60 `#BFC5D4` no escuro) — sem laranja;
 - **Diretrizes visuais:** superfícies neutras, cards com borda sutil sem sombra pesada (`elevation: 0`), cantos arredondados (14–20px), campos **preenchidos sem contorno**, botões `FilledButton` com altura 52;
 - **Navegação:** `NavigationBar` (altura 68, indicador `primaryContainer`) e `NavigationRail` (`groupAlignment: -0.9`);
 - **Tipografia:** escala modular (Apple HIG/SF Pro): **34** (Large Title — login/boas-vindas) → **28** (títulos de página) → **24** (KPIs/totais) → **22** (cartões/modais/AppBar) → **20** (subtítulos/seções) → **17/15/14/13/12/11** (corpo destacado/corpo/destaques/nota/labels/caption); hierarquia por tamanho + peso (w300 display, w400 corpo, w600+ valores), **`tabularFigures`** nos estilos numéricos (preços MZN e quantidades kg/un alinham dígito a dígito) e **três eixos de precisão** como o SF Pro: (1) **eixo óptico `opsz`** — a Inter é variável (14–32) e títulos ≥20px usam o corte *Display* (opsz 24–32) enquanto o corpo fica no corte *Texto*; (2) **tracking** negativo nos títulos (−0.15 a −0.6), neutro no corpo e positivo leve nos captions; (3) **entrelinha** na razão do SF Pro (~1.2 títulos, ~1.4 corpo); a decisão completa (tabela da escala, papéis e regras de ouro) está no [capítulo 12 — Decisões de Arquitetura](12-decisoes-de-arquitetura.md);

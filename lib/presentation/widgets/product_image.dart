@@ -41,24 +41,29 @@ class ProductImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
 
-    // Placeholder padrão: azul saturado da marca com o glifo em branco
-    // suave — a regra do sistema (conteúdo claro sobre azul) também vale
-    // para a imagem padrão do produto, que antes usava o tom pálido com
-    // ícone escuro.
+    // Placeholder padrão: tinta neutra (Preto 100 no claro, Preto 80 no
+    // escuro) com glifo Snow. A tinta fica reservada a CTA/seleção — uma
+    // miniatura por linha não é acento, é conteúdo.
+    final fallbackBackground = dark
+        ? scheme.surfaceContainerHighest
+        : scheme.onSurface;
+    final fallbackForeground = dark ? scheme.onSurface : scheme.surface;
+
     Widget fallbackOf(double width, double height) => Container(
       width: width,
       height: height,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
+        color: fallbackBackground,
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Icon(
         Icons.inventory_2_outlined,
         size: iconSize,
-        color: theme.colorScheme.onPrimary,
+        color: fallbackForeground,
       ),
     );
 

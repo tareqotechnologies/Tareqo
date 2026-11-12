@@ -225,7 +225,7 @@ Widget _buildApp({
     ],
     child: testApp(
       home: const AdminTenantsScreen(),
-      // A fonte de teste (Ahem) é mais larga que a Outfit de produção — o
+      // A fonte de teste (Ahem) é mais larga que a Inter de produção — o
       // sheet de detalhes (limitado a 640px pelo framework) estoura Rows
       // de texto longo. Clamp de escala compensa sem afetar as asserções.
       builder: (context, child) =>
@@ -235,7 +235,7 @@ Widget _buildApp({
 }
 
 /// Viewport largo e alto (1250×1600): a fonte de teste (Ahem) é bem mais
-/// larga que a Outfit de produção — 400px estoura Rows de cards/barras e
+/// larga que a Inter de produção — 400px estoura Rows de cards/barras e
 /// ~560px estoura o header de seção do sheet de detalhes.
 void _useWideViewport(WidgetTester tester) {
   tester.view.physicalSize = const Size(1250, 1600);

@@ -321,10 +321,10 @@ Componentes reutilizáveis do design system. Um ecrã novo deve preferir estes w
 
 ### 8.1 Fontes
 
-- `assets/fonts/Outfit-Variable.ttf` — família principal da UI (Outfit).
-- `assets/fonts/Outfit-Bold.ttf` — corte estático usado na exportação PDF.
+- `assets/fonts/Inter-Variable.ttf` — família principal da UI (Inter, Google Fonts).
+- `assets/fonts/Inter-Regular.ttf` / `Inter-Bold.ttf` — cortes estáticos usados na exportação PDF.
 - `assets/fonts/RobotoMono-Variable.ttf` — IDs, códigos MFA e conteúdo monoespaçado.
-- `assets/fonts/OFL.txt` — licença das fontes.
+- `assets/fonts/Inter-OFL.txt` — licença SIL OFL 1.1 da família Inter.
 
 ### 8.2 Marca e arranque
 

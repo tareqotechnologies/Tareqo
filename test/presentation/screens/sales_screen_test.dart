@@ -264,19 +264,19 @@ void main() {
     expect(find.text('2 × R\$ 2,00'), findsOneWidget);
     // Subtotal do item + total (resumo e rodapé) da venda.
     expect(find.text('R\$ 4,00'), findsAtLeastNWidgets(2));
-    // Chrome do feed: ícone circular azul (40px) no cabeçalho + no item do sheet.
+    // Chrome do feed: ícone circular de tinta (40px) no resumo do dia, no
+    // card, no cabeçalho do sheet e no item.
     expect(
       find.byWidgetPredicate(
         (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color ==
-                AppColors.accentBlue &&
+            (widget.decoration as BoxDecoration).color == AppColors.darkVoid &&
             (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
             widget.constraints?.maxWidth == 40 &&
             widget.constraints?.maxHeight == 40,
       ),
-      findsNWidgets(3), // header card + header sheet + item sheet
+      findsNWidgets(4), // resumo do dia + card + cabeçalho do sheet + item
     );
   });
 

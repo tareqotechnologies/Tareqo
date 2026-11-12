@@ -72,15 +72,10 @@ void main() {
     test('pares de texto do ColorScheme atingem AA 4.5:1', () {
       _expectContrast(scheme.onSurface, surface, 'onSurface/surface');
       _expectContrast(scheme.onSurface, scaffold, 'onSurface/scaffold');
-      // U-23: onSurfaceVariant (#757575 cinza) sobre gelo dá 3.5:1 — texto
-      // pequeno usa preto (#232323, 17.6:1); o cinza fica para não-texto.
-      _expectContrast(
-        scheme.onSurface,
-        fieldFill,
-        'onSurface/campo (cinza 3.5:1 só para não-texto)',
-      );
+      // Texto primário Preto 100 sobre o campo Branco 90 = 18.4:1.
+      _expectContrast(scheme.onSurface, fieldFill, 'onSurface/campo');
       _expectContrast(scheme.onSurface, navBg, 'onSurface/nav');
-      // Botões primários: azul com rótulo PRETO = 6.1:1 (AA texto).
+      // Botões primários: tinta Preto 100 com rótulo Branco 100 = 19:1.
       _expectContrast(scheme.onPrimary, scheme.primary, 'onPrimary/primary');
       _expectContrast(
         scheme.onPrimaryContainer,
@@ -96,9 +91,10 @@ void main() {
     });
 
     test('alertas semânticos (paleta oficial) sobre superfícies', () {
-      // U-23: paleta com exceção controlada — sucesso #2E7D32, erro
-      // #C62828 e aviso #F9A825 medem < 4.5:1 sobre gelo (3.6/4.0/1.5);
-      // os testes distinguem texto (4.5:1) de texto grande/ícone (3:1).
+      // Sem laranja: sucesso #2E7D32 (5.1:1 sobre branco), erro #C62828
+      // (5.6:1) e aviso na tinta Preto 70 (7.3:1) — todos legíveis como
+      // texto AA; a pílula tintada é auditada a 3:1 (indicador semântico
+      // redundante com ícone e rótulo).
       for (final (label, color) in [
         ('income', theme.income),
         ('expense', theme.expense),
@@ -107,8 +103,8 @@ void main() {
         _expectContrast(
           color,
           surface,
-          '$label/superfície (ícone)',
-          minRatio: 3.0,
+          '$label/superfície (texto AA)',
+          minRatio: 4.5,
         );
         _expectContrast(color, chipBg(color), '$label/chip', minRatio: 3.0);
         // Card de resumo do fiado: fundo com 10% da cor (texto grande, 3:1).
@@ -143,14 +139,14 @@ void main() {
     test('pares de texto do ColorScheme atingem AA 4.5:1', () {
       _expectContrast(scheme.onSurface, surface, 'onSurface/surface');
       _expectContrast(scheme.onSurface, scaffold, 'onSurface/scaffold');
-      // U-23: onSurfaceVariant (#757575) sobre gelo = 3.5:1 — texto
-      // pequeno usa preto (#232323); o cinza é só não-texto/metadata.
+      // Texto primário Branco 100 sobre o campo Preto 90 = 15.6:1.
       _expectContrast(
         scheme.onSurface,
         fieldFill,
-        'onSurface/campo (cinza 3.5:1 só para não-texto)',
+        'onSurface/campo',
       );
       _expectContrast(scheme.onSurface, navBg, 'onSurface/nav');
+      // Botão primário escuro: Branco 100 com rótulo Preto 100 = 19:1.
       _expectContrast(scheme.onPrimary, scheme.primary, 'onPrimary/primary');
       _expectContrast(
         scheme.onPrimaryContainer,
@@ -178,7 +174,7 @@ void main() {
           '$label/card (não-texto)',
           minRatio: 3.0,
         );
-        // Chips de status: texto @90% sobre pílula tintada (3:1).
+        // Chips de status: a cor sólida sobre a pílula tintada (3:1).
         _expectContrast(
           chipFg(color),
           chipBg(color),
@@ -201,10 +197,11 @@ void main() {
       // Os tons base de alerta (#2E7D32/#C62828) medem 3.84/3.50 sobre o
       // preto — servem para preenchimentos, não para valores monetários em
       // texto pequeno. `theme.income`/`theme.expense` no escuro devolvem os
-      // tints de texto (#66BB6A/#FF6B66) e cumprem AA nos cards e no fundo.
+      // tints de texto (#66BB6A/#FF8A80) e o aviso usa Branco 60 (8.8:1).
       for (final (label, color) in [
         ('income', theme.income),
         ('expense', theme.expense),
+        ('warning', theme.warning),
       ]) {
         _expectContrast(color, surface, '$label/superfície (texto AA)');
         _expectContrast(color, scaffold, '$label/scaffold (texto AA)');
@@ -224,21 +221,22 @@ void main() {
       for (final method in PaymentMethod.values) {
         final accent = method.accent(theme);
         final badgeBg = _compose(surface, accent, 0.22);
-        // U-23: eMola (azul #0067FF) sobre gelo a 22% ≈ 2.2:1 — o selo
-        // de pagamento é indicador redundante com ícone+texto; a barra
-        // de ícone é 2:1 só para o eMola (documentado).
+        // Todos os métodos usam a escala neutra ou alertas semânticos
+        // (M-Pesa vermelho, dinheiro verde) — nenhum laranja; ícone/UI
+        // exige 3:1 sobre o selo a 22%.
         _expectContrast(
           accent,
           badgeBg,
           '${method.name} (${theme.brightness.name})',
-          minRatio: method == PaymentMethod.eMola ? 2.0 : 3.0,
+          minRatio: 3.0,
         );
       }
     }
-  }); // Regressões auditadas (V5): onError explícito (branco puro dava 2.8:1
-  // sobre #F87171 no escuro), ação do SnackBar (o default inversePrimary não
-  // era auditado) e a borda em repouso dos botões outline (≥ 3:1 — antes
-  // usava outlineVariant ≈ 1.3:1, praticamente invisível).
+  }); // Regressões auditadas (V5): onError explícito (branco sobre o
+  // vermelho #C62828 = 5.6:1 no claro; Preto 100 sobre #FF8A80 = 9.3:1 no
+  // escuro), ação do SnackBar (Branco 100 sobre Preto 90 = 15.6:1) e a
+  // borda em repouso dos botões outline (3:1 — antes usava outlineVariant
+  // ≈ 1.3:1, praticamente invisível).
   test('onError, ação do SnackBar e bordas outline têm contraste', () {
     for (final theme in [AppTheme.light, AppTheme.dark]) {
       final scheme = theme.colorScheme;
@@ -252,13 +250,9 @@ void main() {
         const <WidgetState>{},
       );
 
-      // Preenchimento de erro: gelo sobre tinta no claro e tinta sobre
-      // gelo no escuro — 14.9:1 nos dois temas (AA de texto).
-      _expectContrast(
-        scheme.onError,
-        scheme.error,
-        'onError/error ($name)',
-      );
+      // Preenchimento de erro: Branco 100 sobre #C62828 no claro e Preto
+      // 100 sobre #FF8A80 no escuro — AA de texto nos dois temas.
+      _expectContrast(scheme.onError, scheme.error, 'onError/error ($name)');
       _expectContrast(
         scheme.onErrorContainer,
         scheme.errorContainer,
@@ -266,11 +260,9 @@ void main() {
       );
       _expectContrast(action, snackBg, 'ação do snackbar ($name)');
       if (side != null) {
-        // U-23 (paleta nova): borda outline usa controlBorder — preto
-        // #232323 no claro (17.6:1 sobre suave) e cinza #E7E5E5 sobre
-        // preto no escuro (14.8:1). O par outline/scaffold no dark dá
-        // 1.0:1 porque scaffold = surface = #232323 — a borda é auditada
-        // sobre a superfície do botão (surface), não o scaffold.
+        // Borda outline = controlBorder (Preto 60 #667085) nos dois
+        // temas: 4.4:1 sobre o canvas claro e 3.05:1 sobre o cartão
+        // escuro. É auditada sobre a superfície do botão (surface).
         _expectContrast(
           side.color,
           surface,
@@ -281,10 +273,10 @@ void main() {
     }
   });
 
-  // Campos de formulário: o fill #E7E5E5 (claro) e #232323 (escuro)
-  // apagava o rótulo cinza (3.91:1), o hint (3.91:1), o rótulo flutuante
-  // azul (3.82:1) e a própria borda (1:1 sobre o fill). O pares abaixo
-  // são os tokens efetivos aplicados pelo InputDecorationTheme.
+  // Campos de formulário: fill Branco 90 no claro e Preto 90 no escuro;
+  // rótulo/flutuante usam o texto primário, o hint o secundário e a
+  // borda controlBorder (≥ 3:1). Os pares abaixo são os tokens efetivos
+  // aplicados pelo InputDecorationTheme.
   test('campos: rótulo, hint, borda e erro atingem contraste', () {
     for (final theme in [AppTheme.light, AppTheme.dark]) {
       final scheme = theme.colorScheme;
@@ -325,8 +317,8 @@ void main() {
           minRatio: 3.0,
         );
       }
-      // Erro como texto no campo e na superfície (no escuro o papel
-      // `error` era #232323 sobre #232323 = 1:1).
+      // Erro como texto no campo e na superfície (vermelho AA nos dois
+      // temas: #C62828 no claro, #FF8A80 no escuro).
       _expectContrast(scheme.error, fill, 'erro/campo ($name)');
       _expectContrast(scheme.error, scheme.surface, 'erro/superfície ($name)');
     }
@@ -355,10 +347,10 @@ void main() {
   // * Filled/primário: hover ESCURECE o preenchimento (véu preto 8%) e o
   //   texto branco continua ≥ 4.5:1; desabilitado usa cinza neutro (sem
   //   verde) com contraste suficiente para comunicar o estado.
-  // * Outline/texto/ícone: véu de hover compõe cinza claro sobre a
-  //   superfície — o texto escuro continua ≥ 4.5:1 (feedback discreto,
-  //   sem verde, brilho ou gradiente).
-  // * FAB: hover escurece o verde da marca (véu preto) — ícone ≥ 3:1.
+  // * Outline/texto/ícone: véu de hover compõe um cinza neutro sobre a
+  //   superfície — o texto continua ≥ 4.5:1 (feedback discreto, sem cor,
+  //   brilho ou gradiente).
+  // * FAB: hover escurece a tinta (véu preto) — ícone ≥ 3:1.
   test('estados de hover/pressed/disabled dos botões têm contraste', () {
     Color compose(Color bg, Color fg, double alpha) =>
         Color.lerp(bg, fg, alpha)!;
@@ -392,8 +384,8 @@ void main() {
         // Color.a já é 0.0–1.0 (sem divisão por 255).
         final hoveredBg = compose(filledBg, hoverVeil, hoverVeil.a);
         _expectContrast(filledFg, hoveredBg, 'primário hover ($name)');
-        // O hover NÃO deve ficar mais claro que o repouso (verde vivo é
-        // proibido — escurece ou mantém, nunca clareia o primário).
+        // O hover NÃO deve ficar mais claro que o repouso (a tinta
+        // escurece ou mantém, nunca clareia o primário).
         expect(
           hoveredBg.computeLuminance(),
           lessThanOrEqualTo(filledBg.computeLuminance() + 0.001),
@@ -438,11 +430,15 @@ void main() {
           hoveredSurface,
           'texto sobre hover $label ($name)',
         );
-        // O véu do hover NÃO pode ser verde (neutro r≈g≈b).
+        // O véu do hover NÃO pode ser uma cor semântica (verde/vermelho)
+        // nem laranja: fica no neutro da tinta oficial. O Preto 100
+        // #0A0E15 tem viés azul de 0.043 (Δrg 0.016 + Δgb 0.027), por
+        // isso a barra é 0.06 em vez de 0.02 — qualquer tinta colorida
+        // (laranja inclusive) fica bem acima.
         expect(
           (veil.r - veil.g).abs() + (veil.g - veil.b).abs(),
-          lessThan(0.02),
-          reason: 'hover de $label deve ser neutro, não verde ($name)',
+          lessThan(0.06),
+          reason: 'hover de $label deve ser neutro, sem cor ($name)',
         );
       }
 

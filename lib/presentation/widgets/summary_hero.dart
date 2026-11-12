@@ -61,14 +61,14 @@ class SummaryHero extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
-    // Acabamento premium: superfície com véu de marca quase imperceptível,
+    // Acabamento premium: superfície com véu neutro quase imperceptível,
     // halo de luz no canto superior direito e sombra neutra em camadas. O
     // conteúdo continua sobre `surface` — a cor de estado só nos
-    // indicadores.
+    // indicadores; a tinta fica no traço de marca e nos CTAs.
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        gradient: PremiumDecor.heroSurface(scheme, tint: theme.accent),
+        gradient: PremiumDecor.heroSurface(scheme, tint: scheme.onSurface),
         borderRadius: AppRadius.xlAll,
         border: Border.all(color: PremiumDecor.hairline(scheme)),
         boxShadow: PremiumDecor.softShadow(scheme),
@@ -78,7 +78,11 @@ class SummaryHero extends StatelessWidget {
           Positioned(
             top: -90,
             right: -70,
-            child: PremiumGlow(color: theme.accent, size: 240, opacity: 0.12),
+            child: PremiumGlow(
+              color: scheme.onSurface,
+              size: 240,
+              opacity: 0.06,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),

@@ -91,23 +91,24 @@ class PremiumDecor {
     ],
   );
 
-  /// Superfície de hero: o cartão do tema com um véu de marca quase
+  /// Superfície de hero: o cartão do tema com um véu neutro quase
   /// imperceptível nos cantos — profundidade sem tingir o conteúdo.
+  /// A marca (tinta) fica no traço do rótulo e nos CTAs, não no fundo.
   static LinearGradient heroSurface(ColorScheme scheme, {Color? tint}) {
     final dark = _isDark(scheme);
-    final t = tint ?? scheme.primary;
+    final t = tint ?? scheme.onSurface;
     return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       stops: const [0, 0.55, 1],
       colors: [
         Color.alphaBlend(
-          t.withValues(alpha: dark ? 0.12 : 0.06),
+          t.withValues(alpha: dark ? 0.07 : 0.035),
           scheme.surface,
         ),
         scheme.surface,
         Color.alphaBlend(
-          scheme.tertiary.withValues(alpha: dark ? 0.08 : 0.035),
+          t.withValues(alpha: dark ? 0.03 : 0.015),
           scheme.surface,
         ),
       ],
