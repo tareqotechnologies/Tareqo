@@ -7,8 +7,8 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_tokens.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
@@ -20,7 +20,6 @@ import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_picker_field.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/barcode_scan_sheet.dart';
@@ -169,9 +168,6 @@ class _ProductPhotoPicker extends StatelessWidget {
   }
 }
 
-/// Rótulo de seção do formulário — a mesma voz de `SheetSection`:
-/// ícone discreto (`onSurfaceVariant`) + título 14/w600. Sem quadrado
-/// escuro nem cor de módulo: o acento não decora rótulos.
 /// Botão de ação minimalista para o seletor de foto.
 class _PhotoActionButton extends StatelessWidget {
   const _PhotoActionButton({
@@ -232,44 +228,13 @@ class _PhotoActionButton extends StatelessWidget {
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel({required this.icon, required this.title});
-
-  final IconData icon;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 18, color: scheme.onSurfaceVariant),
-        const SizedBox(width: AppSpacing.xs),
-        Flexible(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              title,
-              maxLines: 1,
-              style: AppTypography.labelLarge.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _CompactSwitch extends StatelessWidget {
   const _CompactSwitch({
     required this.label,
     required this.subtitle,
     required this.value,
     required this.onChanged,
+    this.embedded = false,
   });
 
   final String label;
@@ -277,9 +242,42 @@ class _CompactSwitch extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
+  /// `true` quando o switch já está dentro de uma [SheetSection] — evita
+  /// caixa dentro de caixa (a superfície do grupo já é o fundo).
+  final bool embedded;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+
+    final content = Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: AppTypography.labelLarge.copyWith(
+                  color: scheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.micro),
+              Text(
+                subtitle,
+                style: AppTypography.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Switch(value: value, onChanged: onChanged),
+      ],
+    );
+
+    if (embedded) return content;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -290,32 +288,7 @@ class _CompactSwitch extends StatelessWidget {
         color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: AppTypography.labelLarge.copyWith(
-                    color: scheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.micro),
-                Text(
-                  subtitle,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch(value: value, onChanged: onChanged),
-        ],
-      ),
+      child: content,
     );
   }
 }
@@ -333,6 +306,61 @@ Future<Uint8List?> _pickPhotoBytes(ImageSource source) async {
   );
   if (picked == null) return null;
   return picked.readAsBytes();
+}
+
+/// Seção ESTOQUE (quantidade, validade opcional e venda por peso) — comum
+/// a novo/editar produto. A validade só existe na criação (lote inicial).
+class _StockSection extends StatelessWidget {
+  const _StockSection({
+    required this.stockController,
+    required this.stockHelperText,
+    required this.stockValidator,
+    required this.vendaPorFracao,
+    required this.unitLabel,
+    required this.onWeightChanged,
+    required this.onUnitChanged,
+    this.expiryField,
+  });
+
+  final TextEditingController stockController;
+  final String? stockHelperText;
+  final FormFieldValidator<String> stockValidator;
+  final bool vendaPorFracao;
+  final String unitLabel;
+  final ValueChanged<bool> onWeightChanged;
+  final ValueChanged<String?> onUnitChanged;
+  final Widget? expiryField;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return SheetSection(
+      icon: Icons.warehouse_outlined,
+      title: l10n.productsSectionStock,
+      children: [
+        AppTextField(
+          controller: stockController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          label: l10n.productsStockQuantity,
+          helperText: stockHelperText,
+          prefixIcon: Icons.warehouse_outlined,
+          validator: stockValidator,
+        ),
+        if (expiryField != null) ...[
+          const SizedBox(height: AppSpacing.xs),
+          expiryField!,
+        ],
+        const SizedBox(height: AppSpacing.sm),
+        ProductWeightFields(
+          vendaPorFracao: vendaPorFracao,
+          unitLabel: unitLabel,
+          onWeightChanged: onWeightChanged,
+          onUnitChanged: onUnitChanged,
+        ),
+      ],
+    );
+  }
 }
 
 class AddProductSheet extends ConsumerStatefulWidget {
@@ -521,149 +549,86 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.88,
-      ),
-      child: SingleChildScrollView(
-        padding: AppSpacing.sheetPadding,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SheetHeader(title: l10n.productsAddNew),
-              // FOTO — seção própria no topo (preview + câmera/galeria).
-              const SizedBox(height: AppSpacing.md),
-              _ProductPhotoPicker(
-                bytes: _imageBytes,
-                imagePath: '',
-                onTakePhoto: () => _pickPhoto(ImageSource.camera),
-                onPickGallery: () => _pickPhoto(ImageSource.gallery),
-                onRemove: () => setState(() => _imageBytes = null),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              // INFORMAÇÕES — identidade do produto.
-              // INFORMAÇÕES — identidade do produto (widget compartilhado
-              // por Add/Edit; antes era ~100 linhas duplicadas nos dois
-              // builds, já divergentes em comentários).
-              ProductIdentitySection(
-                nameController: _nameController,
-                descriptionController: _descriptionController,
-                codeController: _codeController,
-                barcodeController: _barcodeController,
-                type: _type,
-                onTypeChanged: (value) =>
-                    setState(() => _type = value ?? ProductType.resale),
-                onScanBarcode: () async {
-                  final code = await showBarcodeScanner(context);
-                  if (code != null && code.isNotEmpty) {
-                    final digits = code.replaceAll(' ', '').trim();
-                    _barcodeController.text = digits.isNotEmpty
-                        ? digits
-                        : code.trim();
-                  }
-                },
-              ),
-              const SizedBox(height: AppSpacing.md),
-              // PREÇOS — compra e venda lado a lado.
-              ProductPricingFields(
-                purchaseController: _purchasePriceController,
-                saleController: _salePriceController,
-              ),
-
-              const SizedBox(height: AppSpacing.md),
-              // ESTOQUE — quantidade + validade + venda por peso.
-              _SectionLabel(
-                icon: Icons.warehouse_outlined,
-                title: l10n.productsSectionStock,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              AppTextField(
-                controller: _stockController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                label: l10n.productsStockQuantity,
-                helperText: _vendaPorFracao
-                    ? l10n.productsStockWeightHint
-                    : null,
-                prefixIcon: Icons.warehouse_outlined,
-                isDense: true,
-                validator: (value) {
-                  // W11: aceita decimais (ex.: 1,75) — convertido para
-                  // milésimos no submit; rejeita texto/números negativos.
-                  final quantity = Quantity.parse(
-                    value?.trim() ?? '',
-                    language: Formatters.currentLanguage,
-                  );
-                  if (quantity < 0 ||
-                      (value != null &&
-                          value.trim().isNotEmpty &&
-                          quantity == 0)) {
-                    return l10n.productsStockError;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppSpacing.xxs),
-              // W11: validade opcional — o lote inicial do estoque de
-              // abertura nasce com ela; o dashboard alerta (vermelho =
-              // vencido; amarelo = vence em < 30 dias) quando expira.
-              // Seletor MINIMALISTA: um único campo no padrão dos demais
-              // inputs (borda sutil + ícone), sem botão largo separado.
-              _ExpiryField(
-                expiryDate: _expiryDate,
-                onPick: _pickExpiry,
-                onClear: _clearExpiry,
-              ),
-              const SizedBox(height: AppSpacing.xxs),
-              // W11: venda por PESO (fração) — o PDV passa a aceitar
-              // quantidades decimais e o código de barras de balança.
-              // Material explícito: o SwitchListTile pinta o fundo e o ink no
-              // Material ancestral; dentro do Container colorido do app_sheet
-              // (DecoratedBox) o Flutter emite a assertion "ListTile
-              // background color or ink splashes may be invisible" (mesmo
-              // padrão já usado no add_transaction_sheet).
-              ProductWeightFields(
-                vendaPorFracao: _vendaPorFracao,
-                unitLabel: _unitLabel,
-                onWeightChanged: (value) => setState(() {
-                  _vendaPorFracao = value;
-                  _unitLabel = value ? 'kg' : 'un';
-                }),
-                onUnitChanged: (value) =>
-                    setState(() => _unitLabel = value ?? 'kg'),
-              ),
-              if (_formError != null) ...[
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  _formError!,
-                  // `theme.expense` = tint AA no escuro (o #C62828 puro
-                  // falha contraste como texto sobre o preto).
-                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              AppButton.primary(
-                label: l10n.productsAddSubmit,
-                onPressed: _isSubmitting ? null : _submit,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        height: AppSizes.iconMd,
-                        width: AppSizes.iconMd,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : null,
-              ),
-            ],
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.productsAddNew,
+      maxHeightFactor: 0.88,
+      error: _formError,
+      actionLabel: l10n.productsAddSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        // FOTO — preview + câmera/galeria no topo (mesma superfície de grupo).
+        _ProductPhotoPicker(
+          bytes: _imageBytes,
+          imagePath: '',
+          onTakePhoto: () => _pickPhoto(ImageSource.camera),
+          onPickGallery: () => _pickPhoto(ImageSource.gallery),
+          onRemove: () => setState(() => _imageBytes = null),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        ProductIdentitySection(
+          nameController: _nameController,
+          descriptionController: _descriptionController,
+          codeController: _codeController,
+          barcodeController: _barcodeController,
+          type: _type,
+          onTypeChanged: (value) =>
+              setState(() => _type = value ?? ProductType.resale),
+          onScanBarcode: () async {
+            final code = await showBarcodeScanner(context);
+            if (code != null && code.isNotEmpty) {
+              final digits = code.replaceAll(' ', '').trim();
+              _barcodeController.text = digits.isNotEmpty
+                  ? digits
+                  : code.trim();
+            }
+          },
+        ),
+        const SizedBox(height: AppSpacing.md),
+        ProductPricingFields(
+          purchaseController: _purchasePriceController,
+          saleController: _salePriceController,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        _StockSection(
+          stockController: _stockController,
+          stockHelperText: _vendaPorFracao
+              ? l10n.productsStockWeightHint
+              : null,
+          stockValidator: (value) {
+            // W11: aceita decimais (ex.: 1,75) — convertido para
+            // milésimos no submit; rejeita texto/números negativos.
+            final quantity = Quantity.parse(
+              value?.trim() ?? '',
+              language: Formatters.currentLanguage,
+            );
+            if (quantity < 0 ||
+                (value != null &&
+                    value.trim().isNotEmpty &&
+                    quantity == 0)) {
+              return l10n.productsStockError;
+            }
+            return null;
+          },
+          vendaPorFracao: _vendaPorFracao,
+          unitLabel: _unitLabel,
+          onWeightChanged: (value) => setState(() {
+            _vendaPorFracao = value;
+            _unitLabel = value ? 'kg' : 'un';
+          }),
+          onUnitChanged: (value) => setState(() => _unitLabel = value ?? 'kg'),
+          // W11: validade opcional do lote inicial — alimenta os alertas do
+          // dashboard (vencido / vence em menos de 30 dias).
+          expiryField: _ExpiryField(
+            expiryDate: _expiryDate,
+            onPick: _pickExpiry,
+            onClear: _clearExpiry,
           ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -881,145 +846,93 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.9,
-      ),
-      child: SingleChildScrollView(
-        padding: AppSpacing.sheetPadding,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SheetHeader(title: l10n.productsEditTitle),
-              // FOTO — seção própria no topo (preview + câmera/galeria).
-              const SizedBox(height: AppSpacing.md),
-              _ProductPhotoPicker(
-                bytes: _imageBytes,
-                imagePath: _imagePath,
-                onTakePhoto: () => _pickPhoto(ImageSource.camera),
-                onPickGallery: () => _pickPhoto(ImageSource.gallery),
-                onRemove: _removePhoto,
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              // INFORMAÇÕES — identidade do produto.
-              // INFORMAÇÕES — identidade do produto (widget compartilhado
-              // por Add/Edit; antes era ~100 linhas duplicadas nos dois
-              // builds, já divergentes em comentários).
-              ProductIdentitySection(
-                nameController: _nameController,
-                descriptionController: _descriptionController,
-                codeController: _codeController,
-                barcodeController: _barcodeController,
-                type: _type,
-                onTypeChanged: (value) =>
-                    setState(() => _type = value ?? ProductType.resale),
-                onScanBarcode: () async {
-                  final code = await showBarcodeScanner(context);
-                  if (code != null && code.isNotEmpty) {
-                    final digits = code.replaceAll(' ', '').trim();
-                    _barcodeController.text = digits.isNotEmpty
-                        ? digits
-                        : code.trim();
-                  }
-                },
-              ),
-              const SizedBox(height: AppSpacing.md),
-              // PREÇOS — compra e venda lado a lado.
-              ProductPricingFields(
-                purchaseController: _purchasePriceController,
-                saleController: _salePriceController,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              // ESTOQUE — quantidade exata + venda por peso (FIFO).
-              _SectionLabel(
-                icon: Icons.warehouse_outlined,
-                title: l10n.productsSectionStock,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              AppTextField(
-                controller: _stockController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                label: l10n.productsStockQuantity,
-                helperText: _vendaPorFracao
-                    ? l10n.productsStockWeightHint
-                    : l10n.productsStockAdjustHint,
-                prefixIcon: Icons.warehouse_outlined,
-                isDense: true,
-                validator: (value) {
-                  // Edição: aceita ZERO explícito (zerar o estoque é um
-                  // ajuste legítimo — ex.: quebra total). Vazio = 0.
-                  // Rejeita texto não numérico e negativos.
-                  final text = value?.trim() ?? '';
-                  if (text.isEmpty) return null;
-                  final normalized = text
-                      .replaceAll(' ', '')
-                      .replaceAll(',', '.');
-                  final parsed = double.tryParse(normalized);
-                  if (parsed == null || parsed < 0) {
-                    return l10n.productsStockError;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppSpacing.xxs),
-              ProductWeightFields(
-                vendaPorFracao: _vendaPorFracao,
-                unitLabel: _unitLabel,
-                onWeightChanged: (value) => setState(() {
-                  _vendaPorFracao = value;
-                  _unitLabel = value ? 'kg' : 'un';
-                }),
-                onUnitChanged: (value) =>
-                    setState(() => _unitLabel = value ?? 'kg'),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              // STATUS — ativar/desativar (inativo some do PDV e das
-              // compras; o estoque é preservado — a reativação devolve a
-              // venda).
-              _SectionLabel(
-                icon: Icons.toggle_on_outlined,
-                title: l10n.productsSectionStatus,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              _CompactSwitch(
-                label: l10n.productsActiveLabel,
-                subtitle: l10n.productsActiveHint,
-                value: _isActive,
-                onChanged: (value) => setState(() => _isActive = value),
-              ),
-              if (_formError != null) ...[
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  _formError!,
-                  // `theme.expense` = tint AA no escuro (o #C62828 puro
-                  // falha contraste como texto sobre o preto).
-                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              AppButton.primary(
-                label: l10n.productsEditSubmit,
-                onPressed: _isSubmitting ? null : _submit,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        height: AppSizes.iconMd,
-                        width: AppSizes.iconMd,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : null,
-              ),
-            ],
-          ),
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.productsEditTitle,
+      maxHeightFactor: 0.9,
+      error: _formError,
+      actionLabel: l10n.productsEditSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        // FOTO — preview + câmera/galeria no topo (mesma superfície de grupo).
+        _ProductPhotoPicker(
+          bytes: _imageBytes,
+          imagePath: _imagePath,
+          onTakePhoto: () => _pickPhoto(ImageSource.camera),
+          onPickGallery: () => _pickPhoto(ImageSource.gallery),
+          onRemove: _removePhoto,
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        ProductIdentitySection(
+          nameController: _nameController,
+          descriptionController: _descriptionController,
+          codeController: _codeController,
+          barcodeController: _barcodeController,
+          type: _type,
+          onTypeChanged: (value) =>
+              setState(() => _type = value ?? ProductType.resale),
+          onScanBarcode: () async {
+            final code = await showBarcodeScanner(context);
+            if (code != null && code.isNotEmpty) {
+              final digits = code.replaceAll(' ', '').trim();
+              _barcodeController.text = digits.isNotEmpty
+                  ? digits
+                  : code.trim();
+            }
+          },
+        ),
+        const SizedBox(height: AppSpacing.md),
+        ProductPricingFields(
+          purchaseController: _purchasePriceController,
+          saleController: _salePriceController,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        _StockSection(
+          stockController: _stockController,
+          stockHelperText: _vendaPorFracao
+              ? l10n.productsStockWeightHint
+              : l10n.productsStockAdjustHint,
+          stockValidator: (value) {
+            // Edição: aceita ZERO explícito (zerar o estoque é um ajuste
+            // legítimo — ex.: quebra total). Vazio = 0. Rejeita texto
+            // não numérico e negativos.
+            final text = value?.trim() ?? '';
+            if (text.isEmpty) return null;
+            final normalized = text.replaceAll(' ', '').replaceAll(',', '.');
+            final parsed = double.tryParse(normalized);
+            if (parsed == null || parsed < 0) {
+              return l10n.productsStockError;
+            }
+            return null;
+          },
+          vendaPorFracao: _vendaPorFracao,
+          unitLabel: _unitLabel,
+          onWeightChanged: (value) => setState(() {
+            _vendaPorFracao = value;
+            _unitLabel = value ? 'kg' : 'un';
+          }),
+          onUnitChanged: (value) => setState(() => _unitLabel = value ?? 'kg'),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // STATUS — inativo some do PDV e das compras; o estoque é
+        // preservado e a reativação devolve a venda.
+        SheetSection(
+          icon: Icons.toggle_on_outlined,
+          title: l10n.productsSectionStatus,
+          children: [
+            _CompactSwitch(
+              label: l10n.productsActiveLabel,
+              subtitle: l10n.productsActiveHint,
+              value: _isActive,
+              onChanged: (value) => setState(() => _isActive = value),
+              embedded: true,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -1045,9 +958,15 @@ class _ExpiryField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final l10n = context.l10n;
     final hasDate = expiryDate != null;
+    // Mesma moldura/fill do AppTextField — o seletor de validade lê como
+    // parte do formulário, não como um botão à parte.
+    final fieldBorder = theme.brightness == Brightness.light
+        ? AppColors.grayMid
+        : AppColors.darkBorder;
 
     // Semantics: o campo inteiro é um botão (abre o date picker) — leitores
     // de tela anunciam a ação, não só o texto visível (como no X de limpar,
@@ -1066,9 +985,9 @@ class _ExpiryField extends StatelessWidget {
             vertical: AppSpacing.md,
           ),
           decoration: BoxDecoration(
-            color: scheme.surface,
+            color: theme.inputDecorationTheme.fillColor ?? scheme.surface,
             borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: scheme.outlineVariant),
+            border: Border.all(color: fieldBorder),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -1152,20 +1071,15 @@ class ProductIdentitySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SheetSection(
+      icon: Icons.inventory_2_outlined,
+      title: l10n.productsSectionInfo,
       children: [
-        _SectionLabel(
-          icon: Icons.inventory_2_outlined,
-          title: l10n.productsSectionInfo,
-        ),
-        const SizedBox(height: AppSpacing.sm),
         AppTextField(
           controller: nameController,
           textInputAction: TextInputAction.next,
           label: l10n.loginNameLabel,
           prefixIcon: Icons.inventory_2_outlined,
-          isDense: true,
           // Validação: campo obrigatório; erro aparece abaixo do campo
           validator: (value) => (value == null || value.trim().isEmpty)
               ? l10n.productsNameError
@@ -1177,13 +1091,10 @@ class ProductIdentitySection extends StatelessWidget {
           textInputAction: TextInputAction.next,
           label: l10n.productsDescriptionLabel,
           prefixIcon: Icons.notes_outlined,
-          isDense: true,
         ),
         const SizedBox(height: AppSpacing.sm),
         // W11: código de barras/PLU — usado pelas balanças etiquetadoras
         // (20PPPPPWWWWW) e pelo campo de código de barras do PDV.
-        // Os ids internos são alfanuméricos longos; o PLU é o código
-        // numérico impresso nas etiquetas.
         AppTextField(
           controller: codeController,
           textInputAction: TextInputAction.next,
@@ -1192,9 +1103,6 @@ class ProductIdentitySection extends StatelessWidget {
           label: l10n.productsCodeLabel,
           helperText: l10n.productsCodeHint,
           prefixIcon: Icons.qr_code_2_outlined,
-          // Helper/counter usam o helperStyle do tema (12) — 10 px saía da
-          // escala e deixava a instrução do código quase ilegível.
-          isDense: true,
           // Validação: apenas 1-5 dígitos; erro abaixo do campo
           validator: (value) {
             final digits = value?.trim() ?? '';
@@ -1204,9 +1112,9 @@ class ProductIdentitySection extends StatelessWidget {
             return null;
           },
         ),
-        const SizedBox(height: AppSpacing.xs),
-        // Código de barras convencional (EAN-13, EAN-8, UPC-A, UPC-E, Code 128)
-        // Campo opcional, universal — independente do PLU ou configuração de balança.
+        const SizedBox(height: AppSpacing.sm),
+        // Código de barras convencional (EAN-13, EAN-8, UPC-A, UPC-E,
+        // Code 128) — opcional e independente do PLU.
         AppTextField(
           controller: barcodeController,
           textInputAction: TextInputAction.next,
@@ -1222,35 +1130,23 @@ class ProductIdentitySection extends StatelessWidget {
                   tooltip: l10n.productsBarcodeLabel,
                   onPressed: onScanBarcode,
                 ),
-          isDense: true,
           // Validação: aceita EAN-13 (13 dígitos), EAN-8 (8 dígitos),
-          // UPC-A (12 dígitos), UPC-E (8 dígitos), Code 128 (variável).
+          // UPC-A (12 dígitos), UPC-E (8 dígitos) e Code 128 (variável).
           // Zeros à esquerda são preservados tratando como texto.
           validator: (value) {
             final text = value?.trim() ?? '';
             if (text.isNotEmpty) {
-              // Remover espaços e validar formato de barcode.
               final cleaned = text.replaceAll(' ', '');
-              // EAN-13: 13 dígitos
-              // EAN-8: 8 dígitos
-              // UPC-A: 12 dígitos
-              // UPC-E: 8 dígitos (compactado)
-              // Code 128: variável, aceitar.
-              final digitRegex = RegExp(r'^\d+$');
-              if (!digitRegex.hasMatch(cleaned)) {
+              if (!RegExp(r'^\d+$').hasMatch(cleaned)) {
                 return l10n.productsBarcodeError;
               }
-              // Comprimentos fora de EAN-13/EAN-8/UPC-A são aceitos como
-              // Code 128 (variável) — sem erro.
             }
             return null;
           },
         ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         // Fase 1: tipo estrutural do produto (matéria-prima, revenda,
-        // produzido, composto, embalagem). Define o papel na
-        // produção/receitas das fases seguintes — o default 'revenda'
-        // mantém o comportamento do varejo.
+        // produzido, composto, embalagem).
         AppPickerField<ProductType>(
           value: type,
           label: l10n.productsTypeLabel,
@@ -1281,15 +1177,12 @@ class ProductPricingFields extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SheetSection(
+      icon: Icons.payments_outlined,
+      title: l10n.productsSectionPricing,
       children: [
-        _SectionLabel(
-          icon: Icons.payments_outlined,
-          title: l10n.productsSectionPricing,
-        ),
-        const SizedBox(height: AppSpacing.xs),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: AppTextField(
@@ -1298,7 +1191,6 @@ class ProductPricingFields extends StatelessWidget {
                   decimal: true,
                 ),
                 label: l10n.productsPurchasePrice,
-                isDense: true,
                 validator: (value) => Money.parse(value ?? '') <= 0
                     ? l10n.productsPurchasePriceError
                     : null,
@@ -1312,7 +1204,6 @@ class ProductPricingFields extends StatelessWidget {
                   decimal: true,
                 ),
                 label: l10n.productsSalePrice,
-                isDense: true,
                 validator: (value) => Money.parse(value ?? '') <= 0
                     ? l10n.productsSalePriceError
                     : null,
@@ -1320,9 +1211,9 @@ class ProductPricingFields extends StatelessWidget {
             ),
           ],
         ),
-        // A2: preview ao vivo dos preços digitados (compra e venda) —
-        // alinhado com os campos acima, mostrando "= R$ 1.390,00" ANTES
-        // de salvar (evita registrar 100× o pretendido).
+        const SizedBox(height: AppSpacing.xxs),
+        // A2: preview ao vivo dos preços digitados — alinhado com os
+        // campos acima, mostrando "= R$ 1.390,00" ANTES de salvar.
         Row(
           children: [
             Expanded(child: MoneyLivePreview(controller: purchaseController)),
@@ -1365,8 +1256,10 @@ class ProductWeightFields extends StatelessWidget {
           subtitle: l10n.productsWeighHint,
           value: vendaPorFracao,
           onChanged: onWeightChanged,
+          embedded: true,
         ),
         if (vendaPorFracao) ...[
+          const SizedBox(height: AppSpacing.sm),
           AppPickerField<String>(
             value: unitLabel,
             label: l10n.productsUnitLabel,

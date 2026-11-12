@@ -133,106 +133,84 @@ class _RecordProductionSheetState extends ConsumerState<RecordProductionSheet> {
       );
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return SheetForm(
+      title: l10n.productionProduce,
+      headerSubtitle: finished?.name,
+      error: _error,
+      actionLabel: l10n.productionConfirm,
+      onSubmit: (_saving || finished == null || bases <= 0)
+          ? null
+          : () => _confirm(finished, productsById),
+      isSubmitting: _saving,
       children: [
-        SheetHeader(
-          title: l10n.productionProduce,
-          subtitle: finished?.name,
-          onSave: (_saving || finished == null || bases <= 0)
-              ? null
-              : () => _confirm(finished, productsById),
-          actionLabel: l10n.productionConfirm,
-          isSaving: _saving,
-        ),
-        Flexible(
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xl,
-              AppSpacing.md,
-              AppSpacing.xl,
-              AppSpacing.xl,
-            ),
-            children: [
-              if (_error != null) ...[
-                Text(
-                  _error!,
-                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-              SheetSection(
-                icon: Icons.bakery_dining_outlined,
-                title: l10n.productionFinishedProduct,
+        SheetSection(
+          icon: Icons.bakery_dining_outlined,
+          title: l10n.productionFinishedProduct,
+          children: [
+            if (finished != null) ...[
+              Row(
                 children: [
-                  if (finished != null) ...[
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            finished.name,
-                            style: AppTypography.labelLarge.copyWith(
-                              color: scheme.onSurface,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          productTypeLabel(context, finished.type),
-                          style: AppTypography.bodySmall.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                  ],
-                  AppTextField(
-                    controller: _basesController,
-                    label: l10n.productionBasesLabel,
-                    keyboardType: TextInputType.number,
-                    onChanged: (_) => setState(() {}),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    l10n.productionProduced(
-                      Quantity.format(
-                        produced,
-                        unitLabel: finished?.unitLabel,
-                        language: Formatters.currentLanguage,
+                  Expanded(
+                    child: Text(
+                      finished.name,
+                      style: AppTypography.labelLarge.copyWith(
+                        color: scheme.onSurface,
                       ),
                     ),
-                    style: AppTypography.titleMedium.copyWith(
-                      color: scheme.onSurface,
-                    ),
                   ),
-                  const SizedBox(height: AppSpacing.xxs),
+                  const SizedBox(width: AppSpacing.xs),
                   Text(
-                    l10n.productionCostTotal(Formatters.currency(totalCost)),
+                    productTypeLabel(context, finished.type),
                     style: AppTypography.bodySmall.copyWith(
                       color: scheme.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
-              SheetSection(
-                icon: Icons.category_outlined,
-                title: l10n.productionComponents,
-                children: rows.isEmpty
-                    ? [
-                        Text(
-                          l10n.productionEmptyTitle,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ]
-                    : rows,
-              ),
+              const SizedBox(height: AppSpacing.sm),
             ],
-          ),
+            AppTextField(
+              controller: _basesController,
+              label: l10n.productionBasesLabel,
+              keyboardType: TextInputType.number,
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.productionProduced(
+                Quantity.format(
+                  produced,
+                  unitLabel: finished?.unitLabel,
+                  language: Formatters.currentLanguage,
+                ),
+              ),
+              style: AppTypography.titleMedium.copyWith(
+                color: scheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              l10n.productionCostTotal(Formatters.currency(totalCost)),
+              style: AppTypography.bodySmall.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        SheetSection(
+          icon: Icons.category_outlined,
+          title: l10n.productionComponents,
+          children: rows.isEmpty
+              ? [
+                  Text(
+                    l10n.productionEmptyTitle,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ]
+              : rows,
         ),
       ],
     );

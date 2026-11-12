@@ -13,12 +13,10 @@ import '../../../domain/usecases/add_financial_transaction_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/finance_providers.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/app_segmented_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/money_live_preview.dart';
-import '../../widgets/premium_decor.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Bottom sheet para registrar uma transação financeira
@@ -123,145 +121,100 @@ class _AddTransactionSheetState extends ConsumerState<AddTransactionSheet> {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return SafeArea(
-      top: false,
-      child: SingleChildScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: AppSpacing.sheetPadding,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SheetHeader(title: l10n.financialAddTitle),
-              // Seção: Tipo — pílulas estilo Apple.
-              SheetSection(
-                children: [
-                  AppSegmentedButton<TransactionType>(
-                    segments: [
-                      ButtonSegment(
-                        value: TransactionType.income,
-                        label: Text(l10n.financialIncomingType),
-                        icon: const Icon(Icons.add_circle_outline),
-                      ),
-                      ButtonSegment(
-                        value: TransactionType.expense,
-                        label: Text(l10n.financialOutgoingType),
-                        icon: const Icon(Icons.remove_circle_outline),
-                      ),
-                    ],
-                    selected: {_type},
-                    onSelectionChanged: (selection) =>
-                        setState(() => _type = selection.first),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              AppTextField(
-                controller: _descriptionController,
-                label: l10n.financialDescriptionLabel,
-                prefixIcon: Icons.edit_note_rounded,
-                textInputAction: TextInputAction.next,
-                validator: (value) => (value == null || value.trim().isEmpty)
-                    ? l10n.financialDescriptionError
-                    : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: _categoryController,
-                      label: l10n.financialCategoryLabel,
-                      prefixIcon: Icons.tag_rounded,
-                      textInputAction: TextInputAction.next,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                controller: _amountController,
-                label: l10n.financialAmountLabel,
-                prefixIcon: Icons.currency_exchange_rounded,
-                textInputAction: TextInputAction.done,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.financialAddTitle,
+      maxHeightFactor: 0.9,
+      error: _formError,
+      actionLabel: l10n.financialRegister,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        // Tipo — pílulas estilo Apple.
+        SheetSection(
+          children: [
+            AppSegmentedButton<TransactionType>(
+              segments: [
+                ButtonSegment(
+                  value: TransactionType.income,
+                  label: Text(l10n.financialIncomingType),
+                  icon: const Icon(Icons.add_circle_outline),
                 ),
-                validator: (value) => _parseAmount(value ?? '') <= 0
-                    ? l10n.financialAmountError
-                    : null,
-              ),
-              // A2: mostra ao vivo o valor que será registado.
-              MoneyLivePreview(controller: _amountController),
-              const SizedBox(height: AppSpacing.sm),
-              // Status Pendente (Fiado/A Pagar)
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: _isPending
-                        ? theme.warning.withValues(alpha: 0.5)
-                        : PremiumDecor.hairline(theme.colorScheme),
-                  ),
-                  borderRadius: AppRadius.mdAll,
-                  color: _isPending
-                      ? theme.warning.withValues(alpha: 0.05)
-                      : null,
-                ),
-                child: Material(
-                  type: MaterialType.transparency,
-                  child: SwitchListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: AppRadius.mdAll,
-                    ),
-                    title: Text(
-                      l10n.financialPendingLabel,
-                      // Título em tinta (AA); o amarelo fica no switch e
-                      // no contorno — semântica de alerta, não de texto.
-                      style: AppTypography.labelLarge.copyWith(
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    subtitle: Text(
-                      l10n.financialPendingHint,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    value: _isPending,
-                    activeThumbColor: theme.warning,
-                    onChanged: (value) => setState(() => _isPending = value),
-                  ),
-                ),
-              ),
-              if (_formError != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  _formError!,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
+                ButtonSegment(
+                  value: TransactionType.expense,
+                  label: Text(l10n.financialOutgoingType),
+                  icon: const Icon(Icons.remove_circle_outline),
                 ),
               ],
-              const SizedBox(height: AppSpacing.sm),
-              // AppButton (design system ultra-clean): altura 48, cantos 12,
-              // cores sólidas — o spinner substitui o ícone durante o envio.
-              AppButton.primary(
-                onPressed: _isSubmitting ? null : _submit,
-                label: l10n.financialRegister,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        height: AppSizes.iconMd,
-                        width: AppSizes.iconMd,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : null,
-              ),
-            ],
-          ),
+              selected: {_type},
+              onSelectionChanged: (selection) =>
+                  setState(() => _type = selection.first),
+            ),
+          ],
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        // Dados — descrição, categoria, valor e estado.
+        SheetSection(
+          icon: Icons.edit_note_rounded,
+          children: [
+            AppTextField(
+              controller: _descriptionController,
+              label: l10n.financialDescriptionLabel,
+              prefixIcon: Icons.edit_note_rounded,
+              textInputAction: TextInputAction.next,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.financialDescriptionError
+                  : null,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _categoryController,
+              label: l10n.financialCategoryLabel,
+              prefixIcon: Icons.tag_rounded,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _amountController,
+              label: l10n.financialAmountLabel,
+              prefixIcon: Icons.currency_exchange_rounded,
+              textInputAction: TextInputAction.done,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              validator: (value) => _parseAmount(value ?? '') <= 0
+                  ? l10n.financialAmountError
+                  : null,
+            ),
+            // A2: mostra ao vivo o valor que será registado.
+            MoneyLivePreview(controller: _amountController),
+            const SizedBox(height: AppSpacing.xs),
+            // Pendente (fiado) — switch de efeito imediato, sem moldura
+            // própria: o grupo já é a superfície.
+            Material(
+              type: MaterialType.transparency,
+              child: SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  l10n.financialPendingLabel,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                subtitle: Text(
+                  l10n.financialPendingHint,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                value: _isPending,
+                activeThumbColor: theme.warning,
+                onChanged: (value) => setState(() => _isPending = value),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

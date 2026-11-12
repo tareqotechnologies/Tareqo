@@ -66,72 +66,52 @@ class _UpgradeSheetState extends ConsumerState<_UpgradeSheet> {
         .where((plan) => plan.id != widget.tenant.planId && plan.isActive)
         .toList();
 
-    return SingleChildScrollView(
-      padding: AppSpacing.sheetPadding,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SheetHeader(title: l10n.upgradeTitle),
-          Text(
-            l10n.upgradeSubtitle,
-            style: AppTypography.bodyMedium.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+    return SheetForm(
+      title: l10n.upgradeTitle,
+      maxHeightFactor: 0.9,
+      error: _formError,
+      actionLabel: l10n.upgradeSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      actionIcon: const Icon(Icons.send_outlined, size: AppSizes.iconMd),
+      children: [
+        Text(
+          l10n.upgradeSubtitle,
+          style: AppTypography.bodyMedium.copyWith(
+            color: scheme.onSurfaceVariant,
           ),
-          const SizedBox(height: AppSpacing.md),
-          plansAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) => Text(
-              l10n.onboardingPlansError,
-              style: AppTypography.bodySmall.copyWith(color: theme.expense),
-            ),
-            data: (_) {
-              if (candidates.isEmpty) {
-                return Text(
-                  l10n.upgradeMaxReached,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                );
-              }
-              return Column(
-                children: [
-                  for (final plan in candidates) ...[
-                    _UpgradePlanTile(
-                      plan: plan,
-                      selected: _selectedPlanId == plan.id,
-                      onTap: () => setState(() => _selectedPlanId = plan.id),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                  ],
-                ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        plansAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => Text(
+            l10n.onboardingPlansError,
+            style: AppTypography.bodySmall.copyWith(color: theme.expense),
+          ),
+          data: (_) {
+            if (candidates.isEmpty) {
+              return Text(
+                l10n.upgradeMaxReached,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               );
-            },
-          ),
-          if (_formError != null) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              _formError!,
-              style: AppTypography.bodySmall.copyWith(color: theme.expense),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.md),
-          // AppButton (design system ultra-clean): altura 48, cantos 12,
-          // cores sólidas — o spinner substitui o ícone durante o envio.
-          AppButton.primary(
-            onPressed: _isSubmitting ? null : _submit,
-            icon: _isSubmitting
-                ? const SizedBox(
-                    height: AppSizes.iconMd,
-                    width: AppSizes.iconMd,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.send_outlined, size: AppSizes.iconMd),
-            label: l10n.upgradeSubmit,
-          ),
-        ],
-      ),
+            }
+            return Column(
+              children: [
+                for (final plan in candidates) ...[
+                  _UpgradePlanTile(
+                    plan: plan,
+                    selected: _selectedPlanId == plan.id,
+                    onTap: () => setState(() => _selectedPlanId = plan.id),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }

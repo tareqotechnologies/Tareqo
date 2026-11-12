@@ -17,10 +17,10 @@ import '../../controllers/invoice_template_providers.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_picker_field.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/color_palette.dart';
 import '../../widgets/premium_decor.dart';
-import '../../widgets/section_label.dart';
 import 'custom_invoice_preview.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -230,27 +230,35 @@ class _DocumentFormSheetState extends ConsumerState<DocumentFormSheet> {
         ? (invoiceTotal > 0 ? invoiceTotal : 0)
         : _subtotalCents;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
-        MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.customInvoiceNew,
-              style: AppTypography.titleLarge.copyWith(color: scheme.onSurface),
-            ),
-            const SizedBox(height: AppSpacing.lg),
+    final canSubmit =
+        _clientController.text.trim().isNotEmpty && _items.isNotEmpty;
 
-            // ─── Cliente ──
-            SectionLabel(text: l10n.customInvoiceClientSection),
-            const SizedBox(height: AppSpacing.xs),
+    return SheetForm(
+      title: _isInvoice ? l10n.customInvoiceNew : l10n.quotationNewFab,
+      actionLabel: _isInvoice ? l10n.customInvoiceCreate : l10n.quotationSave,
+      onSubmit: canSubmit
+          ? () {
+              widget.onSave(
+                DocumentDraft(
+                  clientName: _clientController.text.trim(),
+                  clientPhone: _phoneController.text.trim(),
+                  clientTaxId: _isInvoice ? _taxIdController.text.trim() : '',
+                  customerId: _selectedCustomerId,
+                  items: List.from(_items),
+                  totalCents: displayTotalCents,
+                  discountCents: _isInvoice ? discount : 0,
+                  taxCents: _isInvoice ? tax : 0,
+                  validityDays: 7,
+                ),
+              );
+            }
+          : null,
+      children: [
+        // ─── Cliente ──
+        SheetSection(
+          icon: Icons.person_outline,
+          title: l10n.customInvoiceClientSection,
+          children: [
             if (customers.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedCustomerId,
@@ -302,13 +310,15 @@ class _DocumentFormSheetState extends ConsumerState<DocumentFormSheet> {
                 prefixIcon: Icons.badge_outlined,
               ),
             ],
-            const SizedBox(height: AppSpacing.md),
-            Divider(height: 1, color: PremiumDecor.hairline(scheme)),
-            const SizedBox(height: AppSpacing.sm),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
 
-            // ─── Produto ──
-            SectionLabel(text: l10n.customInvoiceProductSection),
-            const SizedBox(height: AppSpacing.xs),
+        // ─── Produto ──
+        SheetSection(
+          icon: Icons.inventory_2_outlined,
+          title: l10n.customInvoiceProductSection,
+          children: [
             if (activeProducts.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedProductId,
@@ -484,34 +494,9 @@ class _DocumentFormSheetState extends ConsumerState<DocumentFormSheet> {
                 textAlign: TextAlign.end,
               ),
             ],
-            const SizedBox(height: AppSpacing.lg),
-            AppButton.primary(
-              expanded: true,
-              label: _isInvoice ? l10n.customInvoiceCreate : l10n.quotationSave,
-              onPressed:
-                  _clientController.text.trim().isNotEmpty && _items.isNotEmpty
-                  ? () {
-                      widget.onSave(
-                        DocumentDraft(
-                          clientName: _clientController.text.trim(),
-                          clientPhone: _phoneController.text.trim(),
-                          clientTaxId: _isInvoice
-                              ? _taxIdController.text.trim()
-                              : '',
-                          customerId: _selectedCustomerId,
-                          items: List.from(_items),
-                          totalCents: displayTotalCents,
-                          discountCents: _isInvoice ? discount : 0,
-                          taxCents: _isInvoice ? tax : 0,
-                          validityDays: 7,
-                        ),
-                      );
-                    }
-                  : null,
-            ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
@@ -637,29 +622,18 @@ class _DocumentTemplateSettingsSheetState
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
-        MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SheetForm(
+      title: _isInvoice
+          ? l10n.customInvoiceTemplateTitle
+          : l10n.quotationTemplateTitle,
+      actionLabel: l10n.customInvoiceTemplateSave,
+      onSubmit: _save,
+      children: [
+        // ─── Logotipo ──
+        SheetSection(
+          icon: Icons.image_outlined,
+          title: l10n.customInvoiceTemplateLogoSection,
           children: [
-            Text(
-              _isInvoice
-                  ? l10n.customInvoiceTemplateTitle
-                  : l10n.quotationTemplateTitle,
-              style: AppTypography.titleLarge.copyWith(color: scheme.onSurface),
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // ─── Logotipo ──
-            SectionLabel(text: l10n.customInvoiceTemplateLogoSection),
-            const SizedBox(height: AppSpacing.sm),
             GestureDetector(
               onTap: _pickLogo,
               child: Container(
@@ -725,11 +699,15 @@ class _DocumentTemplateSettingsSheetState
                       ),
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
 
-            // ─── Cor Principal ──
-            SectionLabel(text: l10n.customInvoiceTemplateColorSection),
-            const SizedBox(height: AppSpacing.sm),
+        // ─── Cor Principal ──
+        SheetSection(
+          icon: Icons.palette_outlined,
+          title: l10n.customInvoiceTemplateColorSection,
+          children: [
             Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
@@ -765,12 +743,16 @@ class _DocumentTemplateSettingsSheetState
                 );
               }).toList(),
             ),
-            const SizedBox(height: AppSpacing.lg),
+          ],
+        ),
 
-            // ─── Estilo (só FACTURA — Classic/Modern/Compact) ──
-            if (_isInvoice) ...[
-              SectionLabel(text: l10n.customInvoiceTemplateStyle),
-              const SizedBox(height: AppSpacing.sm),
+        // ─── Estilo (só FACTURA — Classic/Modern/Compact) ──
+        if (_isInvoice) ...[
+          const SizedBox(height: AppSpacing.md),
+          SheetSection(
+            icon: Icons.style_outlined,
+            title: l10n.customInvoiceTemplateStyle,
+            children: [
               Row(
                 children: [
                   Expanded(
@@ -803,12 +785,16 @@ class _DocumentTemplateSettingsSheetState
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.lg),
             ],
+          ),
+        ],
 
-            // ─── Dados da Empresa ──
-            SectionLabel(text: l10n.customInvoiceTemplateCompanySection),
-            const SizedBox(height: AppSpacing.sm),
+        // ─── Dados da Empresa ──
+        const SizedBox(height: AppSpacing.md),
+        SheetSection(
+          icon: Icons.business_outlined,
+          title: l10n.customInvoiceTemplateCompanySection,
+          children: [
             AppTextField(
               controller: _nameController,
               label: l10n.customInvoiceTemplateCompanyName,
@@ -845,12 +831,16 @@ class _DocumentTemplateSettingsSheetState
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.lg),
+          ],
+        ),
 
-            // ─── Preview (formas diferentes por tipo, como no original) ──
+        // ─── Preview (formas diferentes por tipo, como no original) ──
+        const SizedBox(height: AppSpacing.md),
+        SheetSection(
+          icon: Icons.visibility_outlined,
+          title: l10n.commonPreview,
+          children: [
             if (_isInvoice) ...[
-              SectionLabel(text: l10n.commonPreview),
-              const SizedBox(height: AppSpacing.sm),
               CustomInvoicePreview(
                 businessName: _nameController.text,
                 businessAddress: _addressController.text,
@@ -932,23 +922,9 @@ class _DocumentTemplateSettingsSheetState
                 ),
               ),
             ],
-            const SizedBox(height: AppSpacing.lg),
-
-            // ─── Botões ──
-            AppButton.primary(
-              expanded: true,
-              label: l10n.customInvoiceTemplateSave,
-              onPressed: _save,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            AppButton.secondary(
-              expanded: true,
-              label: l10n.commonCancel,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
           ],
         ),
-      ),
+      ],
     );
   }
 }

@@ -16,6 +16,7 @@ import '../../controllers/admin_providers.dart';
 import '../../widgets/admin_thin_bridge.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
@@ -840,65 +841,19 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: AppRadius.sheetTop,
-      ),
-      child: SingleChildScrollView(
-        padding: AppSpacing.sheetPadding,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SheetForm(
+      title: l10n.adminAddonsEditPriceTitle,
+      headerSubtitle: widget.addon.name,
+      error: _formError,
+      actionLabel: l10n.commonSave,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        SheetSection(
+          icon: Icons.sell_outlined,
           children: [
-            // Handle bar
-            Center(
-              child: Container(
-                width: AppSizes.avatarSm,
-                height: AppSpacing.xxs,
-                margin: const EdgeInsets.only(
-                  top: AppSpacing.sm,
-                  bottom: AppSpacing.lg,
-                ),
-                decoration: BoxDecoration(
-                  color: PremiumDecor.hairline(scheme),
-                  borderRadius: AppRadius.microAll,
-                ),
-              ),
-            ),
-            // Header
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.adminAddonsEditPriceTitle,
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: AppSpacing.micro),
-                      Text(
-                        widget.addon.name,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  tooltip: l10n.appSheetClose,
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
             AppTextField(
               controller: _priceController,
               keyboardType: const TextInputType.numberWithOptions(
@@ -909,28 +864,9 @@ class _AddOnPriceSheetState extends ConsumerState<_AddOnPriceSheet> {
             ),
             // A2: mostra ao vivo o preço que será registado.
             MoneyLivePreview(controller: _priceController),
-            if (_formError != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                _formError!,
-                style: AppTypography.bodySmall.copyWith(color: theme.expense),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            AppButton.primary(
-              onPressed: _isSubmitting ? null : _submit,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      height: AppSizes.iconMd,
-                      width: AppSizes.iconMd,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : null,
-              label: l10n.commonSave,
-            ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
@@ -1007,10 +943,8 @@ class _TenantAddOnManagerState extends ConsumerState<_TenantAddOnManager> {
 
   /// Abre o sheet de edição do preço mensal do add-on (super admin).
   Future<void> _editPrice(AddOn addon) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    await showAppSheet<void>(
+      context,
       builder: (sheetContext) => adminThinIfNeeded(
         sheetContext,
         thinStyle: true,

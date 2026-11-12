@@ -197,149 +197,128 @@ class _RecipeFormSheetState extends ConsumerState<RecipeFormSheet> {
         if (product.isActive && product.id != _productId) product,
     ];
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return SheetForm(
+      title: widget.initial == null
+          ? l10n.productionNewRecipe
+          : l10n.productionRecipeTitle,
+      error: _error,
+      actionLabel: l10n.commonSave,
+      onSubmit: _save,
+      isSubmitting: _saving,
       children: [
-        SheetHeader(
-          title: widget.initial == null
-              ? l10n.productionNewRecipe
-              : l10n.productionRecipeTitle,
-          onSave: _saving ? null : _save,
-          actionLabel: l10n.commonSave,
-          isSaving: _saving,
-        ),
-        Flexible(
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xl,
-              AppSpacing.md,
-              AppSpacing.xl,
-              AppSpacing.xl,
-            ),
+        if (producible.isEmpty && widget.initial == null)
+          SheetSection(
+            icon: Icons.info_outline,
+            title: l10n.productionNoProducibleTitle,
             children: [
-              if (_error != null) ...[
-                _InlineAlert(message: _error!),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-              if (producible.isEmpty && widget.initial == null)
-                SheetSection(
-                  icon: Icons.info_outline,
-                  title: l10n.productionNoProducibleTitle,
-                  children: [
-                    Text(
-                      l10n.productionNoProducibleSubtitle,
-                      style: AppTypography.bodySmall.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                )
-              else ...[
-                SheetSection(
-                  icon: Icons.bakery_dining_outlined,
-                  title: l10n.productionFinishedProduct,
-                  children: [
-                    _ProductPickerField(
-                      key: const Key('recipe-finished-product'),
-                      products: producible,
-                      value: _productId,
-                      hint: l10n.productionFinishedProduct,
-                      icon: Icons.bakery_dining_outlined,
-                      errorText: _productError,
-                      onChanged: widget.initial == null
-                          ? (value) => setState(() {
-                              _productId = value;
-                              _productError = null;
-                              // O acabado não pode ser componente da própria
-                              // ficha: limpa a seleção repetida em vez de
-                              // deixar o erro chegar do domínio.
-                              for (final draft in _components) {
-                                if (draft.productId == value) {
-                                  draft.productId = null;
-                                }
-                              }
-                            })
-                          : null,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppTextField(
-                      controller: _yieldController,
-                      label: l10n.productionYieldLabel,
-                      errorText: _yieldError,
-                      onChanged: (_) {
-                        if (_yieldError != null) {
-                          setState(() => _yieldError = null);
-                        }
-                      },
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                    ),
-                  ],
+              Text(
+                l10n.productionNoProducibleSubtitle,
+                style: AppTypography.bodySmall.copyWith(
+                  color: scheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: AppSpacing.md),
-                SheetSection(
-                  icon: Icons.category_outlined,
-                  title: l10n.productionComponents,
-                  children: [
-                    for (var i = 0; i < _components.length; i++) ...[
-                      _ComponentCard(
-                        key: ValueKey('recipe-component-$i'),
-                        productId: _components[i].productId,
-                        controller: _components[i].controller,
-                        // Só produtos ativos, sem o acabado e sem os que já
-                        // estão noutra linha (exceto a própria linha).
-                        products: [
-                          for (final product in componentOptions)
-                            if (product.id == _components[i].productId ||
-                                !selected.contains(product.id))
-                              product,
-                        ],
-                        onChanged: (value) => setState(() {
-                          _components[i].productId = value;
-                          _componentsError = null;
-                        }),
-                        quantityError: _quantityErrorIndex == i
-                            ? l10n.productionComponentQuantityRequired
-                            : null,
-                        onQuantityChanged: (_) {
-                          if (_quantityErrorIndex == i) {
-                            setState(() => _quantityErrorIndex = null);
+              ),
+            ],
+          )
+        else ...[
+          SheetSection(
+            icon: Icons.bakery_dining_outlined,
+            title: l10n.productionFinishedProduct,
+            children: [
+              _ProductPickerField(
+                key: const Key('recipe-finished-product'),
+                products: producible,
+                value: _productId,
+                hint: l10n.productionFinishedProduct,
+                icon: Icons.bakery_dining_outlined,
+                errorText: _productError,
+                onChanged: widget.initial == null
+                    ? (value) => setState(() {
+                        _productId = value;
+                        _productError = null;
+                        // O acabado não pode ser componente da própria
+                        // ficha: limpa a seleção repetida em vez de
+                        // deixar o erro chegar do domínio.
+                        for (final draft in _components) {
+                          if (draft.productId == value) {
+                            draft.productId = null;
                           }
-                        },
-                        onRemove: () => setState(() {
-                          _components.removeAt(i).dispose();
-                          _quantityErrorIndex = null;
-                          if (_components.isEmpty) _componentsError = null;
-                        }),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                    ],
-                    if (_componentsError != null) ...[
-                      Text(
-                        _componentsError!,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: theme.expense,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                    ],
-                    AppButton.secondary(
-                      label: l10n.productionAddComponent,
-                      icon: const Icon(Icons.add, size: AppSizes.iconMd),
-                      expanded: true,
-                      onPressed: () => setState(() {
-                        _components.add(_ComponentDraft());
-                        _componentsError = null;
-                      }),
-                    ),
-                  ],
+                        }
+                      })
+                    : null,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppTextField(
+                controller: _yieldController,
+                label: l10n.productionYieldLabel,
+                errorText: _yieldError,
+                onChanged: (_) {
+                  if (_yieldError != null) {
+                    setState(() => _yieldError = null);
+                  }
+                },
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
                 ),
-              ],
+              ),
             ],
           ),
-        ),
+          const SizedBox(height: AppSpacing.md),
+          SheetSection(
+            icon: Icons.category_outlined,
+            title: l10n.productionComponents,
+            children: [
+              for (var i = 0; i < _components.length; i++) ...[
+                _ComponentCard(
+                  key: ValueKey('recipe-component-$i'),
+                  productId: _components[i].productId,
+                  controller: _components[i].controller,
+                  // Só produtos ativos, sem o acabado e sem os que já
+                  // estão noutra linha (exceto a própria linha).
+                  products: [
+                    for (final product in componentOptions)
+                      if (product.id == _components[i].productId ||
+                          !selected.contains(product.id))
+                        product,
+                  ],
+                  onChanged: (value) => setState(() {
+                    _components[i].productId = value;
+                    _componentsError = null;
+                  }),
+                  quantityError: _quantityErrorIndex == i
+                      ? l10n.productionComponentQuantityRequired
+                      : null,
+                  onQuantityChanged: (_) {
+                    if (_quantityErrorIndex == i) {
+                      setState(() => _quantityErrorIndex = null);
+                    }
+                  },
+                  onRemove: () => setState(() {
+                    _components.removeAt(i).dispose();
+                    _quantityErrorIndex = null;
+                    if (_components.isEmpty) _componentsError = null;
+                  }),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+              if (_componentsError != null) ...[
+                Text(
+                  _componentsError!,
+                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+              ],
+              AppButton.secondary(
+                label: l10n.productionAddComponent,
+                icon: const Icon(Icons.add, size: AppSizes.iconMd),
+                expanded: true,
+                onPressed: () => setState(() {
+                  _components.add(_ComponentDraft());
+                  _componentsError = null;
+                }),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -639,42 +618,6 @@ class _ProductPickerSheetState extends State<_ProductPickerSheet> {
             ),
           ),
       ],
-    );
-  }
-}
-
-/// Aviso inline da sheet (erro de gravação) — tom de despesa sem peso.
-class _InlineAlert extends StatelessWidget {
-  const _InlineAlert({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: theme.expense.withValues(alpha: 0.08),
-        borderRadius: AppRadius.mdAll,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: AppSizes.iconMd,
-            color: theme.expense,
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTypography.bodySmall.copyWith(color: theme.expense),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

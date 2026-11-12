@@ -10,7 +10,6 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 
@@ -120,53 +119,38 @@ class _ForgotPasswordSheetState extends ConsumerState<ForgotPasswordSheet> {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return SingleChildScrollView(
-      padding: AppSpacing.sheetPadding,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SheetHeader(title: l10n.forgotPasswordTitle),
-            Text(
-              l10n.forgotPasswordHint,
-              style: AppTypography.bodyMedium.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => _submit(),
-              autofillHints: const [AutofillHints.email],
-              label: l10n.loginEmailLabel,
-              prefixIcon: Icons.mail_outline,
-              validator: (value) {
-                final email = value?.trim() ?? '';
-                if (email.isEmpty || !emailRegExp.hasMatch(email)) {
-                  return l10n.loginEmailError;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            AppButton.primary(
-              onPressed: _isSubmitting ? null : _submit,
-              label: l10n.forgotPasswordSubmit,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      height: AppSizes.iconMd,
-                      width: AppSizes.iconMd,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : null,
-            ),
-          ],
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.forgotPasswordTitle,
+      maxHeightFactor: 0.9,
+      actionLabel: l10n.forgotPasswordSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        Text(
+          l10n.forgotPasswordHint,
+          style: AppTypography.bodyMedium.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        AppTextField(
+          controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _submit(),
+          autofillHints: const [AutofillHints.email],
+          label: l10n.loginEmailLabel,
+          prefixIcon: Icons.mail_outline,
+          validator: (value) {
+            final email = value?.trim() ?? '';
+            if (email.isEmpty || !emailRegExp.hasMatch(email)) {
+              return l10n.loginEmailError;
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 }

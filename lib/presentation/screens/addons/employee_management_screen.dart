@@ -18,6 +18,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_picker_field.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_view.dart';
@@ -654,80 +655,58 @@ class _CommissionsTab extends ConsumerWidget {
       text: existing == null ? '' : '${existing.rateBps ~/ 100}',
     );
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.xl,
-          0,
-          AppSpacing.xl,
-          MediaQuery.viewInsetsOf(sheetContext).bottom + AppSpacing.xl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.employeeCommissionSetRate,
-              style: AppTypography.titleMedium.copyWith(
-                color: Theme.of(sheetContext).colorScheme.onSurface,
+    await showAppSheet<void>(
+      context,
+      builder: (sheetContext) => SheetForm(
+        title: l10n.employeeCommissionSetRate,
+        headerSubtitle: employee.fullName,
+        actionLabel: l10n.commonConfirm,
+        children: [
+          SheetSection(
+            icon: Icons.percent_outlined,
+            children: [
+              AppTextField(
+                controller: controller,
+                label: l10n.employeeCommissionRateLabel,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              employee.fullName,
-              style: AppTypography.bodySmall.copyWith(
-                color: Theme.of(sheetContext).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              controller: controller,
-              label: l10n.employeeCommissionRateLabel,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppButton.primary(
-              label: l10n.commonConfirm,
-              onPressed: () async {
-                final value = int.tryParse(controller.text.trim());
-                if (value == null || value < 0 || value > 100) {
-                  return;
-                }
-                try {
-                  await ref
-                      .read(employeeManagementRepositoryProvider)
-                      .setCommissionRate(
-                        storeId: employee.storeId,
-                        userId: employee.userId,
-                        rateBps: value * 100,
-                      );
-                  ref.invalidate(commissionRatesProvider);
-                  ref.invalidate(
-                    commissionSummaryProvider(employeeMonthOf(DateTime.now())),
-                  );
-                  if (!sheetContext.mounted) return;
-                  Navigator.of(sheetContext).pop();
-                  if (sheetContext.mounted) {
-                    ScaffoldMessenger.of(sheetContext).showSnackBar(
-                      SnackBar(content: Text(l10n.employeeCommissionRateSaved)),
-                    );
-                  }
-                } catch (_) {
-                  if (sheetContext.mounted) {
-                    ScaffoldMessenger.of(sheetContext).showSnackBar(
-                      SnackBar(content: Text(l10n.employeeCommissionRateError)),
-                    );
-                  }
-                }
-              },
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
+        onSubmit: () async {
+          final value = int.tryParse(controller.text.trim());
+          if (value == null || value < 0 || value > 100) {
+            return;
+          }
+          try {
+            await ref
+                .read(employeeManagementRepositoryProvider)
+                .setCommissionRate(
+                  storeId: employee.storeId,
+                  userId: employee.userId,
+                  rateBps: value * 100,
+                );
+            ref.invalidate(commissionRatesProvider);
+            ref.invalidate(
+              commissionSummaryProvider(employeeMonthOf(DateTime.now())),
+            );
+            if (!sheetContext.mounted) return;
+            Navigator.of(sheetContext).pop();
+            if (sheetContext.mounted) {
+              ScaffoldMessenger.of(sheetContext).showSnackBar(
+                SnackBar(content: Text(l10n.employeeCommissionRateSaved)),
+              );
+            }
+          } catch (_) {
+            if (sheetContext.mounted) {
+              ScaffoldMessenger.of(sheetContext).showSnackBar(
+                SnackBar(content: Text(l10n.employeeCommissionRateError)),
+              );
+            }
+          }
+        },
       ),
     );
     controller.dispose();
@@ -944,76 +923,60 @@ class _TargetsTab extends ConsumerWidget {
     final amountController = TextEditingController();
     final messenger = ScaffoldMessenger.of(context);
 
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.xl,
-          0,
-          AppSpacing.xl,
-          MediaQuery.viewInsetsOf(sheetContext).bottom + AppSpacing.xl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.employeeTargetNewTitle,
-              style: AppTypography.titleMedium.copyWith(
-                color: Theme.of(sheetContext).colorScheme.onSurface,
+    await showAppSheet<void>(
+      context,
+      builder: (sheetContext) => SheetForm(
+        title: l10n.employeeTargetNewTitle,
+        actionLabel: l10n.employeeTargetSave,
+        children: [
+          SheetSection(
+            icon: Icons.flag_outlined,
+            children: [
+              AppPickerField<String>(
+                value: selectedUserId,
+                label: l10n.employeeTargetEmployee,
+                items: [
+                  for (final employee in available)
+                    DropdownMenuItem(
+                      value: employee.userId,
+                      child: Text(employee.fullName),
+                    ),
+                ],
+                onChanged: (value) => selectedUserId = value,
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppPickerField<String>(
-              value: selectedUserId,
-              label: l10n.employeeTargetEmployee,
-              items: [
-                for (final employee in available)
-                  DropdownMenuItem(
-                    value: employee.userId,
-                    child: Text(employee.fullName),
-                  ),
-              ],
-              onChanged: (value) => selectedUserId = value,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppTextField(
-              controller: amountController,
-              label: l10n.employeeTargetMonthly,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppButton.primary(
-              label: l10n.employeeTargetSave,
-              onPressed: () async {
-                final cents = _parseCents(amountController.text.trim());
-                final userId = selectedUserId;
-                if (cents == null || cents < 0 || userId == null) return;
-                try {
-                  await ref
-                      .read(employeeManagementRepositoryProvider)
-                      .setTarget(
-                        storeId: available.first.storeId,
-                        userId: userId,
-                        month: month,
-                        targetCents: cents,
-                      );
-                  ref.invalidate(targetsProvider);
-                  if (sheetContext.mounted) Navigator.of(sheetContext).pop();
-                  messenger.showSnackBar(
-                    SnackBar(content: Text(l10n.employeeTargetSaved)),
-                  );
-                } catch (_) {
-                  messenger.showSnackBar(
-                    SnackBar(content: Text(l10n.employeeTargetError)),
-                  );
-                }
-              },
-            ),
-          ],
-        ),
+              const SizedBox(height: AppSpacing.sm),
+              AppTextField(
+                controller: amountController,
+                label: l10n.employeeTargetMonthly,
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+        ],
+        onSubmit: () async {
+          final cents = _parseCents(amountController.text.trim());
+          final userId = selectedUserId;
+          if (cents == null || cents < 0 || userId == null) return;
+          try {
+            await ref
+                .read(employeeManagementRepositoryProvider)
+                .setTarget(
+                  storeId: available.first.storeId,
+                  userId: userId,
+                  month: month,
+                  targetCents: cents,
+                );
+            ref.invalidate(targetsProvider);
+            if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+            messenger.showSnackBar(
+              SnackBar(content: Text(l10n.employeeTargetSaved)),
+            );
+          } catch (_) {
+            messenger.showSnackBar(
+              SnackBar(content: Text(l10n.employeeTargetError)),
+            );
+          }
+        },
       ),
     );
     amountController.dispose();

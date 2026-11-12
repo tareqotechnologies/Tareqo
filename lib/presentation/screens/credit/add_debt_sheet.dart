@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/domain_error_l10n.dart';
 import '../../../core/i18n/l10n_ext.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/ui/haptics.dart';
@@ -19,7 +18,6 @@ import '../../controllers/customers_providers.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/debts_providers.dart';
 import '../../controllers/finance_providers.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/money_live_preview.dart';
@@ -169,136 +167,111 @@ class _AddDebtSheetState extends ConsumerState<AddDebtSheet> {
     final l10n = context.l10n;
     final customersAsync = ref.watch(customersProvider);
 
-    return SingleChildScrollView(
-      padding: AppSpacing.sheetPadding,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SheetHeader(title: l10n.debtsAddDebt),
-            const SizedBox(height: AppSpacing.md),
-            // Seção: Cliente — seletor opcional vinculado ao módulo de clientes.
-            customersAsync.when(
-              loading: () => const SizedBox.shrink(),
-              error: (_, _) => const SizedBox.shrink(),
-              data: (customers) => customers.isEmpty
-                  ? const SizedBox.shrink()
-                  : Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                      child: SheetSection(
-                        icon: Icons.people_outline,
-                        title: l10n.debtsCustomerLinkLabel,
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.debtsAddDebt,
+      maxHeightFactor: 0.9,
+      error: _formError,
+      actionLabel: l10n.debtsAddDebt,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        // Cliente — seletor opcional vinculado ao módulo de clientes.
+        customersAsync.when(
+          loading: () => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
+          data: (customers) => customers.isEmpty
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: SheetSection(
+                    icon: Icons.people_outline,
+                    title: l10n.debtsCustomerLinkLabel,
+                    children: [
+                      Wrap(
+                        spacing: AppSpacing.xs,
+                        runSpacing: AppSpacing.xs,
                         children: [
-                          Wrap(
-                            spacing: AppSpacing.xs,
-                            runSpacing: AppSpacing.xs,
-                            children: [
-                              ChoiceChip(
-                                label: Text(l10n.debtsNoCustomer),
-                                selected: _customer == null,
-                                onSelected: (_) => _selectCustomer(null),
-                              ),
-                              for (final customer in customers)
-                                ChoiceChip(
-                                  label: Text(customer.name),
-                                  selected: _customer?.id == customer.id,
-                                  onSelected: (_) => _selectCustomer(customer),
-                                ),
-                            ],
+                          ChoiceChip(
+                            label: Text(l10n.debtsNoCustomer),
+                            selected: _customer == null,
+                            onSelected: (_) => _selectCustomer(null),
                           ),
+                          for (final customer in customers)
+                            ChoiceChip(
+                              label: Text(customer.name),
+                              selected: _customer?.id == customer.id,
+                              onSelected: (_) => _selectCustomer(customer),
+                            ),
                         ],
                       ),
-                    ),
-            ),
-            // Seção: Dados da dívida — nome, valor e vencimento.
-            SheetSection(
-              icon: Icons.receipt_long_outlined,
-              // Rótulo da SEÇÃO, distinto do título da sheet — antes os dois
-              // diziam "Registar fiado" e a hierarquia não existia.
-              title: l10n.debtsDataSection,
-              children: [
-                AppTextField(
-                  controller: _nameController,
-                  label: l10n.debtsCustomerNameLabel,
-                  prefixIcon: Icons.person_outline,
-                  textInputAction: TextInputAction.next,
-                  // Validação: campo obrigatório; erro aparece abaixo
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.debtsCustomerNameError
-                      : null,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _amountController,
-                  label: l10n.financialAmountLabel,
-                  prefixIcon: Icons.attach_money,
-                  // Teclado com separador decimal: o usuário consegue digitar
-                  // "13,90" em vez de "1390" (que viraria 1.390,00).
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  // Validação: valor deve ser positivo; erro abaixo do campo
-                  validator: (value) => _parseAmount(value ?? '') <= 0
-                      ? l10n.financialAmountError
-                      : null,
-                ),
-                // A2: mostra ao vivo o valor que será registado — "1390"
-                // aparece como 1.390,00 ANTES de salvar.
-                MoneyLivePreview(controller: _amountController),
-                const SizedBox(height: AppSpacing.sm),
-                InkWell(
-                  borderRadius: AppRadius.mdAll,
-                  onTap: _pickDate,
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: l10n.debtsDueDateLabel,
-                      prefixIcon: const Icon(Icons.event_outlined),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          Formatters.date(_dueDate),
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        const Icon(
-                          Icons.calendar_today_outlined,
-                          size: AppSizes.iconMd,
-                        ),
-                      ],
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            if (_formError != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                _formError!,
-                style: AppTypography.bodySmall.copyWith(color: theme.expense),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.sm),
-            // AppButton (design system ultra-clean): altura 48, cantos 12,
-            // cores sólidas — o spinner substitui o ícone durante o envio.
-            AppButton.primary(
-              onPressed: _isSubmitting ? null : _submit,
-              label: l10n.debtsAddDebt,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      height: AppSizes.iconMd,
-                      width: AppSizes.iconMd,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+        ),
+        // Dados da dívida — nome, valor e vencimento.
+        SheetSection(
+          icon: Icons.receipt_long_outlined,
+          // Rótulo da SEÇÃO, distinto do título da sheet — a hierarquia
+          // fica explícita.
+          title: l10n.debtsDataSection,
+          children: [
+            AppTextField(
+              controller: _nameController,
+              label: l10n.debtsCustomerNameLabel,
+              prefixIcon: Icons.person_outline,
+              textInputAction: TextInputAction.next,
+              // Validação: campo obrigatório; erro aparece abaixo do campo
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.debtsCustomerNameError
                   : null,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _amountController,
+              label: l10n.financialAmountLabel,
+              prefixIcon: Icons.attach_money,
+              // Teclado com separador decimal: o usuário consegue digitar
+              // "13,90" em vez de "1390" (que viraria 1.390,00).
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              // Validação: valor deve ser positivo; erro abaixo do campo
+              validator: (value) => _parseAmount(value ?? '') <= 0
+                  ? l10n.financialAmountError
+                  : null,
+            ),
+            // A2: mostra ao vivo o valor que será registado.
+            MoneyLivePreview(controller: _amountController),
+            const SizedBox(height: AppSpacing.xs),
+            InkWell(
+              borderRadius: AppRadius.mdAll,
+              onTap: _pickDate,
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: l10n.debtsDueDateLabel,
+                  prefixIcon: const Icon(Icons.event_outlined),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      Formatters.date(_dueDate),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.calendar_today_outlined,
+                      size: AppSizes.iconMd,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 }

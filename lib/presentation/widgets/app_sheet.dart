@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/i18n/l10n_ext.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/app_typography.dart';
 import '../widgets/app_button.dart';
@@ -107,6 +108,145 @@ class _SheetScaleIn extends StatelessWidget {
         child: Transform.scale(scale: 0.92 + 0.08 * t, child: child),
       ),
       child: child,
+    );
+  }
+}
+
+/// Scaffold ÚNICO de formulário em sheet.
+///
+/// Padroniza o ritmo visual de TODOS os formulários de criação/edição:
+/// cabeçalho → conteúdo (seções `SheetSection`) → erro → ação primária de
+/// largura total. Quem chama só declara os campos; scroll, padding, teclado,
+/// limite de altura e estado de envio ficam aqui — nenhum formulário
+/// reimplementa (ou esquece) uma parte do padrão.
+///
+/// * [formKey] liga o [Form] interno (validação com os `AppTextField`).
+/// * [error] aparece imediatamente acima da ação, em bloco compacto.
+/// * [actionLabel]/[onSubmit]/[isSubmitting] desenham o botão primário no
+///   rodapé, com spinner no lugar do ícone durante o envio.
+/// * [leading] permite uma peça fixa no topo do conteúdo (ex.: foto).
+class SheetForm extends StatelessWidget {
+  const SheetForm({
+    super.key,
+    this.formKey,
+    required this.title,
+    required this.children,
+    this.error,
+    this.actionLabel,
+    this.onSubmit,
+    this.isSubmitting = false,
+    this.actionIcon,
+    this.headerSubtitle,
+    this.maxHeightFactor = 0.9,
+    this.scrollKey,
+  });
+
+  final GlobalKey<FormState>? formKey;
+  final String title;
+  final String? headerSubtitle;
+  final List<Widget> children;
+
+  /// Mensagem de erro do formulário (exceção de domínio/servidor).
+  final String? error;
+
+  /// Rótulo da ação principal. `null` = formulário sem ação no rodapé.
+  final String? actionLabel;
+  final VoidCallback? onSubmit;
+  final bool isSubmitting;
+
+  /// Ícone opcional da ação (o spinner o substitui durante o envio).
+  final Widget? actionIcon;
+
+  /// Fração máxima da altura do ecrã ocupada pela sheet.
+  final double maxHeightFactor;
+
+  /// Chave opcional do scroll (testes que precisam de `dragUntilVisible`).
+  final Key? scrollKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasAction = actionLabel != null;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * maxHeightFactor,
+      ),
+      child: SingleChildScrollView(
+        key: scrollKey,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: AppSpacing.sheetPadding,
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SheetHeader(title: title, subtitle: headerSubtitle),
+              const SizedBox(height: AppSpacing.md),
+              ...children,
+              if (error != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                SheetFormError(message: error!),
+              ],
+              if (hasAction) ...[
+                const SizedBox(height: AppSpacing.lg),
+                AppButton.primary(
+                  label: actionLabel!,
+                  onPressed: isSubmitting ? null : onSubmit,
+                  icon: isSubmitting
+                      ? const SizedBox(
+                          height: AppSizes.iconMd,
+                          width: AppSizes.iconMd,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : actionIcon,
+                ),
+              ] else
+                const SizedBox(height: AppSpacing.sm),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Erro de formulário — bloco compacto com ícone, acima da ação.
+///
+/// Usa `theme.expense` (tinta de despesa com AA garantido nos dois temas)
+/// em vez do vermelho puro, que falha contraste como texto no papel escuro.
+class SheetFormError extends StatelessWidget {
+  const SheetFormError({super.key, required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: theme.expense.withValues(alpha: 0.08),
+        borderRadius: AppRadius.mdAll,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: AppSizes.iconMd,
+            color: theme.expense,
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTypography.bodySmall.copyWith(color: theme.expense),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

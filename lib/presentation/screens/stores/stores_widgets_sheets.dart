@@ -80,96 +80,72 @@ class _AddStoreSheetState extends ConsumerState<_AddStoreSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return SingleChildScrollView(
-      padding: AppSpacing.sheetPadding,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.addStoreTitle,
+      maxHeightFactor: 0.9,
+      error: _formError,
+      actionLabel: l10n.addStoreSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        // Seção: Dados da loja — nome e endereço.
+        SheetSection(
+          icon: Icons.store_outlined,
+          title: l10n.addStoreTitle,
           children: [
-            SheetHeader(title: l10n.addStoreTitle),
-            // Seção: Dados da loja — nome e endereço.
-            SheetSection(
-              icon: Icons.store_outlined,
-              title: l10n.addStoreTitle,
-              children: [
-                AppTextField(
-                  controller: _nameController,
-                  label: l10n.addStoreNameLabel,
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.addStoreNameError
-                      : null,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _addressController,
-                  label: l10n.addStoreAddressLabel,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _phoneController,
-                  label: l10n.addStorePhoneLabel,
-                  keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _emailController,
-                  label: l10n.addStoreEmailLabel,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            SheetSection(
-              icon: Icons.receipt_long_outlined,
-              title: l10n.storeDetailNuit,
-              children: [
-                AppTextField(
-                  controller: _nuitController,
-                  label: l10n.addStoreNuitLabel,
-                  keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _cityController,
-                  label: l10n.addStoreCityLabel,
-                  textInputAction: TextInputAction.done,
-                ),
-              ],
-            ),
-            if (_formError != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                _formError!,
-                style: AppTypography.bodySmall.copyWith(color: theme.expense),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            // AppButton (design system ultra-clean): altura 48, cantos 12,
-            // cores sólidas — o spinner substitui o ícone durante o envio.
-            AppButton.primary(
-              onPressed: _isSubmitting ? null : _submit,
-              label: l10n.addStoreSubmit,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      height: AppSizes.iconMd,
-                      width: AppSizes.iconMd,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+            AppTextField(
+              controller: _nameController,
+              label: l10n.addStoreNameLabel,
+              textInputAction: TextInputAction.next,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.addStoreNameError
                   : null,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _addressController,
+              label: l10n.addStoreAddressLabel,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _phoneController,
+              label: l10n.addStorePhoneLabel,
+              keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _emailController,
+              label: l10n.addStoreEmailLabel,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
             ),
           ],
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        SheetSection(
+          icon: Icons.receipt_long_outlined,
+          title: l10n.storeDetailNuit,
+          children: [
+            AppTextField(
+              controller: _nuitController,
+              label: l10n.addStoreNuitLabel,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _cityController,
+              label: l10n.addStoreCityLabel,
+              textInputAction: TextInputAction.done,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -276,156 +252,129 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
     final l10n = context.l10n;
     final storesAsync = ref.watch(storesProvider(widget.tenant.id));
 
-    return SingleChildScrollView(
-      padding: AppSpacing.sheetPadding,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.addEmployeeTitle,
+      maxHeightFactor: 0.9,
+      error: _formError,
+      actionLabel: l10n.addEmployeeSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        // Seção: Dados pessoais — nome, email e senha.
+        SheetSection(
+          icon: Icons.person_outline,
+          title: l10n.addEmployeeTitle,
           children: [
-            SheetHeader(title: l10n.addEmployeeTitle),
-            // Seção: Dados pessoais — nome, email e senha.
-            SheetSection(
-              icon: Icons.person_outline,
-              title: l10n.addEmployeeTitle,
-              children: [
-                AppTextField(
-                  controller: _nameController,
-                  label: l10n.addEmployeeNameLabel,
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.addEmployeeNameError
-                      : null,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _emailController,
-                  label: l10n.addEmployeeEmailLabel,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  validator: (value) {
-                    final email = value?.trim() ?? '';
-                    if (email.isEmpty || !email.contains('@')) {
-                      return l10n.addEmployeeEmailError;
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _passwordController,
-                  label: l10n.addEmployeePasswordLabel,
-                  obscureText: _obscurePassword,
-                  textInputAction: TextInputAction.next,
-                  suffixIcon: IconButton(
-                    tooltip: _obscurePassword
-                        ? l10n.loginShowPassword
-                        : l10n.loginHidePassword,
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                    ),
-                    onPressed: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                  ),
-                  validator: (value) => (value ?? '').length < 8
-                      ? l10n.addEmployeePasswordError
-                      : null,
-                ),
-              ],
+            AppTextField(
+              controller: _nameController,
+              label: l10n.addEmployeeNameLabel,
+              textInputAction: TextInputAction.next,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.addEmployeeNameError
+                  : null,
             ),
-            const SizedBox(height: AppSpacing.md),
-            // Seção: Vínculo — loja e cargo.
-            SheetSection(
-              icon: Icons.work_outline,
-              title: l10n.addEmployeeStoreLabel,
-              children: [
-                storesAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (_, _) => Text(
-                    l10n.storesLoadError,
-                    style: AppTypography.bodySmall.copyWith(
-                      color: theme.expense,
-                    ),
-                  ),
-                  data: (stores) {
-                    if (stores.isEmpty) {
-                      return Text(
-                        l10n.addEmployeeNoStores,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      );
-                    }
-                    return Wrap(
-                      spacing: AppSpacing.xs,
-                      runSpacing: AppSpacing.xs,
-                      children: [
-                        for (final store in stores)
-                          ChoiceChip(
-                            label: Text(store.name),
-                            selected: _selectedStoreId == store.id,
-                            onSelected: (_) =>
-                                setState(() => _selectedStoreId = store.id),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  l10n.addEmployeeRoleLabel,
-                  style: AppTypography.labelMedium.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Wrap(
-                  spacing: AppSpacing.xs,
-                  children: [
-                    ChoiceChip(
-                      label: Text(l10n.roleEmployee),
-                      selected: _role == EmployeeRole.employee,
-                      onSelected: (_) =>
-                          setState(() => _role = EmployeeRole.employee),
-                    ),
-                    ChoiceChip(
-                      label: Text(l10n.roleManager),
-                      selected: _role == EmployeeRole.manager,
-                      onSelected: (_) =>
-                          setState(() => _role = EmployeeRole.manager),
-                    ),
-                  ],
-                ),
-              ],
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _emailController,
+              label: l10n.addEmployeeEmailLabel,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              validator: (value) {
+                final email = value?.trim() ?? '';
+                if (email.isEmpty || !email.contains('@')) {
+                  return l10n.addEmployeeEmailError;
+                }
+                return null;
+              },
             ),
-            if (_formError != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                _formError!,
-                style: AppTypography.bodySmall.copyWith(color: theme.expense),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _passwordController,
+              label: l10n.addEmployeePasswordLabel,
+              obscureText: _obscurePassword,
+              textInputAction: TextInputAction.next,
+              suffixIcon: IconButton(
+                tooltip: _obscurePassword
+                    ? l10n.loginShowPassword
+                    : l10n.loginHidePassword,
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                ),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
               ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            // AppButton (design system ultra-clean): altura 48, cantos 12,
-            // cores sólidas — o spinner substitui o ícone durante o envio.
-            AppButton.primary(
-              onPressed: _isSubmitting ? null : _submit,
-              label: l10n.addEmployeeSubmit,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      height: AppSizes.iconMd,
-                      width: AppSizes.iconMd,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+              validator: (value) => (value ?? '').length < 8
+                  ? l10n.addEmployeePasswordError
                   : null,
             ),
           ],
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        // Seção: Vínculo — loja e cargo.
+        SheetSection(
+          icon: Icons.work_outline,
+          title: l10n.addEmployeeStoreLabel,
+          children: [
+            storesAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, _) => Text(
+                l10n.storesLoadError,
+                style: AppTypography.bodySmall.copyWith(color: theme.expense),
+              ),
+              data: (stores) {
+                if (stores.isEmpty) {
+                  return Text(
+                    l10n.addEmployeeNoStores,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  );
+                }
+                return Wrap(
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
+                  children: [
+                    for (final store in stores)
+                      ChoiceChip(
+                        label: Text(store.name),
+                        selected: _selectedStoreId == store.id,
+                        onSelected: (_) =>
+                            setState(() => _selectedStoreId = store.id),
+                      ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              l10n.addEmployeeRoleLabel,
+              style: AppTypography.labelMedium.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Wrap(
+              spacing: AppSpacing.xs,
+              children: [
+                ChoiceChip(
+                  label: Text(l10n.roleEmployee),
+                  selected: _role == EmployeeRole.employee,
+                  onSelected: (_) =>
+                      setState(() => _role = EmployeeRole.employee),
+                ),
+                ChoiceChip(
+                  label: Text(l10n.roleManager),
+                  selected: _role == EmployeeRole.manager,
+                  onSelected: (_) => setState(() => _role = EmployeeRole.manager),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -517,93 +466,71 @@ class _EditStoreSheetState extends ConsumerState<_EditStoreSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return SingleChildScrollView(
-      padding: AppSpacing.sheetPadding,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.editStoreTitle,
+      maxHeightFactor: 0.9,
+      error: _formError,
+      actionLabel: l10n.editStoreSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        SheetSection(
+          icon: Icons.store_outlined,
+          title: l10n.editStoreTitle,
           children: [
-            SheetHeader(title: l10n.editStoreTitle),
-            SheetSection(
-              icon: Icons.store_outlined,
-              title: l10n.editStoreTitle,
-              children: [
-                AppTextField(
-                  controller: _nameController,
-                  label: l10n.addStoreNameLabel,
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.addStoreNameError
-                      : null,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _addressController,
-                  label: l10n.addStoreAddressLabel,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _phoneController,
-                  label: l10n.addStorePhoneLabel,
-                  keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _emailController,
-                  label: l10n.addStoreEmailLabel,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-            SheetSection(
-              icon: Icons.receipt_long_outlined,
-              title: l10n.storeDetailNuit,
-              children: [
-                AppTextField(
-                  controller: _nuitController,
-                  label: l10n.addStoreNuitLabel,
-                  keyboardType: TextInputType.number,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _cityController,
-                  label: l10n.addStoreCityLabel,
-                  textInputAction: TextInputAction.done,
-                ),
-              ],
-            ),
-            if (_formError != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                _formError!,
-                style: AppTypography.bodySmall.copyWith(color: theme.expense),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            AppButton.primary(
-              onPressed: _isSubmitting ? null : _submit,
-              label: l10n.editStoreSubmit,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      height: AppSizes.iconMd,
-                      width: AppSizes.iconMd,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+            AppTextField(
+              controller: _nameController,
+              label: l10n.addStoreNameLabel,
+              textInputAction: TextInputAction.next,
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? l10n.addStoreNameError
                   : null,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _addressController,
+              label: l10n.addStoreAddressLabel,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _phoneController,
+              label: l10n.addStorePhoneLabel,
+              keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _emailController,
+              label: l10n.addStoreEmailLabel,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
             ),
           ],
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        SheetSection(
+          icon: Icons.receipt_long_outlined,
+          title: l10n.storeDetailNuit,
+          children: [
+            AppTextField(
+              controller: _nuitController,
+              label: l10n.addStoreNuitLabel,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _cityController,
+              label: l10n.addStoreCityLabel,
+              textInputAction: TextInputAction.done,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

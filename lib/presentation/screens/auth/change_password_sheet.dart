@@ -8,7 +8,6 @@ import '../../../core/observability/crash_reporting.dart';
 import '../../../core/ui/haptics.dart';
 import '../../../core/utils/password_policy.dart';
 import '../../controllers/auth_providers.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 
@@ -117,15 +116,17 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return SingleChildScrollView(
-      padding: AppSpacing.sheetPadding,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.changePasswordTitle,
+      maxHeightFactor: 0.9,
+      actionLabel: l10n.changePasswordSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        SheetSection(
+          icon: Icons.lock_outline,
           children: [
-            SheetHeader(title: l10n.changePasswordTitle),
             AppTextField(
               controller: _currentController,
               obscureText: _obscureCurrent,
@@ -149,7 +150,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                   ? l10n.loginPasswordError
                   : null,
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _newController,
               obscureText: _obscureNew,
@@ -177,7 +178,7 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 };
               },
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.sm),
             AppTextField(
               controller: _confirmController,
               obscureText: _obscureConfirm,
@@ -205,21 +206,9 @@ class _ChangePasswordSheetState extends ConsumerState<ChangePasswordSheet> {
                 return null;
               },
             ),
-            const SizedBox(height: AppSpacing.lg),
-            AppButton.primary(
-              onPressed: _isSubmitting ? null : _submit,
-              label: l10n.changePasswordSubmit,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      height: AppSizes.iconMd,
-                      width: AppSizes.iconMd,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : null,
-            ),
           ],
         ),
-      ),
+      ],
     );
   }
 }

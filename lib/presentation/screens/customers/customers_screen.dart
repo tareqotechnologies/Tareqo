@@ -15,7 +15,6 @@ import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/customers_providers.dart';
 import '../../controllers/debts_providers.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/confirm_dialog.dart';
@@ -530,84 +529,85 @@ class _AddCustomerSheetState extends ConsumerState<AddCustomerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return SingleChildScrollView(
-      padding: AppSpacing.sheetPadding,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SheetHeader(title: l10n.customersAddNew),
-            const SizedBox(height: AppSpacing.md),
-            // Seção: Dados do cliente — nome, telefone e email.
-            SheetSection(
-              icon: Icons.person_outline,
-              title: l10n.customersAddNew,
-              children: [
-                AppTextField(
-                  controller: _nameController,
-                  label: l10n.loginNameLabel,
-                  prefixIcon: Icons.person_outline,
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.customersNameError
-                      : null,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _phoneController,
-                  label: l10n.customersPhoneLabel,
-                  prefixIcon: Icons.phone_outlined,
-                  keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _emailController,
-                  label: l10n.customersEmailLabel,
-                  prefixIcon: Icons.mail_outline,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.done,
-                  // Email OPCIONAL — mas se preenchido, precisa ter formato
-                  // válido (emails inválidos não entram na base).
-                  validator: (value) {
-                    final email = value?.trim() ?? '';
-                    if (email.isEmpty) return null;
-                    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
-                        ? null
-                        : l10n.loginEmailError;
-                  },
-                ),
-              ],
-            ),
-            if (_formError != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                _formError!,
-                style: AppTypography.bodySmall.copyWith(color: theme.expense),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            // AppButton (design system ultra-clean): altura 48, cantos 12,
-            // cores sólidas — o spinner substitui o ícone durante o envio.
-            AppButton.primary(
-              onPressed: _isSubmitting ? null : _submit,
-              label: l10n.customersAddSubmit,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      height: AppSizes.iconMd,
-                      width: AppSizes.iconMd,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : null,
-            ),
-          ],
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.customersAddNew,
+      maxHeightFactor: 0.9,
+      error: _formError,
+      actionLabel: l10n.customersAddSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        _CustomerFields(
+          title: l10n.customersAddNew,
+          nameController: _nameController,
+          phoneController: _phoneController,
+          emailController: _emailController,
         ),
-      ),
+      ],
+    );
+  }
+}
+
+/// Campos do cliente (nome, telefone e e-mail) — fonte única dos sheets de
+/// criação e edição; validações e mensagens vivem aqui.
+class _CustomerFields extends StatelessWidget {
+  const _CustomerFields({
+    required this.title,
+    required this.nameController,
+    required this.phoneController,
+    required this.emailController,
+  });
+
+  final String title;
+  final TextEditingController nameController;
+  final TextEditingController phoneController;
+  final TextEditingController emailController;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return SheetSection(
+      icon: Icons.person_outline,
+      title: title,
+      children: [
+        AppTextField(
+          controller: nameController,
+          label: l10n.loginNameLabel,
+          prefixIcon: Icons.person_outline,
+          textInputAction: TextInputAction.next,
+          validator: (value) => (value == null || value.trim().isEmpty)
+              ? l10n.customersNameError
+              : null,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        AppTextField(
+          controller: phoneController,
+          label: l10n.customersPhoneLabel,
+          prefixIcon: Icons.phone_outlined,
+          keyboardType: TextInputType.phone,
+          textInputAction: TextInputAction.next,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        AppTextField(
+          controller: emailController,
+          label: l10n.customersEmailLabel,
+          prefixIcon: Icons.mail_outline,
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.done,
+          // Email OPCIONAL — mas se preenchido, precisa ter formato válido.
+          validator: (value) {
+            final email = value?.trim() ?? '';
+            if (email.isEmpty) return null;
+            return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
+                ? null
+                : l10n.loginEmailError;
+          },
+        ),
+      ],
     );
   }
 }
@@ -688,79 +688,24 @@ class _EditCustomerSheetState extends ConsumerState<_EditCustomerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = context.l10n;
 
-    return SingleChildScrollView(
-      padding: AppSpacing.sheetPadding,
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SheetHeader(title: l10n.customersEditTitle),
-            const SizedBox(height: AppSpacing.md),
-            SheetSection(
-              icon: Icons.person_outline,
-              title: l10n.customersEditTitle,
-              children: [
-                AppTextField(
-                  controller: _nameController,
-                  label: l10n.loginNameLabel,
-                  prefixIcon: Icons.person_outline,
-                  textInputAction: TextInputAction.next,
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.customersNameError
-                      : null,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _phoneController,
-                  label: l10n.customersPhoneLabel,
-                  prefixIcon: Icons.phone_outlined,
-                  keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppTextField(
-                  controller: _emailController,
-                  label: l10n.customersEmailLabel,
-                  prefixIcon: Icons.mail_outline,
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.done,
-                  validator: (value) {
-                    final email = value?.trim() ?? '';
-                    if (email.isEmpty) return null;
-                    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)
-                        ? null
-                        : l10n.loginEmailError;
-                  },
-                ),
-              ],
-            ),
-            if (_formError != null) ...[
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                _formError!,
-                style: AppTypography.bodySmall.copyWith(color: theme.expense),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            AppButton.primary(
-              onPressed: _isSubmitting ? null : _submit,
-              label: l10n.customersEditSubmit,
-              icon: _isSubmitting
-                  ? const SizedBox(
-                      height: AppSizes.iconMd,
-                      width: AppSizes.iconMd,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : null,
-            ),
-          ],
+    return SheetForm(
+      formKey: _formKey,
+      title: l10n.customersEditTitle,
+      maxHeightFactor: 0.9,
+      error: _formError,
+      actionLabel: l10n.customersEditSubmit,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        _CustomerFields(
+          title: l10n.customersEditTitle,
+          nameController: _nameController,
+          phoneController: _phoneController,
+          emailController: _emailController,
         ),
-      ),
+      ],
     );
   }
 }

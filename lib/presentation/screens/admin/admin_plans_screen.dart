@@ -17,6 +17,7 @@ import '../../../domain/usecases/add_plan_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/admin_providers.dart';
 import '../../widgets/app_button.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/money_live_preview.dart';
@@ -38,10 +39,8 @@ class AdminPlansScreen extends ConsumerStatefulWidget {
 
 class _AdminPlansScreenState extends ConsumerState<AdminPlansScreen> {
   Future<void> _openEditor([Plan? plan]) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+    await showAppSheet<void>(
+      context,
       // Thin: rotas modais não herdam o Theme local do shell — o builder
       // aplica o tema thin explicitamente.
       builder: (sheetContext) => adminThinIfNeeded(
@@ -667,9 +666,7 @@ class _InfoRow extends StatelessWidget {
           Flexible(
             child: Text(
               value,
-              style: AppTypography.bodyMedium.copyWith(
-                color: scheme.onSurface,
-              ),
+              style: AppTypography.bodyMedium.copyWith(color: scheme.onSurface),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
@@ -946,145 +943,85 @@ class _PlanEditorSheetState extends ConsumerState<_PlanEditorSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: AppRadius.sheetTop,
-      ),
-      child: SingleChildScrollView(
-        padding: AppSpacing.sheetPadding,
-        child: Form(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: AppSpacing.xxxl,
-                  height: AppSpacing.xxs,
-                  margin: const EdgeInsets.only(
-                    top: AppSpacing.sm,
-                    bottom: AppSpacing.lg,
-                  ),
-                  decoration: BoxDecoration(
-                    color: PremiumDecor.hairline(scheme),
-                    borderRadius: AppRadius.microAll,
+    return SheetForm(
+      title: widget.plan == null
+          ? l10n.adminPlanNewTitle
+          : l10n.adminPlanEditTitle,
+      error: _formError,
+      actionLabel: widget.plan == null ? l10n.adminPlanCreate : l10n.commonSave,
+      onSubmit: _submit,
+      isSubmitting: _isSubmitting,
+      children: [
+        SheetSection(
+          icon: Icons.tune_outlined,
+          children: [
+            AppTextField(
+              controller: _nameController,
+              textInputAction: TextInputAction.next,
+              label: l10n.adminPlanNameLabel,
+              prefixIcon: Icons.workspaces_outline,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _descriptionController,
+              textInputAction: TextInputAction.next,
+              label: l10n.commonDescription,
+              prefixIcon: Icons.notes_outlined,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            AppTextField(
+              controller: _priceController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              label: l10n.adminPlanPriceLabel,
+              prefixIcon: Icons.attach_money,
+            ),
+            // A2: mostra ao vivo o preço que será registado.
+            MoneyLivePreview(controller: _priceController),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: AppTextField(
+                    controller: _maxStoresController,
+                    keyboardType: TextInputType.number,
+                    label: l10n.adminPlanMaxStores,
+                    prefixIcon: Icons.store_outlined,
                   ),
                 ),
-              ),
-              // Header
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.plan == null
-                          ? l10n.adminPlanNewTitle
-                          : l10n.adminPlanEditTitle,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: scheme.onSurface,
-                      ),
-                    ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: AppTextField(
+                    controller: _maxEmployeesController,
+                    keyboardType: TextInputType.number,
+                    label: l10n.adminPlanMaxEmployees,
+                    prefixIcon: Icons.badge_outlined,
                   ),
-                  IconButton(
-                    tooltip: l10n.appSheetClose,
-                    icon: const Icon(Icons.close, size: AppSizes.iconMd),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              AppTextField(
-                controller: _nameController,
-                textInputAction: TextInputAction.next,
-                label: l10n.adminPlanNameLabel,
-                prefixIcon: Icons.workspaces_outline,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                controller: _descriptionController,
-                textInputAction: TextInputAction.next,
-                label: l10n.commonDescription,
-                prefixIcon: Icons.notes_outlined,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              AppTextField(
-                controller: _priceController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                label: l10n.adminPlanPriceLabel,
-                prefixIcon: Icons.attach_money,
-              ),
-              // A2: mostra ao vivo o preço que será registado.
-              MoneyLivePreview(controller: _priceController),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: _maxStoresController,
-                      keyboardType: TextInputType.number,
-                      label: l10n.adminPlanMaxStores,
-                      prefixIcon: Icons.store_outlined,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: AppTextField(
-                      controller: _maxEmployeesController,
-                      keyboardType: TextInputType.number,
-                      label: l10n.adminPlanMaxEmployees,
-                      prefixIcon: Icons.badge_outlined,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              // Material próprio: sem ele, o ListTile pinta fundo/ink no
-              // Material ANCESTRAL (fora do DecoratedBox da sheet) e o
-              // Flutter emite a assertion "ListTile background color or
-              // ink splashes may be invisible" (mesmo padrão do
-              // _CompactSwitch em product_list).
-              Material(
-                type: MaterialType.transparency,
-                child: SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.adminPlanActiveTitle),
-                  subtitle: Text(l10n.adminPlanActiveSubtitle),
-                  value: _isActive,
-                  onChanged: (value) => setState(() => _isActive = value),
-                ),
-              ),
-              if (_formError != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  _formError!,
-                  style: AppTypography.bodySmall.copyWith(color: theme.expense),
                 ),
               ],
-              const SizedBox(height: AppSpacing.lg),
-              AppButton.primary(
-                onPressed: _isSubmitting ? null : _submit,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        height: AppSizes.iconMd,
-                        width: AppSizes.iconMd,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : null,
-                label: widget.plan == null
-                    ? l10n.adminPlanCreate
-                    : l10n.commonSave,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            // Material próprio: sem ele, o ListTile pinta fundo/ink no
+            // Material ANCESTRAL (fora do DecoratedBox da sheet) e o
+            // Flutter emite a assertion "ListTile background color or
+            // ink splashes may be invisible" (mesmo padrão do
+            // _CompactSwitch em product_list).
+            Material(
+              type: MaterialType.transparency,
+              child: SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.adminPlanActiveTitle),
+                subtitle: Text(l10n.adminPlanActiveSubtitle),
+                value: _isActive,
+                onChanged: (value) => setState(() => _isActive = value),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ),
+      ],
     );
   }
 }

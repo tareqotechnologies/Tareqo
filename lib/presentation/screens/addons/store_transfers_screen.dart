@@ -17,10 +17,9 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_picker_field.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/premium_decor.dart';
-import '../../widgets/section_label.dart';
 
 /// Ecra de transferências entre lojas — envio, recebimento e histórico.
 class StoreTransfersScreen extends ConsumerStatefulWidget {
@@ -71,10 +70,8 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
   }
 
   void _openNewTransfer() {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
+    showAppSheet<void>(
+      context,
       builder: (_) => const _NewTransferSheet(),
     );
   }
@@ -349,11 +346,11 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
     }
 
     if (stores.length < 2) {
-      return Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+      return SheetForm(
+        title: l10n.transfersNewFab,
+        children: [
+          SheetSection(
+            icon: Icons.store_outlined,
             children: [
               Icon(
                 Icons.store_outlined,
@@ -378,27 +375,29 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
               ),
             ],
           ),
-        ),
+        ],
       );
     }
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.lg,
-        AppSpacing.lg,
-        MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SheetForm(
+      title: l10n.transfersNewFab,
+      maxHeightFactor: 0.9,
+      actionLabel: _executing
+          ? l10n.transfersExecuting
+          : l10n.transfersExecute,
+      onSubmit:
+          _fromStoreId == null ||
+              _toStoreId == null ||
+              _fromStoreId == _toStoreId ||
+              _items.isEmpty
+          ? null
+          : _executeTransfer,
+      isSubmitting: _executing,
+      children: [
+        // Rota — origem e destino da transferência.
+        SheetSection(
+          icon: Icons.swap_horiz_outlined,
           children: [
-            Text(
-              l10n.transfersNewFab,
-              style: AppTypography.titleLarge.copyWith(color: scheme.onSurface),
-            ),
-            const SizedBox(height: AppSpacing.lg),
             AppPickerField<String>(
               value: _fromStoreId,
               label: l10n.transfersOriginStore,
@@ -423,11 +422,14 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
               ],
               onChanged: (v) => setState(() => _toStoreId = v),
             ),
-            const SizedBox(height: AppSpacing.md),
-            Divider(height: 1, color: PremiumDecor.hairline(scheme)),
-            const SizedBox(height: AppSpacing.sm),
-            SectionLabel(text: l10n.transfersProduct),
-            const SizedBox(height: AppSpacing.xs),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // Produtos — seletor, quantidade e itens adicionados.
+        SheetSection(
+          icon: Icons.inventory_2_outlined,
+          title: l10n.transfersProduct,
+          children: [
             if (activeProducts.isNotEmpty)
               AppPickerField<String>(
                 value: _selectedProductId,
@@ -519,24 +521,9 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
                 ),
               ),
             ],
-            const SizedBox(height: AppSpacing.lg),
-            AppButton.primary(
-              expanded: true,
-              label: _executing
-                  ? l10n.transfersExecuting
-                  : l10n.transfersExecute,
-              onPressed:
-                  _executing ||
-                      _fromStoreId == null ||
-                      _toStoreId == null ||
-                      _fromStoreId == _toStoreId ||
-                      _items.isEmpty
-                  ? null
-                  : _executeTransfer,
-            ),
           ],
         ),
-      ),
+      ],
     );
   }
 }
