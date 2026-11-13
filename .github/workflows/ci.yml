@@ -45,6 +45,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.47.7'
           cache: true
       - run: flutter pub get
       - run: flutter analyze
@@ -68,6 +69,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.47.7'
           cache: true
       - run: flutter pub get
       - run: flutter test --coverage
@@ -107,6 +109,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.47.7'
           cache: true
       - run: flutter pub get
       # Build do flavor DEV com os dart-defines de desenvolvimento
