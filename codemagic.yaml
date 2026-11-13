@@ -7,7 +7,8 @@
 #   ios-unsigned — IPA sem assinatura. Não precisa de conta Apple nem de
 #                  certificados; serve para validar o build e distribuir
 #                  internamente (assinar depois com Xcode/fastlane).
-#   ios-appstore — IPA assinado + TestFlight. Requer, no Codemagic:
+#   ios-appstore — IPA assinado + TestFlight. Corre automaticamente em tags
+#                  v*. Requer, no Codemagic:
 #                    1. Team settings > Team integrations > Developer Portal >
 #                       Manage keys: App Store Connect API key (access level
 #                       App Manager). O nome do key tem de ser igual ao
@@ -111,6 +112,16 @@ workflows:
     name: Tareqo iOS (App Store / TestFlight)
     max_build_duration: 120
     instance_type: mac_mini_m2
+    # Dispara automaticamente quando uma tag v* (ex.: v2.6.1+32) é enviada.
+    # Requer a app ligada ao GitHub no Codemagic com os webhooks ativos, e a
+    # tag tem de conter este ficheiro (tags anteriores não disparam nada).
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'v*'
+          include: true
+      cancel_previous_builds: true
     integrations:
       # Nome do App Store Connect API key configurado no Codemagic.
       app_store_connect: tareqo_asc
