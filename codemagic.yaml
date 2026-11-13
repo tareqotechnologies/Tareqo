@@ -1,0 +1,179 @@
+# Codemagic — build do iOS (IPA) para a Tareqo.
+#
+# Este ficheiro tem de ficar na raiz do repositório. O Codemagic deteta-o ao
+# correr "Check for configuration file" na app.
+#
+# Workflows:
+#   ios-unsigned — IPA sem assinatura. Não precisa de conta Apple nem de
+#                  certificados; serve para validar o build e distribuir
+#                  internamente (assinar depois com Xcode/fastlane).
+#   ios-appstore — IPA assinado + TestFlight. Requer, no Codemagic:
+#                    1. Team settings > Team integrations > Developer Portal >
+#                       Manage keys: App Store Connect API key (access level
+#                       App Manager). O nome do key tem de ser igual ao
+#                       `integrations.app_store_connect` abaixo.
+#                    2. Team settings > codemagic.yaml settings >
+#                       Code signing identities: certificado Apple Distribution
+#                       (.p12) e provisioning profile App Store de
+#                       com.tareqo.tareqo.
+#
+# Variáveis de ambiente (Codemagic > Environment variables, marcadas como
+# secretas/encrypted):
+#   SUPABASE_URL        — URL do projeto Supabase de PRODUÇÃO
+#   SUPABASE_ANON_KEY   — anon key do projeto de PRODUÇÃO
+#   SENTRY_DSN          — opcional
+#
+# Notas do projeto:
+#   - O iOS não usa flavors: o scheme é sempre `Runner` e o flavor de produção
+#     entra pelo define `APP_FLAVOR=prod` (fallback lido por AppFlavorConfig).
+#   - A guarda de release recusa defaults embutidos, por isso
+#     SUPABASE_CREDENTIALS_EXPLICIT=true é obrigatório.
+#   - O projeto iOS é Swift Package Manager puro (sem Podfile); resquícios de
+#     CocoaPods são removidos antes do build.
+
+workflows:
+  ios-unsigned:
+    name: Tareqo iOS (IPA sem assinatura)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    environment:
+      flutter: 3.47.7
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: com.tareqo.tareqo
+    scripts:
+      - name: Validar credenciais de produção
+        script: |
+          set -e
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Defina SUPABASE_URL e SUPABASE_ANON_KEY (encrypted) nas variáveis do Codemagic."
+            exit 1
+          fi
+
+      - name: Dependências (SPM, sem CocoaPods)
+        script: |
+          set -e
+          flutter pub get
+          flutter config --enable-swift-package-manager
+          rm -f ios/Podfile ios/Podfile.lock
+          rm -rf ios/Pods ios/.symlinks
+
+      - name: Build IPA (sem assinatura)
+        script: |
+          set -e
+          # O número de build vem do pubspec (ex.: 2.6.0+31); usa-se o contador
+          # do Codemagic apenas se for maior, para o TestFlight nunca receber
+          # um CFBundleVersion inferior ao já publicado.
+          PUB_BUILD=$(sed -n 's/^version:.*+\([0-9]*\).*/\1/p' pubspec.yaml)
+          PUB_BUILD=${PUB_BUILD:-0}
+          BUILD=${BUILD_NUMBER:-0}
+          if [ "$BUILD" -le "$PUB_BUILD" ]; then BUILD=$PUB_BUILD; fi
+          ARGS=(
+            --dart-define=APP_FLAVOR=prod
+            --dart-define=SUPABASE_URL="$SUPABASE_URL"
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+            --dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true
+            --build-number="$BUILD"
+            --obfuscate
+            --split-debug-info=build/symbols
+          )
+          if [ -n "$SENTRY_DSN" ]; then
+            ARGS+=(--dart-define=SENTRY_DSN="$SENTRY_DSN")
+          fi
+          flutter build ipa --release --no-codesign "${ARGS[@]}"
+
+      # `--no-codesign` arquiva mas não exporta IPA; empacota-se o Runner.app
+      # no formato IPA legítimo (zip com Payload/) para assinar mais tarde.
+      - name: Empacotar Runner.app como IPA
+        script: |
+          set -e
+          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+          if ls build/ios/ipa/*.ipa >/dev/null 2>&1; then
+            echo "IPA gerado pelo Flutter."
+          else
+            APP=$(find build/ios -type d -name Runner.app | head -1)
+            [ -n "$APP" ] || { echo "Runner.app não encontrado"; exit 1; }
+            APPDIR=$(dirname "$APP")
+            mkdir -p build/ios/ipa
+            (cd "$APPDIR" && mkdir -p Payload && cp -R Runner.app Payload/ \
+              && zip -qry "$OLDPWD/build/ios/ipa/tareqo-${VERSION}-unsigned.ipa" Payload \
+              && rm -rf Payload)
+          fi
+          ls -lh build/ios/ipa/
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/symbols/*
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+
+  ios-appstore:
+    name: Tareqo iOS (App Store / TestFlight)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      # Nome do App Store Connect API key configurado no Codemagic.
+      app_store_connect: tareqo_asc
+    environment:
+      flutter: 3.47.7
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.tareqo.tareqo
+      vars:
+        BUNDLE_ID: com.tareqo.tareqo
+    scripts:
+      - name: Validar credenciais de produção
+        script: |
+          set -e
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "Defina SUPABASE_URL e SUPABASE_ANON_KEY (encrypted) nas variáveis do Codemagic."
+            exit 1
+          fi
+
+      - name: Dependências (SPM, sem CocoaPods)
+        script: |
+          set -e
+          flutter pub get
+          flutter config --enable-swift-package-manager
+          rm -f ios/Podfile ios/Podfile.lock
+          rm -rf ios/Pods ios/.symlinks
+
+      - name: Aplicar certificados e provisioning profiles
+        script: xcode-project use-profiles
+
+      - name: Build IPA assinado
+        script: |
+          set -e
+          PUB_BUILD=$(sed -n 's/^version:.*+\([0-9]*\).*/\1/p' pubspec.yaml)
+          PUB_BUILD=${PUB_BUILD:-0}
+          BUILD=${BUILD_NUMBER:-0}
+          if [ "$BUILD" -le "$PUB_BUILD" ]; then BUILD=$PUB_BUILD; fi
+          ARGS=(
+            --dart-define=APP_FLAVOR=prod
+            --dart-define=SUPABASE_URL="$SUPABASE_URL"
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+            --dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true
+            --build-number="$BUILD"
+            --obfuscate
+            --split-debug-info=build/symbols
+          )
+          if [ -n "$SENTRY_DSN" ]; then
+            ARGS+=(--dart-define=SENTRY_DSN="$SENTRY_DSN")
+          fi
+          flutter build ipa --release --export-options-plist="$HOME/export_options.plist" "${ARGS[@]}"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/symbols/*
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        # Mude para true quando quiser enviar automaticamente ao TestFlight.
+        # Requer o app record com o bundle id com.tareqo.tareqo já criado.
+        submit_to_testflight: false
