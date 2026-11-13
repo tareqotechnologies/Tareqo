@@ -10,9 +10,11 @@
 #   Settings → Secrets and variables → Actions: SUPABASE_URL_PROD e
 #   SUPABASE_ANON_KEY_PROD (os mesmos usados por downloads.yml/release.yml).
 #
-# Dispara a cada push na branch principal, em tags `v*` (acompanha a
-# release) e manualmente via workflow_dispatch. Só corre com os secrets
-# acima configurados — sem eles o job aborta no primeiro passo.
+# Dispara em pushes na branch principal que alterem o conteúdo publicado
+# (`lib/`, `web/`, `pubspec.*`, `website/`), em tags `v*` (acompanha a
+# release — o filtro de paths não se aplica a tags) e manualmente via
+# workflow_dispatch. Só corre com os secrets acima configurados — sem eles
+# o job aborta no primeiro passo.
 name: Web (GitHub Pages)
 
 on:
@@ -22,6 +24,13 @@ on:
       - feat/ui-standardization-telas
     tags:
       - "v*"
+    # Evita um build de ~4 min em pushes que não mudam o site nem a app.
+    paths:
+      - 'lib/**'
+      - 'web/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'website/**'
   workflow_dispatch:
 
 permissions:
