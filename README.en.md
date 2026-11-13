@@ -1,5 +1,7 @@
 # TAREQO ERP
 
+[![Deploy web (GitHub Pages)](https://github.com/tareqotechnologies/Tareqo/actions/workflows/web.yml/badge.svg)](https://github.com/tareqotechnologies/Tareqo/actions/workflows/web.yml)
+
 > Multi-tenant business management system (inventory, sales, purchases, finance, credit and reports) built in **Flutter** with **Clean Architecture** — with local persistence (SQLite), authenticated SaaS (Supabase + RLS) and a **pt/en/fr** interface.
 
 <p align="center">
