@@ -140,10 +140,10 @@ Ou via script (obfuscação obrigatória + valida o marcador):
 bash scripts/build_android.sh prod
 ```
 
-**iOS:** `bash scripts/build_ios.sh prod` (exige macOS) — ou o CI
-(`.github/workflows/ipa.yml` → fastlane → TestFlight), que injeta os defines
-dos secrets do GitHub (`SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`,
-`SENTRY_DSN`, `SUPABASE_CREDENTIALS_EXPLICIT`).
+**iOS:** `bash scripts/build_ios.sh prod` (exige macOS) — ou o Codemagic
+(`codemagic.yaml`, workflow `ios-appstore`), que injeta os defines a partir
+das variáveis de ambiente da conta (`SUPABASE_URL`, `SUPABASE_ANON_KEY`,
+`SENTRY_DSN`) e aplica `SUPABASE_CREDENTIALS_EXPLICIT=true`.
 
 > Confira antes: Play Store → keystore de upload configurada (o Gradle BLOQUEIA
 > `prodRelease` sem assinatura — comportamento correto); App Store → bundle id

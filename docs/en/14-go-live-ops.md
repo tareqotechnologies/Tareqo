@@ -2,15 +2,18 @@
 
 > This chapter covers **everything that is not in the repository** — the
 > steps that require the consoles (Google Play, Apple Developer, Supabase)
-> and the CI secrets. The release code is ready (workflows + Fastlane);
-> these steps are manual and one-time.
+> and the CI secrets. The release code is ready (GitHub Actions workflows
+> for Android/Windows and `codemagic.yaml` for iOS); these steps are manual
+> and one-time.
 
 ## 0. Current state
 
 - ✓ Upload keystore generated (`android/app/upload-keystore.jks`, gitignored)
  + `android/key.properties` — Android signing ready.
-- ✓ `release.yml` (Android → Play *Internal testing*) and `ios.yml`
- (iOS → TestFlight) ready; triggered by `v*` tags.
+- ✓ `release.yml` (Android → Play *Internal testing*) ready and triggered
+ by `v*` tags.
+- ✓ iOS built on **Codemagic** (`codemagic.yaml`, `ios-appstore` workflow) —
+ also automatic on `v*` tags. GitHub Actions no longer builds iOS.
 - ✗ CI secrets to configure; store accounts; console activations.
 
 ## 1. GitHub secrets (Settings → Secrets and variables → Actions)
@@ -24,10 +27,11 @@
 | `KEYSTORE_PASSWORD` | `storePassword` from `android/key.properties` (PKCS12: same for `keyPassword`) |
 | `KEY_ALIAS` | `keyAlias` from `android/key.properties` (default `upload`) |
 | `PLAY_SERVICE_ACCOUNT_JSON` | Play Console service account (Google Play Developer API) — see §3 |
-| `APPLE_ISSUER_ID` | App Store Connect → Users and Access → Integrations → App Store Connect API → Issuer ID |
-| `APPLE_KEY_ID` | key id created on the same screen |
-| `APPLE_KEY_CONTENT` | **base64** content of the `.p8` file for that API key |
-| `APPLE_TEAM_ID` | Apple Developer → Membership → Team ID |
+
+> The Apple secrets (`APPLE_ISSUER_ID`, `APPLE_KEY_ID`, `APPLE_KEY_CONTENT`,
+> `APPLE_TEAM_ID`) are no longer needed on GitHub: iOS builds moved to
+> Codemagic, where the API key, certificates and profiles are configured in
+> the account itself (§4).
 
 ## 2. Supabase (production project)
 
@@ -111,24 +115,35 @@
 5. Store assets: icon (already generated), feature graphic, screenshots,
  description, privacy policy + ToS (mandatory links).
 
-## 4. Apple (iOS)
+## 4. Apple (iOS) — build on Codemagic
 
-1. **Apple Developer Program** active + App ID `com.tareqo.tareqo`.
-2. Configure automatic signing in Xcode (team) OR use `match`
- (alternative documented in the `ios beta` lane).
-3. Create the App Store Connect API key (`.p8` file) and add the 3 Apple
- secrets (§1). The `fastlane ios beta` lane first validates the build
- without signing (`--no-codesign`), then signs and uploads.
-4. **Note:** the iOS build requires macOS — CI uses `macos-14`. Locally
- (Windows) the IPA cannot be validated; validation happens in the workflow.
+1. **Apple Developer Program** active + App ID `com.tareqo.tareqo` (and the
+ matching app record in App Store Connect).
+2. In Codemagic: **Team settings → Team integrations → Developer Portal →
+ Manage keys** — create the App Store Connect API key (**App Manager**
+ level) named **`tareqo_asc`**, the one referenced by
+ `integrations.app_store_connect` in `codemagic.yaml`.
+3. In Codemagic: **Team settings → codemagic.yaml settings → Code signing
+ identities** — upload the **Apple Distribution** certificate (.p12) and
+ the **App Store** provisioning profile for `com.tareqo.tareqo`.
+4. Codemagic environment variables (secret): `SUPABASE_URL`,
+ `SUPABASE_ANON_KEY` (production) and, optionally, `SENTRY_DSN`.
+5. The `ios-appstore` workflow (mac_mini_m2) applies the profiles with
+ `xcode-project use-profiles`, signs and builds the IPA; it runs on `v*`
+ tags and uploads to TestFlight when `submit_to_testflight: true`. The
+ `ios-unsigned` workflow (manual) produces an unsigned IPA for validation.
+6. **Note:** iOS only builds on macOS. On Windows the IPA cannot be
+ validated locally — validation happens on the Codemagic runners.
 
 ## 5. Before the first tag
 
-- [ ] All §1 secrets filled
+- [ ] §1 secrets (GitHub) filled — Android/Supabase only
+- [ ] Codemagic: `tareqo_asc` API key + certificate/provisioning profile
+ (`com.tareqo.tareqo`) + `SUPABASE_*` variables configured
 - [ ] Supabase: email confirmation ON + 2FA + migration 008 applied
 - [ ] Custom SMTP on the production Supabase (Resend + own domain) — §2.6
 - [ ] Play App Signing enabled + service account created
-- [ ] Apple Developer + API keys created
+- [ ] Apple Developer active + app record created in App Store Connect
 - [ ] Privacy policy + ToS published (store links)
 - [ ] `flutter test` green + `sql_check.sh` 9/9 (CI validates on every push)
 
