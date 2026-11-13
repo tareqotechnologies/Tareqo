@@ -39,6 +39,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate production credentials
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_PROD }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Configure SUPABASE_URL_PROD e SUPABASE_ANON_KEY_PROD antes de gerar o IPA de produção."
+            exit 1
+          fi
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
