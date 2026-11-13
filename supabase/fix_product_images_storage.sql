@@ -36,10 +36,16 @@ ON CONFLICT (id) DO NOTHING;
 -- criado privado; sem public=TRUE a URL do CDN não serve a imagem).
 UPDATE storage.buckets SET public = TRUE WHERE id = 'product-images';
 
--- 2. Leitura pública (URL via CDN — products.image_path guarda essa URL).
+-- 2. Leitura (URL via CDN — products.image_path guarda essa URL).
+--    O SELECT também é exigido pelo upload com `upsert: true`; restringir
+--    à própria loja evita expor a listagem de outras lojas e mantém o
+--    upsert funcionando (a URL pública do CDN não passa por esta policy).
 DROP POLICY IF EXISTS product_images_public_read ON storage.objects;
 CREATE POLICY product_images_public_read ON storage.objects
-  FOR SELECT USING (bucket_id = 'product-images');
+  FOR SELECT USING (
+    bucket_id = 'product-images'
+    AND public.is_my_store((storage.foldername(name))[1])
+  );
 
 -- 3. Escrita SÓ na pasta da loja do usuário autenticado:
 --    path `<storeId>/<productId>.jpg` → (foldername(name))[1] = storeId.

@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:tareqo/core/theme/app_theme.dart';
-import 'package:tareqo/domain/entities/sale.dart';
-import 'package:tareqo/presentation/widgets/payment_filter.dart';
+import 'package:tareqo/core/theme/app_tokens.dart';
 
 /// Auditoria de contraste dos temas claro e escuro (WCAG 2.x).
 ///
@@ -140,11 +139,7 @@ void main() {
       _expectContrast(scheme.onSurface, surface, 'onSurface/surface');
       _expectContrast(scheme.onSurface, scaffold, 'onSurface/scaffold');
       // Texto primário Branco 100 sobre o campo Preto 90 = 15.6:1.
-      _expectContrast(
-        scheme.onSurface,
-        fieldFill,
-        'onSurface/campo',
-      );
+      _expectContrast(scheme.onSurface, fieldFill, 'onSurface/campo');
       _expectContrast(scheme.onSurface, navBg, 'onSurface/nav');
       // Botão primário escuro: Branco 100 com rótulo Preto 100 = 19:1.
       _expectContrast(scheme.onPrimary, scheme.primary, 'onPrimary/primary');
@@ -211,27 +206,19 @@ void main() {
     });
   });
 
-  // Ícones dos cards de Venda/Compra: o selo (PaymentMethodBadge) pinta um
-  // gradiente de 22% → 8% da cor do método sobre a superfície do card; o
-  // caso mais claro (22%) é o pior para o contraste do ícone, então o selo
-  // é auditado com esse alfa — exigência de ícones/UI: 3:1.
-  test('ícones das formas de pagamento atingem 3:1 sobre o selo do card', () {
-    for (final theme in [AppTheme.light, AppTheme.dark]) {
-      final surface = theme.cardTheme.color ?? Colors.white;
-      for (final method in PaymentMethod.values) {
-        final accent = method.accent(theme);
-        final badgeBg = _compose(surface, accent, 0.22);
-        // Todos os métodos usam a escala neutra ou alertas semânticos
-        // (M-Pesa vermelho, dinheiro verde) — nenhum laranja; ícone/UI
-        // exige 3:1 sobre o selo a 22%.
-        _expectContrast(
-          accent,
-          badgeBg,
-          '${method.name} (${theme.brightness.name})',
-          minRatio: 3.0,
-        );
-      }
-    }
+  // Selo da forma de pagamento nos cards de Compra: círculo TINTA sólido
+  // com ícone Branco 100 — mesmo idioma IconTone do feed da Home, do painel
+  // de Vendas e do menu (a cor do método NÃO entra no selo). Requisito de
+  // ícones/UI: 3:1 sobre o fundo.
+  test('ícone do selo de pagamento atinge 3:1 sobre a tinta', () {
+    final background = IconTone.darkBackground(AppColors.black100);
+    final foreground = IconTone.lightForeground(AppColors.black100);
+    _expectContrast(
+      foreground,
+      background,
+      'selo de pagamento (tinta sólida)',
+      minRatio: 3.0,
+    );
   }); // Regressões auditadas (V5): onError explícito (branco sobre o
   // vermelho #C62828 = 5.6:1 no claro; Preto 100 sobre #FF8A80 = 9.3:1 no
   // escuro), ação do SnackBar (Branco 100 sobre Preto 90 = 15.6:1) e a

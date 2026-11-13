@@ -43,9 +43,12 @@ class _BarcodeScanSheetState extends State<BarcodeScanSheet> {
 
   void _onDetect(BarcodeCapture capture) {
     for (final barcode in capture.barcodes) {
-      final raw = barcode.rawValue;
+      // QR/barras podem vir com espaços/quebras de linha à volta; só
+      // devolvemos conteúdo REAL (um "código" em branco fecharia a câmara
+      // sem adicionar nada).
+      final raw = barcode.rawValue?.trim();
       if (raw != null && raw.isNotEmpty && mounted) {
-        Navigator.of(context).pop(raw.trim());
+        Navigator.of(context).pop(raw);
         return;
       }
     }

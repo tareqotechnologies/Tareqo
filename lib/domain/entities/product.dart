@@ -115,6 +115,12 @@ abstract class Product with _$Product {
     // Unidade de venda dos produtos por peso (kg, g, l, ml...). 'un'
     // (padrão) = unidade inteira normal.
     @Default('un') String unitLabel,
+    // CATEGORIA do produto (opcional) — agrupamento livre usado para
+    // organizar e FILTRAR o catálogo (ex.: Bebidas, Padaria, Limpeza).
+    // Vazio = sem categoria. A lista de categorias disponíveis no filtro
+    // é derivada dos produtos da loja (não há tabela própria): o dono
+    // escreve a categoria no cadastro e ela aparece como chip na lista.
+    @Default('') String category,
     // Produto ATIVO no catálogo (padrão). Ao ser desativado, some do PDV
     // e das compras (não pode ser vendido nem reposto), mas permanece na
     // lista de Produtos com o selo "Inativo" — o dono/gerente pode

@@ -61,24 +61,21 @@ Future<Uint8List> _buildDoc({required bool registerBold}) async {
 }
 
 void main() {
-  test(
-    'Inter-Bold.ttf é um TTF estático válido (instância, não variável)',
-    () {
-      final bytes = File('assets/fonts/Inter-Bold.ttf').readAsBytesSync();
-      // Magic number TTF: 0x00010000.
-      expect(bytes[0], 0x00);
-      expect(bytes[1], 0x01);
-      expect(bytes[2], 0x00);
-      expect(bytes[3], 0x00);
-      // Instância ESTÁTICA: não contém a tabela `fvar` (eixos variáveis).
-      // É isso que o dart_pdf precisa — ele não seleciona o eixo wght.
-      expect(
-        _contains(bytes, _latin('fvar')),
-        isFalse,
-        reason: 'Inter-Bold deve ser uma instância estática (sem tabela fvar)',
-      );
-    },
-  );
+  test('Inter-Bold.ttf é um TTF estático válido (instância, não variável)', () {
+    final bytes = File('assets/fonts/Inter-Bold.ttf').readAsBytesSync();
+    // Magic number TTF: 0x00010000.
+    expect(bytes[0], 0x00);
+    expect(bytes[1], 0x01);
+    expect(bytes[2], 0x00);
+    expect(bytes[3], 0x00);
+    // Instância ESTÁTICA: não contém a tabela `fvar` (eixos variáveis).
+    // É isso que o dart_pdf precisa — ele não seleciona o eixo wght.
+    expect(
+      _contains(bytes, _latin('fvar')),
+      isFalse,
+      reason: 'Inter-Bold deve ser uma instância estática (sem tabela fvar)',
+    );
+  });
 
   test(
     'sem bold registrado, o PDF só embute a base (estado antigo — bug)',

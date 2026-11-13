@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/test_app.dart';
 import '../../helpers/viewport.dart';
 
+import 'package:tareqo/core/theme/app_tokens.dart';
 import 'package:tareqo/domain/entities/debt.dart';
 import 'package:tareqo/domain/repositories/i_debt_processor.dart';
 import 'package:tareqo/domain/usecases/get_pending_debts_use_case.dart';
@@ -317,6 +318,84 @@ void main() {
     // Sem ação de quitação no histórico.
     expect(find.text('Quitar dívida'), findsNothing);
   });
+
+  for (final width in [320.0, 800.0]) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets(
+        'histórico alinha valores à direita: largura $width escala $scale',
+        (tester) async {
+          usePortraitViewport(tester, size: Size(width, 1000));
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                ...storeContextOverrides(),
+                getPendingDebtsUseCaseProvider.overrideWithValue(
+                  _FakeGetPendingDebtsUseCase([]),
+                ),
+                getSettledDebtsUseCaseProvider.overrideWithValue(
+                  _FakeGetSettledDebtsUseCase([
+                    Debt(
+                      id: 'curta',
+                      number: 1,
+                      personName: 'Ana',
+                      amountCents: 1500,
+                      dueDate: DateTime(2026, 7, 1),
+                      isCustomerDebt: true,
+                      isPaid: true,
+                    ),
+                    Debt(
+                      id: 'longa',
+                      number: 2,
+                      personName: 'Cliente com nome completo muito longo',
+                      amountCents: 123456789,
+                      dueDate: DateTime(2026, 7, 1),
+                      isCustomerDebt: true,
+                      isPaid: true,
+                    ),
+                  ]),
+                ),
+                settleDebtUseCaseProvider.overrideWithValue(
+                  _FakeSettleDebtUseCase(),
+                ),
+              ],
+              child: testApp(
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scale)),
+                  child: child!,
+                ),
+                home: const DebtsScreen(),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('Quitadas'));
+          await tester.pumpAndSettle();
+          for (final (name, amount) in [
+            ('Ana', 'R\$ 15,00'),
+            ('Cliente com nome completo muito longo', 'R\$ 1.234.567,89'),
+          ]) {
+            final card = find.widgetWithText(AppCard, name);
+            final value = find.descendant(
+              of: card,
+              matching: find.text(amount),
+            );
+            await tester.ensureVisible(value);
+            await tester.pumpAndSettle();
+            final cardRect = tester.getRect(card);
+            final valueRect = tester.getRect(value);
+            expect(
+              valueRect.right,
+              closeTo(cardRect.right - AppSpacing.md, 0.1),
+              reason: 'Valor deve terminar na borda interna direita do card',
+            );
+          }
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
 
   testWidgets('quitar dívida também a registra no histórico (aba Quitadas)', (
     tester,

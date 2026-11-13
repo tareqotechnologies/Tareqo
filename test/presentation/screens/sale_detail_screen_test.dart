@@ -187,8 +187,7 @@ void main() {
         (widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
-            (widget.decoration as BoxDecoration).color ==
-                AppColors.darkVoid &&
+            (widget.decoration as BoxDecoration).color == AppColors.darkVoid &&
             (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
             widget.constraints?.maxWidth == 40 &&
             widget.constraints?.maxHeight == 40,

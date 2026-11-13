@@ -1,5 +1,7 @@
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 /// Flavor de ambiente compilado no app (auditoria 2.4).
 ///
 /// Em Android/iOS/macOS o valor vem do define reservado `FLUTTER_APP_FLAVOR`,
@@ -21,7 +23,9 @@ abstract final class AppFlavorConfig {
   /// dev/test pelo ciadores e em prod via script de lançamento antes de rodar
   /// o .exe. Em builds sem a variável o app é considerado dev/sandbox.
   static AppFlavor get current {
-    final fromEnv = Platform.environment['FLUTTER_APP_FLAVOR'];
+    // Navegadores não implementam Platform.environment. Na Web, o flavor
+    // vem exclusivamente dos dart-defines embutidos no build.
+    final fromEnv = kIsWeb ? null : Platform.environment['FLUTTER_APP_FLAVOR'];
     if (fromEnv == 'prod') return AppFlavor.prod;
     const raw = String.fromEnvironment(
       'FLUTTER_APP_FLAVOR',

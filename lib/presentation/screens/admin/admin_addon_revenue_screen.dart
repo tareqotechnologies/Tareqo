@@ -280,10 +280,7 @@ class _AddOnRevenueTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  addon.name,
-                  style: AppTypography.labelLarge,
-                ),
+                Text(addon.name, style: AppTypography.labelLarge),
                 const SizedBox(height: AppSpacing.micro),
                 Text(
                   '${Formatters.currency(addon.priceMonthlyCents)}/tenant/mês',
@@ -303,9 +300,7 @@ class _AddOnRevenueTile extends StatelessWidget {
             children: [
               Text(
                 Formatters.currency(maxRevenue),
-                style: AppTypography.bodyMedium.copyWith(
-                  color: theme.income,
-                ),
+                style: AppTypography.bodyMedium.copyWith(color: theme.income),
               ),
               Text(
                 context.l10n.adminRevenuePerMonth,
@@ -362,10 +357,7 @@ class _CategoryTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  category.label,
-                  style: AppTypography.labelLarge,
-                ),
+                Text(category.label, style: AppTypography.labelLarge),
                 Text(
                   context.l10n.adminAddOnsCount(addOnCount),
                   style: AppTypography.bodySmall.copyWith(

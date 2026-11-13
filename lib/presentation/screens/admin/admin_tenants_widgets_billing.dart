@@ -149,7 +149,9 @@ class _SelectionBar extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: scheme.primaryContainer,
-        border: Border(bottom: BorderSide(color: PremiumDecor.hairline(scheme))),
+        border: Border(
+          bottom: BorderSide(color: PremiumDecor.hairline(scheme)),
+        ),
       ),
       child: Row(
         children: [

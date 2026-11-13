@@ -53,6 +53,54 @@ void main() {
     },
   );
 
+  test('add/update persistem o código de barras universal (QR/EAN)', () async {
+    final dataSource = ProductSqliteDataSourceImpl(db);
+
+    await dataSource.add(buildProduct('p1').copyWith(barcode: '7891000315507'));
+    expect(
+      (await dataSource.getById('p1', storeId: 'st1'))?.barcode,
+      '7891000315507',
+    );
+
+    await dataSource.update(
+      (await dataSource.getById(
+        'p1',
+        storeId: 'st1',
+      ))!.copyWith(barcode: '12345678'),
+    );
+    expect(
+      (await dataSource.getById('p1', storeId: 'st1'))?.barcode,
+      '12345678',
+    );
+  });
+
+  test('add/update persistem a categoria (texto livre)', () async {
+    final dataSource = ProductSqliteDataSourceImpl(db);
+
+    await dataSource.add(buildProduct('p1').copyWith(category: 'Bebidas'));
+    expect(
+      (await dataSource.getById('p1', storeId: 'st1'))?.category,
+      'Bebidas',
+    );
+
+    await dataSource.update(
+      (await dataSource.getById(
+        'p1',
+        storeId: 'st1',
+      ))!.copyWith(category: 'Padaria'),
+    );
+    expect(
+      (await dataSource.getById('p1', storeId: 'st1'))?.category,
+      'Padaria',
+    );
+
+    // Sem categoria grava NULL e o mapper devolve string vazia.
+    await dataSource.update(
+      (await dataSource.getById('p1', storeId: 'st1'))!.copyWith(category: ''),
+    );
+    expect((await dataSource.getById('p1', storeId: 'st1'))?.category, '');
+  });
+
   test('updateStock substitui a quantidade em estoque', () async {
     final dataSource = ProductSqliteDataSourceImpl(db);
     await dataSource.add(buildProduct('p1'));

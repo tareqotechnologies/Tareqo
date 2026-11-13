@@ -14,6 +14,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/utils/quantity.dart';
+import '../../../core/utils/product_categories.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/usecases/add_product_use_case.dart';
 import '../../controllers/account_providers.dart';
@@ -32,6 +33,7 @@ import '../../../core/observability/crash_reporting.dart';
 /// `product_list_screen.dart` (auditoria M5): os sheets de cadastro e
 /// edição + os helpers exclusivos do formulário (picker de foto, campos,
 /// rótulos de seção, switch compacto, validade).
+
 class _ProductPhotoPicker extends StatelessWidget {
   /// Guard anti-toque-acidental (mesma abordagem do `confirm_dialog`):
   /// apagar a foto é destrutivo PERMANENTE na edição — no guardar, o
@@ -381,6 +383,8 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
   // etiquetadoras (formato 20PPPPPWWWWW) e pelo campo do PDV.
   final _codeController = TextEditingController();
   final _barcodeController = TextEditingController();
+  // Categoria (opcional) — agrupamento/filtro do catálogo.
+  final _categoryController = TextEditingController();
 
   // W11: venda por PESO (fração) + unidade de venda (kg, g, l, ml...).
   bool _vendaPorFracao = false;
@@ -411,6 +415,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
     _stockController.dispose();
     _codeController.dispose();
     _barcodeController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -474,7 +479,15 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
     var photoFailed = false;
     try {
       final productId = AppIds.newId('p');
-      final effectiveStoreId = storeId ?? 'st1';
+      // A loja ativa PRECISA estar resolvida: antes caía num id fictício
+      // ('st1'). No modo SaaS isso subia a foto para uma pasta que o RLS
+      // nega (403 "sem permissão de armazenamento") e o produto ficava
+      // gravado no tenant errado. Falha cedo com mensagem clara.
+      if (storeId == null) {
+        setState(() => _formError = l10n.productsAddError);
+        return;
+      }
+      final effectiveStoreId = storeId;
       final bytes = _imageBytes;
       if (bytes != null) {
         try {
@@ -507,7 +520,16 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
               purchasePriceCents: purchasePriceCents,
               salePriceCents: salePriceCents,
               stockQuantity: stockMilli,
+              // Barcode universal (EAN/UPC/Code 128/QR): texto BRUTO (só
+              // trim) — o PDV normaliza espaços/caixa na comparação. Não
+              // truncar nem converter para dígitos: um QR pode ser URL ou
+              // um número com mais de 13 dígitos.
+              barcode: _barcodeController.text.trim(),
               code: _codeController.text.trim(),
+              category: canonicalProductCategory(
+                _categoryController.text,
+                ref.read(productsProvider).value,
+              ),
               vendaPorFracao: _vendaPorFracao,
               unitLabel: _unitLabel,
               type: _type,
@@ -574,16 +596,20 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
           descriptionController: _descriptionController,
           codeController: _codeController,
           barcodeController: _barcodeController,
+          categoryController: _categoryController,
+          categorySuggestions: productCategoriesOf(
+            ref.watch(productsProvider).value,
+          ),
           type: _type,
           onTypeChanged: (value) =>
               setState(() => _type = value ?? ProductType.resale),
           onScanBarcode: () async {
             final code = await showBarcodeScanner(context);
             if (code != null && code.isNotEmpty) {
-              final digits = code.replaceAll(' ', '').trim();
-              _barcodeController.text = digits.isNotEmpty
-                  ? digits
-                  : code.trim();
+              // Guarda o conteúdo BRUTO do QR/código (só trim): o PDV faz
+              // a normalização na comparação. Converter para dígitos
+              // quebrava QR alfanumérico e URLs com mais de um número.
+              _barcodeController.text = code.trim();
             }
           },
         ),
@@ -653,6 +679,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
   late final TextEditingController _stockController;
   late final TextEditingController _codeController;
   late final TextEditingController _barcodeController;
+  late final TextEditingController _categoryController;
 
   late bool _vendaPorFracao;
   late String _unitLabel;
@@ -694,6 +721,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
     );
     _codeController = TextEditingController(text: _product.code);
     _barcodeController = TextEditingController(text: _product.barcode);
+    _categoryController = TextEditingController(text: _product.category);
     _vendaPorFracao = _product.vendaPorFracao;
     _unitLabel = _product.vendaPorFracao ? _product.unitLabel : 'un';
     _isActive = _product.isActive;
@@ -708,6 +736,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
     _stockController.dispose();
     _codeController.dispose();
     _barcodeController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -789,7 +818,13 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
         imagePath: imagePath,
         purchasePriceCents: Money.parse(_purchasePriceController.text),
         salePriceCents: Money.parse(_salePriceController.text),
+        // Texto BRUTO do QR/código (só trim) — ver comentário no cadastro.
+        barcode: _barcodeController.text.trim(),
         code: _codeController.text.trim(),
+        category: canonicalProductCategory(
+          _categoryController.text,
+          ref.read(productsProvider).value,
+        ),
         vendaPorFracao: _vendaPorFracao,
         unitLabel: _unitLabel,
         isActive: _isActive,
@@ -869,16 +904,20 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
           descriptionController: _descriptionController,
           codeController: _codeController,
           barcodeController: _barcodeController,
+          categoryController: _categoryController,
+          categorySuggestions: productCategoriesOf(
+            ref.watch(productsProvider).value,
+          ),
           type: _type,
           onTypeChanged: (value) =>
               setState(() => _type = value ?? ProductType.resale),
           onScanBarcode: () async {
             final code = await showBarcodeScanner(context);
             if (code != null && code.isNotEmpty) {
-              final digits = code.replaceAll(' ', '').trim();
-              _barcodeController.text = digits.isNotEmpty
-                  ? digits
-                  : code.trim();
+              // Guarda o conteúdo BRUTO do QR/código (só trim): o PDV faz
+              // a normalização na comparação. Converter para dígitos
+              // quebrava QR alfanumérico e URLs com mais de um número.
+              _barcodeController.text = code.trim();
             }
           },
         ),
@@ -1050,6 +1089,8 @@ class ProductIdentitySection extends StatelessWidget {
     required this.descriptionController,
     required this.codeController,
     required this.barcodeController,
+    this.categoryController,
+    this.categorySuggestions = const [],
     required this.type,
     required this.onTypeChanged,
     this.onScanBarcode,
@@ -1059,6 +1100,13 @@ class ProductIdentitySection extends StatelessWidget {
   final TextEditingController descriptionController;
   final TextEditingController codeController;
   final TextEditingController barcodeController;
+
+  /// Categoria (opcional) — texto LIVRE usado para agrupar/filtrar o
+  /// catálogo. [categorySuggestions] traz as categorias já usadas na loja
+  /// para preencher com um toque (evita "Bebidas" vs "bebidas").
+  final TextEditingController? categoryController;
+  final List<String> categorySuggestions;
+
   final ProductType type;
   final ValueChanged<ProductType?> onTypeChanged;
 
@@ -1111,13 +1159,18 @@ class ProductIdentitySection extends StatelessWidget {
           },
         ),
         const SizedBox(height: AppSpacing.sm),
-        // Código de barras convencional (EAN-13, EAN-8, UPC-A, UPC-E,
-        // Code 128) — opcional e independente do PLU.
+        // Código de barras/QR — opcional e independente do PLU.
+        //
+        // ⚠️ Conteúdo OPACO: EAN/UPC/Code 128 são numéricos, mas um QR
+        // pode ser URL, texto ou um número com mais de 13 dígitos. NÃO
+        // truncar (`maxLength`) nem exigir dígitos — antes disso, o QR
+        // lido pela câmara era rejeitado/truncado no cadastro e o PDV
+        // respondia "Produto não encontrado". A normalização (espaços,
+        // caixa, zeros à esquerda) acontece na COMPARAÇÃO do PDV.
         AppTextField(
           controller: barcodeController,
           textInputAction: TextInputAction.next,
           keyboardType: TextInputType.text,
-          maxLength: 13,
           label: l10n.productsBarcodeLabel,
           helperText: l10n.productsBarcodeHint,
           prefixIcon: Icons.qr_code,
@@ -1128,20 +1181,46 @@ class ProductIdentitySection extends StatelessWidget {
                   tooltip: l10n.productsBarcodeLabel,
                   onPressed: onScanBarcode,
                 ),
-          // Validação: aceita EAN-13 (13 dígitos), EAN-8 (8 dígitos),
-          // UPC-A (12 dígitos), UPC-E (8 dígitos) e Code 128 (variável).
-          // Zeros à esquerda são preservados tratando como texto.
-          validator: (value) {
-            final text = value?.trim() ?? '';
-            if (text.isNotEmpty) {
-              final cleaned = text.replaceAll(' ', '');
-              if (!RegExp(r'^\d+$').hasMatch(cleaned)) {
-                return l10n.productsBarcodeError;
-              }
-            }
-            return null;
-          },
+          // Teto apenas de sanidade (QRs reais têm < 300 caracteres).
+          validator: (value) => (value?.trim().length ?? 0) > 512
+              ? l10n.productsBarcodeError
+              : null,
         ),
+        const SizedBox(height: AppSpacing.sm),
+        // CATEGORIA (opcional) — agrupamento livre do catálogo. As
+        // categorias existentes aparecem abaixo do campo e preenchem-no
+        // com um toque (ver lista de Produtos → filtro por categoria).
+        AppTextField(
+          controller: categoryController,
+          textInputAction: TextInputAction.next,
+          label: l10n.productsCategoryLabel,
+          helperText: l10n.productsCategoryHint,
+          prefixIcon: Icons.sell_outlined,
+          validator: (value) => (value?.trim().length ?? 0) > 60
+              ? l10n.productsCategoryError
+              : null,
+        ),
+        if (categoryController != null && categorySuggestions.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.xxs),
+          Text(
+            l10n.productsCategorySuggestions,
+            style: AppTypography.labelSmall.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxs),
+          Wrap(
+            spacing: AppSpacing.xxs,
+            runSpacing: AppSpacing.xxs,
+            children: [
+              for (final category in categorySuggestions)
+                ActionChip(
+                  label: Text(category),
+                  onPressed: () => categoryController!.text = category,
+                ),
+            ],
+          ),
+        ],
         const SizedBox(height: AppSpacing.sm),
         // Fase 1: tipo estrutural do produto (matéria-prima, revenda,
         // produzido, composto, embalagem).

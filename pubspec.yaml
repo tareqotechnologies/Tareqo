@@ -2,7 +2,7 @@ name: tareqo
 description: "TAREQO — sistema de gestão empresarial (estoque, vendas, clientes, compras e relatórios) construído em Flutter com Clean Architecture."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 2.5.0+30
+version: 2.6.0+31
 
 environment:
   sdk: ^3.12.2
@@ -153,13 +153,14 @@ flutter:
   # Garante que a fonte de ícones Material esteja incluída no aplicativo.
   uses-material-design: true
 
-  # Logotipo oficial da marca (tinta #232323 + suave #F9F9F9) — usado pela
+  # Logotipo oficial da marca (tinta #0A0E15 + suave #FFFFFF) — usado pela
   # tela de abertura in-app (_SplashScreen do AuthGate), login e onboarding.
   # Masters: tool/gen_tq_logo.py; recortes: tool/generate_icons_test.dart.
   assets:
     # Branding — imagens da marca oficial (splash, login, onboarding).
     - assets/branding/icon_official.png
     - assets/branding/splash_logo.png
+    - assets/branding/splash_logo_ink.png
     - assets/branding/icon_fg.png
     - assets/branding/play_store_icon.png
     # Guias de suporte embutidos (ecrã Ajuda — Lojas → Ajustes → Suporte):
@@ -199,7 +200,7 @@ flutter:
         - asset: assets/fonts/RobotoMono-Variable.ttf
 
 # Ícones nativos (W7) — masters por tool/gen_tq_logo.py (monograma TQ
-# oficial, tinta #232323 + branco suave #F9F9F9); recortes nativos/web por
+# oficial, tinta #0A0E15 + branco suave #FFFFFF); recortes nativos/web por
 # tool/generate_icons_test.dart. Correr:
 #   python tool/gen_tq_logo.py && flutter test tool/generate_icons_test.dart
 #   dart run flutter_launcher_icons
@@ -208,7 +209,7 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/branding/icon_legacy.png"
   # Fundo do adaptativo: tinta oficial da paleta.
-  adaptive_icon_background: "#232323"
+  adaptive_icon_background: "#0A0E15"
   adaptive_icon_foreground: "assets/branding/icon_fg.png"
   adaptive_icon_monochrome: "assets/branding/icon_mono.png"
   remove_alpha_ios: true

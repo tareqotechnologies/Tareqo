@@ -52,52 +52,65 @@
 -- ---------------------------------------------------------------------------
 -- 1. [0025] Leitura do bucket SEM listing
 -- ---------------------------------------------------------------------------
+-- ⚠️ A versão original desta secção usava
+-- `name = foldername[1] || '/' || foldername[2]` para evitar listing — mas
+-- `storage.foldername` EXCLUI o nome do arquivo, então [2] é NULL em
+-- `<storeId>/<prod>.jpg` e a policy negava TODA leitura. Com `upsert: true`
+-- o Storage exige SELECT, e todo upload passou a falhar com 403. Mantém a
+-- intenção anti-listing restringindo a leitura à PRÓPRIA loja
+-- (is_my_store), a mesma guarda da escrita. Ver
+-- `fix_product_images_rls_2026_11.sql`.
 DROP POLICY IF EXISTS product_images_public_read ON storage.objects;
 CREATE POLICY product_images_public_read ON storage.objects
   FOR SELECT USING (
     bucket_id = 'product-images'
-    AND name = ((storage.foldername(name))[1] || '/' ||
-                (storage.foldername(name))[2])
+    AND public.is_my_store((storage.foldername(name))[1])
   );
 
 -- ---------------------------------------------------------------------------
 -- 2. [0029] REVOKE EXECUTE das funções internas (não-API, fora de policies)
 -- ---------------------------------------------------------------------------
+-- ⚠️ Revogação DINÂMICA por nome (não por assinatura fixa): bases diferentes
+-- têm overloads diferentes (ex.: `prevent_scope_change` só existe sem args
+-- nesta schema — os argumentos do trigger chegam por TG_ARGV; bases antigas
+-- têm `lock_products_or_raise` com 4 args). Citar uma assinatura inexistente
+-- aborta o lote com 42883 "function ... does not exist". O laço revoga
+-- TODOS os overloads existentes para cada nome.
 DO $$
+DECLARE
+  fn text;
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
-    -- Triggers (nunca chamados direto pelo app).
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_record_store_id() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_tenant_user_id() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_store_tenant() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_tenant_owner() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_employee_tenant() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_employee_attendance_actor() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_invoice_number() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_custom_invoice_number() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_quotation_number() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_decided_by() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_plan_request_tenant() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.log_audit_entry() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.prevent_scope_change() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.prevent_scope_change(text) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.enforce_store_limit() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.enforce_employee_limit() FROM anon, authenticated';
-    -- Helpers chamados só dentro de RPCs SECURITY DEFINER / triggers (não são
-    -- API e NÃO aparecem em nenhuma policy RLS — ver varredura do corpo das
-    -- policies: apenas is_my_store/is_tenant_owner/is_manager_of_store/
+    -- Triggers (nunca chamados direto pelo app) + helpers internos chamados
+    -- só dentro de RPCs SECURITY DEFINER / triggers (não são API e NÃO
+    -- aparecem em nenhuma policy RLS — ver varredura do corpo das policies:
+    -- apenas is_my_store/is_tenant_owner/is_manager_of_store/
     -- is_store_employee_active/mfa_ok/is_super_admin são citados lá).
-    -- TODOS os overloads: bases antigas podem ter assinaturas legadas
-    -- (ex.: lock_products_or_raise com 4 args) — a guarda do check 42 é por
-    -- NOME e aponta qualquer overload exposto.
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.lock_products_or_raise(jsonb, text, boolean) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.lock_products_or_raise(jsonb, text, uuid, boolean) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_invoice_number(text) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_custom_invoice_number(text) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_quotation_number(text) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_enforced_for_user(uuid) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_verified_factor_count(uuid) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_satisfied(uuid) FROM anon, authenticated';
+    FOR fn IN
+      SELECT format(
+        '%I.%I(%s)', n.nspname, p.proname,
+        pg_get_function_identity_arguments(p.oid)
+      )
+      FROM pg_proc p
+      JOIN pg_namespace n ON n.oid = p.pronamespace
+      WHERE n.nspname = 'public'
+        AND p.proname IN (
+          'set_record_store_id','set_tenant_user_id','set_store_tenant',
+          'set_tenant_owner','set_employee_tenant',
+          'set_employee_attendance_actor','set_invoice_number',
+          'set_custom_invoice_number','set_quotation_number',
+          'set_decided_by','set_plan_request_tenant','log_audit_entry',
+          'prevent_scope_change','enforce_store_limit',
+          'enforce_employee_limit','lock_products_or_raise',
+          'get_next_invoice_number','get_next_custom_invoice_number',
+          'get_next_quotation_number','mfa_enforced_for_user',
+          'mfa_verified_factor_count','mfa_satisfied'
+        )
+    LOOP
+      EXECUTE format(
+        'REVOKE EXECUTE ON FUNCTION %s FROM anon, authenticated', fn
+      );
+    END LOOP;
     -- ⚠️ NÃO revogar aqui: is_my_store / is_tenant_owner / is_manager_of_store
     -- / is_store_employee_active / mfa_ok (citados em policies RLS) nem
     -- is_super_admin() (rpc do painel admin) — ver cabeçalho.

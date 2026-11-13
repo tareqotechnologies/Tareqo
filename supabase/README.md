@@ -8,7 +8,9 @@
 | Arquivo | Uso |
 |---|---|
 | **`schema.sql`** | **Instalação NOVA — único script necessário.** Cria tudo: tabelas, RLS, RPCs, triggers, storage (`product-images`), Realtime, add-ons e billing (PARTE 1.9) e o catálogo de planos. Idempotente, roda em 1 transação. |
-| **`upgrade.sql`** | **Bases EXISTENTES.** As partes idempotentes (até à PARTE 35) que levam qualquer versão anterior ao estado atual. Pode ser reexecutado à vontade (o CI aplica 2x como regressão). |
+| **`upgrade.sql`** | **Bases EXISTENTES.** As partes idempotentes (até à PARTE 38) que levam qualquer versão anterior ao estado atual. Pode ser reexecutado à vontade (o CI aplica 2x como regressão). |
+| `fix_product_images_rls_2026_11.sql` | **PARTE 37 isolada** — corrige o 403/RLS do upload de foto (`product-images`) em bancos que já rodaram a versão anterior da política de SELECT. Idempotente. |
+| `product_category_2026_11.sql` | **PARTE 38 isolada** — adiciona `products.category` (filtro por categoria na lista). Rodar antes de instalar o APK novo. Idempotente. |
 | `promote_super_admin.sql` | Promove um e-mail a super admin (editar `SEU_EMAIL_AQUI`). |
 | `cleanup_demo_data.sql` | (Opcional) Remove dados de demonstração. |
 | `reset_tenant_data.sql` | (Opcional) Zera os dados de UM tenant. |

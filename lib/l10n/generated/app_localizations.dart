@@ -1972,6 +1972,48 @@ abstract class AppLocalizations {
   /// **'Tipo de produto'**
   String get productsTypeLabel;
 
+  /// No description provided for @productsCategoryLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categoria'**
+  String get productsCategoryLabel;
+
+  /// No description provided for @productsCategoryHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Bebidas, Padaria, Limpeza'**
+  String get productsCategoryHint;
+
+  /// No description provided for @productsCategorySuggestions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categorias já usadas'**
+  String get productsCategorySuggestions;
+
+  /// No description provided for @productsCategoryError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categoria inválida: máximo de 60 caracteres.'**
+  String get productsCategoryError;
+
+  /// No description provided for @productsFilterCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categoria'**
+  String get productsFilterCategory;
+
+  /// No description provided for @productsFilterCategoryAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todas'**
+  String get productsFilterCategoryAll;
+
+  /// No description provided for @productsFilterCategoryNone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem categoria'**
+  String get productsFilterCategoryNone;
+
   /// No description provided for @productsTypeRawMaterial.
   ///
   /// In pt, this message translates to:
@@ -3913,13 +3955,13 @@ abstract class AppLocalizations {
   /// No description provided for @productsBarcodeHint.
   ///
   /// In pt, this message translates to:
-  /// **'EAN-13, EAN-8, UPC-A, UPC-E, Code 128'**
+  /// **'EAN, UPC, Code 128 ou o conteúdo do QR'**
   String get productsBarcodeHint;
 
   /// No description provided for @productsBarcodeError.
   ///
   /// In pt, this message translates to:
-  /// **'Código de barras inválido: digite dígitos válidos (8, 12 ou 13).'**
+  /// **'Código de barras inválido: máximo de 512 caracteres.'**
   String get productsBarcodeError;
 
   /// No description provided for @productsWeighLabel.

@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/network/deep_link_handler.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../domain/entities/app_user.dart';
 import '../../../domain/entities/auth_event.dart';
@@ -75,7 +74,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
 
     return authState.when(
       loading: () =>
-          _timeoutReached ? const LoginScreen() : const _SplashScreen(),
+          _timeoutReached ? const LoginScreen() : const TareqoSplashScreen(),
       error: (error, stackTrace) {
         CrashReporting.capture(
           error,
@@ -157,7 +156,7 @@ class _MFAGateState extends ConsumerState<_MFAGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_mfaChecked && !_timedOut) return const _SplashScreen();
+    if (!_mfaChecked && !_timedOut) return const TareqoSplashScreen();
 
     if (_mfaEnabled) {
       return _MFAVerificationGate(user: widget.user);
@@ -210,7 +209,7 @@ class _MFAVerificationGateState extends ConsumerState<_MFAVerificationGate> {
   @override
   Widget build(BuildContext context) {
     if (_verified) return _AdminTenantGate(user: widget.user);
-    return const _SplashScreen();
+    return const TareqoSplashScreen();
   }
 }
 
@@ -250,7 +249,7 @@ class _AdminTenantGateState extends ConsumerState<_AdminTenantGate> {
       return _TenantGate(user: widget.user);
     }
     return adminAsync.when(
-      loading: () => const _SplashScreen(),
+      loading: () => const TareqoSplashScreen(),
       error: (error, stackTrace) {
         CrashReporting.capture(
           error,
@@ -313,7 +312,7 @@ class _TenantGateState extends ConsumerState<_TenantGate> {
       );
     }
     return tenantAsync.when(
-      loading: () => const _SplashScreen(),
+      loading: () => const TareqoSplashScreen(),
       error: (error, stackTrace) {
         CrashReporting.capture(
           error,
@@ -333,7 +332,7 @@ class _TenantGateState extends ConsumerState<_TenantGate> {
             tenant.ownerUserId != widget.user.id) {
           final employeesAsync = ref.watch(employeesProvider(tenant.id));
           if (employeesAsync.isLoading && employeesAsync.value == null) {
-            return const _SplashScreen();
+            return const TareqoSplashScreen();
           }
           final employees = employeesAsync.value;
           if (employees != null) {
@@ -490,80 +489,82 @@ class _TenantErrorScreen extends StatelessWidget {
 
 // ─── Splash ─────────────────────────────────────────────────────────────
 
-class _SplashScreen extends StatelessWidget {
-  const _SplashScreen();
+/// Abertura visual da marca; não controla sessão, rotas ou duração de carga.
+class TareqoSplashScreen extends StatelessWidget {
+  const TareqoSplashScreen({super.key});
 
-  // Mesma paleta da tela de login: segue o brilho do tema do app
-  // (light/dark) — no escuro os tokens AppColors.*Dark; no claro os
-  // neutros do AppTheme.light (ver `login_screen.dart`).
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isDark ? AppColors.backgroundDark : AppColors.scaffoldLight;
-    final textPrimary = isDark ? AppColors.softWhite : AppColors.onSurfaceLight;
-    final textSecondary = isDark
-        ? AppColors.onSurfaceVariantDark
-        : AppColors.onSurfaceVariantLight;
-    // Acento da marca: azul oficial nos dois brilhos — o indicador de
-    // carregamento é uma ação, não uma superfície.
-    final accent = scheme.primary;
 
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Logo direto (TQ monograma branco sobre fundo preto).
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.xxl),
-                child: Image.asset(
-                  'assets/branding/icon_official.png',
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.contain,
-                ),
+          // Mantém a composição acessível em paisagem e com texto ampliado.
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 360),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    isDark
+                        ? 'assets/branding/splash_logo.png'
+                        : 'assets/branding/splash_logo_ink.png',
+                    width: 144,
+                    height: 144,
+                    fit: BoxFit.contain,
+                    excludeFromSemantics: true,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'TAREQO',
+                      textAlign: TextAlign.center,
+                      // Wordmark de marca: mantém uma linha em ecrãs estreitos.
+                      style: AppTypography.display.copyWith(
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: 5,
+                        color: scheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    l10n.loginTagline,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.huge),
+                  SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      color: scheme.onSurfaceVariant,
+                      backgroundColor: scheme.outlineVariant,
+                      semanticsLabel: l10n.splashLoading,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    l10n.splashLoading,
+                    textAlign: TextAlign.center,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: AppSpacing.xl),
-              // Título.
-              Text(
-                'TAREQO',
-                // Logótipo: degrau `display` (28/w500); o tracking aberto é
-                // decisão de marca (não um estilo de texto funcional).
-                style: AppTypography.display.copyWith(
-                  letterSpacing: 2,
-                  color: textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              // Subtítulo (localizado).
-              Text(
-                l10n.loginTagline,
-                textAlign: TextAlign.center,
-                style: AppTypography.bodyMedium.copyWith(color: textSecondary),
-              ),
-              const SizedBox(height: AppSpacing.huge),
-              // Spinner no azul oficial — ação, não superfície.
-              SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: accent,
-                  backgroundColor: accent.withValues(alpha: 0.125),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              // Texto de loading.
-              Text(
-                l10n.splashLoading,
-                style: AppTypography.bodyMedium.copyWith(color: textSecondary),
-              ),
-            ],
+            ),
           ),
         ),
       ),

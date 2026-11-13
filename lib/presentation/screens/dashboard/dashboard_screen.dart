@@ -18,6 +18,7 @@ import '../../../domain/entities/purchase.dart';
 import '../../../domain/entities/sale.dart';
 import '../../../domain/entities/stock_transfer.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/dashboard_providers.dart';
 import '../../controllers/debts_providers.dart';
@@ -28,6 +29,7 @@ import '../../controllers/purchases_providers.dart';
 import '../../controllers/sales_providers.dart';
 import '../../controllers/stock_transfers_provider.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_sheet.dart';
 import '../../widgets/premium_decor.dart';
 import '../../widgets/app_menu_option.dart';
 import '../../widgets/empty_state.dart';
@@ -35,6 +37,8 @@ import '../../widgets/inline_error_card.dart';
 import '../../widgets/store_switcher.dart';
 import '../../navigation/app_routes.dart';
 import '../../widgets/detail_row.dart';
+import '../products/product_form_sheets.dart' show EditProductSheet;
+import '../purchases/purchase_detail_sheet.dart' show showPurchaseDetailSheet;
 import '../shell/app_shell.dart' show AppSection;
 
 /// Limiar de "stock baixo" (W8 + W11): produtos com estoque inferior a
@@ -129,6 +133,25 @@ class DashboardScreen extends ConsumerWidget {
             )
             .toList();
 
+    // Permissão de gestão de produto — mesma matriz da lista de Produtos
+    // (funcionário comum só vende). Sem permissão, o alerta abre a lista.
+    final canManageProducts =
+        ref.watch(currentAccessLevelProvider) != UserAccessLevel.employee;
+
+    // Alerta de produto (estoque baixo/esgotado, validade) leva à FICHA do
+    // produto em questão — a sheet de edição é o detalhe do produto na app —
+    // e não à lista inteira.
+    void openProduct(Product product) {
+      if (!canManageProducts) {
+        AppNavigator.pushSection(context, AppSection.products);
+        return;
+      }
+      showAppSheet<void>(
+        context,
+        builder: (_) => EditProductSheet(product: product),
+      );
+    }
+
     // Produtos ATIVOS com estoque baixo (< 5 un) — alerta do feed.
     final lowStock = (productsAsync.value ?? const <Product>[])
         .where(
@@ -160,7 +183,9 @@ class DashboardScreen extends ConsumerWidget {
             purchase: purchase,
             item: item,
             l10n: l10n,
-            onTap: () => AppNavigator.push(context, AppRoutes.purchases),
+            // Entrada de estoque → detalhe DA COMPRA que a gerou (itens,
+            // validade do lote), não a lista de compras.
+            onTap: () => showPurchaseDetailSheet(context, purchase: purchase),
           ),
       for (final debt in todaySettled)
         _ActivityItem.fiadoPayment(
@@ -195,7 +220,8 @@ class DashboardScreen extends ConsumerWidget {
           // Pílula invertida: tinta no claro, Branco 100 no escuro (o
           // rótulo é calculado pela luminância do fundo).
           badgeBackground: theme.colorScheme.onSurface,
-          onTap: () => AppNavigator.pushSection(context, AppSection.products),
+          // Abre o produto esgotado/baixo em questão (ficha do produto).
+          onTap: () => openProduct(product),
         ),
       for (final alert in expiryAlerts)
         _ActivityItem.expiry(
@@ -203,7 +229,8 @@ class DashboardScreen extends ConsumerWidget {
           l10n: l10n,
           warningColor: theme.warning,
           dangerColor: theme.expense,
-          onTap: () => AppNavigator.pushSection(context, AppSection.products),
+          // Abre o produto do lote a vencer/vencido em questão.
+          onTap: () => openProduct(alert.product),
         ),
     ];
 

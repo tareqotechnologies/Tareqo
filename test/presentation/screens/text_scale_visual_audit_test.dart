@@ -207,6 +207,13 @@ void main() {
     group('auditoria visual — textScaler $scale', () {
       testWidgets('login', (tester) async {
         await _pump(tester, scale, _login());
+        await tester.runAsync(() async {
+          await precacheImage(
+            const AssetImage('assets/branding/icon_official.png'),
+            tester.element(find.byType(LoginScreen)),
+          );
+        });
+        await tester.pumpAndSettle();
 
         expect(find.text('TAREQO'), findsOneWidget);
         expect(find.text('Entrar'), findsOneWidget);

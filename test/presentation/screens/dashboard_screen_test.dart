@@ -37,6 +37,8 @@ import 'package:tareqo/presentation/controllers/products_providers.dart';
 import 'package:tareqo/presentation/controllers/purchases_providers.dart';
 import 'package:tareqo/presentation/controllers/sales_providers.dart';
 import 'package:tareqo/presentation/screens/dashboard/dashboard_screen.dart';
+import 'package:tareqo/presentation/screens/products/product_form_sheets.dart'
+    show EditProductSheet;
 import 'package:tareqo/presentation/screens/shell/menu_screen.dart';
 import 'package:tareqo/presentation/widgets/store_switcher.dart';
 
@@ -855,5 +857,59 @@ void main() {
     expect(find.text('Venda S-00002'), findsOneWidget);
     expect(find.textContaining('M-Pesa'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
+  });
+
+  // Alerta do feed → o PRODUTO em questão (ficha do produto), não a lista.
+  testWidgets('alerta de stock baixo abre a ficha do produto em questão', (
+    tester,
+  ) async {
+    const product = Product(
+      id: 'p-esgotado',
+      name: 'Feijão Esgotado',
+      purchasePriceCents: 1000,
+      salePriceCents: 2000,
+      stockQuantity: 0,
+    );
+    await pumpDashboard(
+      tester,
+      _buildApp(
+        products: const [product],
+        sales: const [],
+        cashFlow: const CashFlow(incomeCents: 10000, expenseCents: 4000),
+        debts: const [],
+      ),
+    );
+
+    await tester.tap(find.text('Stock baixo'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(EditProductSheet), findsOneWidget);
+    final sheet = tester.widget<EditProductSheet>(
+      find.byType(EditProductSheet),
+    );
+    expect(sheet.product.id, product.id);
+  });
+
+  // Evento de entrada de estoque → o DETALHE da compra que o gerou.
+  testWidgets('entrada de estoque abre o detalhe da compra de origem', (
+    tester,
+  ) async {
+    await pumpDashboard(
+      tester,
+      _buildApp(
+        products: const [],
+        sales: const [],
+        cashFlow: const CashFlow(incomeCents: 10000, expenseCents: 4000),
+        debts: const [],
+        purchases: [
+          _purchase(id: 'pu1', number: 1, supplierName: 'Fornecedor X'),
+        ],
+      ),
+    );
+
+    await tester.tap(find.textContaining('Stock · Caneta'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Detalhes da compra'), findsOneWidget);
   });
 }

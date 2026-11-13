@@ -12,6 +12,7 @@ import 'package:tareqo/domain/entities/app_user.dart';
 import 'package:tareqo/domain/entities/auth_event.dart';
 import 'package:tareqo/domain/repositories/i_auth_repository.dart';
 import 'package:tareqo/presentation/controllers/auth_providers.dart';
+import 'package:tareqo/presentation/screens/auth/auth_gate.dart';
 import 'package:tareqo/presentation/screens/auth/login_screen.dart';
 
 /// Baseline visual da tela de login — primeira superfície que o utilizador
@@ -82,6 +83,38 @@ void main() {
       );
     });
     await tester.pumpAndSettle();
+  }
+
+  for (final entry in {
+    'light': AppTheme.light,
+    'dark': AppTheme.dark,
+  }.entries) {
+    testWidgets('splash TQ — ${entry.key}', (tester) async {
+      tester.view.physicalSize = const Size(412, 915);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        testApp(theme: entry.value, home: const TareqoSplashScreen()),
+      );
+      final logo = entry.key == 'dark'
+          ? 'assets/branding/splash_logo.png'
+          : 'assets/branding/splash_logo_ink.png';
+      await tester.runAsync(() async {
+        await precacheImage(
+          AssetImage(logo),
+          tester.element(find.byType(TareqoSplashScreen)),
+        );
+      });
+      // O spinner é indeterminado: capturamos sempre o mesmo instante.
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.text('TAREQO'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('goldens/splash_tq_${entry.key}.png'),
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
   }
 
   testWidgets('login — dark', (tester) async {

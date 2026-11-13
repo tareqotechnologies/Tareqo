@@ -154,7 +154,7 @@ abstract final class AppDatabase {
   static void initialize(Database db) => _migrate(db);
 
   /// Versão atual do schema (`PRAGMA user_version`).
-  static const int currentSchemaVersion = 8;
+  static const int currentSchemaVersion = 10;
 
   /// Migrações versionadas, em ordem crescente de versão.
   ///
@@ -202,6 +202,16 @@ abstract final class AppDatabase {
       version: 8,
       description: 'ficha técnica + produção (Fase 2) — recipes e ordens',
       up: _schemaV8,
+    ),
+    const _Migration(
+      version: 9,
+      description: 'código de barras universal do produto — products.barcode',
+      up: _schemaV9,
+    ),
+    const _Migration(
+      version: 10,
+      description: 'categorização do produto — products.category',
+      up: _schemaV10,
     ),
   ];
 
@@ -1011,6 +1021,35 @@ CREATE TABLE IF NOT EXISTS production_order_items (
 CREATE INDEX IF NOT EXISTS idx_production_order_items_order
  ON production_order_items(production_id);
 ''');
+  }
+
+  /// v9 — Código de barras universal do produto (EAN/UPC/Code 128/QR).
+  ///
+  /// Coluna `products.barcode` (texto, NULL = sem código). O campo já
+  /// existia na entidade e no formulário, mas nunca era persistido — o
+  /// scanner enchia o campo e o valor era descartado ao guardar, deixando
+  /// a leitura no PDV sem correspondência. Guard por presença de coluna:
+  /// bancos novos e legados convergem (mesmo padrão da v5/v7).
+  static void _schemaV9(Database db) {
+    final columns = db.select('PRAGMA table_info(products)');
+    final names = columns.map((row) => row['name']).toSet();
+    if (!names.contains('barcode')) {
+      db.execute('ALTER TABLE products ADD COLUMN barcode TEXT');
+    }
+  }
+
+  /// v10 — Categorização do produto (`products.category`).
+  ///
+  /// Coluna TEXT opcional (NULL = sem categoria) usada para organizar e
+  /// FILTRAR o catálogo. As categorias disponíveis no filtro são derivadas
+  /// dos próprios produtos (sem tabela auxiliar). Guard por presença de
+  /// coluna: bancos novos e legados convergem (mesmo padrão da v5/v7/v9).
+  static void _schemaV10(Database db) {
+    final columns = db.select('PRAGMA table_info(products)');
+    final names = columns.map((row) => row['name']).toSet();
+    if (!names.contains('category')) {
+      db.execute('ALTER TABLE products ADD COLUMN category TEXT');
+    }
   }
 
   /// v5 — Gestão de funcionários (add-on `ao_employee_mgmt`).

@@ -23,6 +23,7 @@ import 'package:tareqo/presentation/screens/products/product_list_screen.dart';
 
 import '../../helpers/fake_stock_lot_repository.dart';
 import '../../helpers/store_context.dart';
+import '../../helpers/viewport.dart';
 
 /// Fake do [GetProductsUseCase] — a tela nunca toca em GetIt nem em
 /// datasources; o provider é sobrescrito no [ProviderScope].
@@ -133,6 +134,7 @@ class _ThrowingGetProductsUseCase implements GetProductsUseCase {
 Widget _buildApp(
   GetProductsUseCase useCase, {
   UpdateProductUseCase? updateUseCase,
+  _InMemoryProductRepository? addRepository,
 }) {
   return ProviderScope(
     overrides: [
@@ -142,7 +144,7 @@ Widget _buildApp(
       // Cadastro/edição: use cases reais sobre fakes em memória (a tela
       // nunca toca em GetIt — o provider é sobrescrito no ProviderScope).
       addProductUseCaseProvider.overrideWithValue(
-        _addUseCase(_InMemoryProductRepository()),
+        _addUseCase(addRepository ?? _InMemoryProductRepository()),
       ),
       updateProductUseCaseProvider.overrideWithValue(
         updateUseCase ?? _updateUseCase(_InMemoryProductRepository()),
@@ -407,7 +409,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(
         find.descendant(
-          of: find.byType(SheetSection).first,
+          of: find.widgetWithText(SheetSection, 'Status'),
           matching: find.text('Stock baixo'),
         ),
       );
@@ -417,6 +419,159 @@ void main() {
 
       expect(find.text('Caneta'), findsOneWidget);
       expect(find.text('Caderno'), findsNothing);
+    });
+
+    testWidgets('chip de categoria na lista filtra os produtos', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '1',
+              name: 'Refrigerante',
+              purchasePriceCents: 300,
+              salePriceCents: 500,
+              category: 'Bebidas',
+            ),
+            Product(
+              id: '2',
+              name: 'Pão de forma',
+              purchasePriceCents: 500,
+              salePriceCents: 800,
+              category: 'Padaria',
+            ),
+            Product(
+              id: '3',
+              name: 'Caneta',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+            ),
+          ]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Faixa rápida: todas, sem categoria e os rótulos do catálogo.
+      expect(find.text('Bebidas'), findsOneWidget);
+      expect(find.text('Padaria'), findsOneWidget);
+
+      await tester.tap(find.text('Bebidas'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Refrigerante'), findsOneWidget);
+      expect(find.text('Pão de forma'), findsNothing);
+      expect(find.text('Caneta'), findsNothing);
+      // O subtítulo reflecte o filtro ativo.
+      expect(find.text('1 produto'), findsOneWidget);
+
+      // "Todas" limpa a categoria e devolve o catálogo completo.
+      await tester.tap(find.text('Todas'));
+      await tester.pumpAndSettle();
+      expect(find.text('Pão de forma'), findsOneWidget);
+      expect(find.text('Caneta'), findsOneWidget);
+      expect(find.text('3 produtos'), findsOneWidget);
+
+      await tester.tap(find.text('Sem categoria'));
+      await tester.pumpAndSettle();
+      expect(find.text('Caneta'), findsOneWidget);
+      expect(find.text('Refrigerante'), findsNothing);
+      expect(find.text('Pão de forma'), findsNothing);
+      expect(find.text('1 produto'), findsOneWidget);
+      await tester.tap(find.text('Limpar filtros'));
+      await tester.pumpAndSettle();
+      expect(find.text('3 produtos'), findsOneWidget);
+    });
+
+    testWidgets('categoria combina com busca e limpar devolve catálogo', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '1',
+              name: 'Água',
+              category: 'Bebidas',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+            ),
+            Product(
+              id: '2',
+              name: 'Sumo',
+              category: ' bebidas ',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+            ),
+            Product(
+              id: '3',
+              name: 'Pão',
+              category: 'Padaria',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+            ),
+          ]),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bebidas'));
+      await tester.pumpAndSettle();
+      expect(find.text('2 produtos'), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.search_rounded));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'sumo');
+      await tester.pumpAndSettle();
+      expect(find.text('Sumo'), findsOneWidget);
+      expect(find.text('Água'), findsNothing);
+      await tester.enterText(find.byType(TextField), 'pão');
+      await tester.pumpAndSettle();
+      expect(find.text('Nenhum produto encontrado'), findsOneWidget);
+      await tester.tap(find.text('Limpar filtros'));
+      await tester.pumpAndSettle();
+      expect(find.text('3 produtos'), findsOneWidget);
+    });
+
+    testWidgets('filtro avançado inclui a secção de categoria', (tester) async {
+      await tester.pumpWidget(
+        _buildApp(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '1',
+              name: 'Refrigerante',
+              purchasePriceCents: 300,
+              salePriceCents: 500,
+              category: 'Bebidas',
+            ),
+            Product(
+              id: '2',
+              name: 'Pão de forma',
+              purchasePriceCents: 500,
+              salePriceCents: 800,
+              category: 'Padaria',
+            ),
+          ]),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.tune_rounded));
+      await tester.pumpAndSettle();
+
+      // A primeira secção do sheet é a de categoria (chips + "Todas").
+      final section = find.byType(SheetSection).first;
+      expect(
+        find.descendant(of: section, matching: find.text('Padaria')),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.descendant(of: section, matching: find.text('Padaria')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Aplicar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pão de forma'), findsOneWidget);
+      expect(find.text('Refrigerante'), findsNothing);
     });
 
     testWidgets('filtro de produtos usa rótulo próprio "Todos"', (
@@ -479,9 +634,12 @@ void main() {
       await tester.tap(find.text('g').last);
       await tester.pumpAndSettle();
 
-      // Fecha a sheet
+      // O formulário é rolável; volta ao cabeçalho antes de fechar.
+      await tester.ensureVisible(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
+      expect(find.byType(AddProductSheet), findsNothing);
     });
 
     testWidgets('cadastro de produto permite definir a validade', (
@@ -540,6 +698,174 @@ void main() {
 
       // Verifica sucesso
       expect(find.text('Produto adicionado!'), findsOneWidget);
+    });
+
+    testWidgets('cadastro guarda o código de barras lido (QR/EAN)', (
+      tester,
+    ) async {
+      // Viewport retrato alto: o formulário completo (com o barcode) e a
+      // ação cabem sem depender de scroll em tela de teste baixa.
+      usePortraitViewport(tester);
+      final repository = _InMemoryProductRepository();
+      await tester.pumpWidget(
+        _buildApp(_FakeGetProductsUseCase(const []), addRepository: repository),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Novo produto'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Nome'),
+        'Leite',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço de compra'),
+        '40,00',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço de venda'),
+        '70,00',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Quantidade em stock'),
+        '10',
+      );
+      // Mesmo valor que o scanner QR/EAN preenche no formulário.
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Código de barras'),
+        '7891000315507',
+      );
+
+      final submit = find.descendant(
+        of: find.byType(AddProductSheet),
+        matching: find.byType(AppButton),
+      );
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+      await tester.tap(submit);
+      await tester.pumpAndSettle();
+
+      // O barcode deixa de ser descartado no save (bug do QR "não
+      // encontrado" no PDV): chega ao repositório tal como foi lido.
+      expect(repository.products, hasLength(1));
+      expect(repository.products.single.barcode, '7891000315507');
+    });
+
+    testWidgets('cadastro guarda a categoria e a sugestão preenche o campo', (
+      tester,
+    ) async {
+      usePortraitViewport(tester);
+      final repository = _InMemoryProductRepository();
+      await tester.pumpWidget(
+        _buildApp(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '9',
+              name: 'Sumo',
+              purchasePriceCents: 300,
+              salePriceCents: 500,
+              category: 'Bebidas',
+            ),
+          ]),
+          addRepository: repository,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Catálogo não vazio: o cadastro abre pelo FAB.
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Nome'),
+        'Água',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço de compra'),
+        '1,00',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço de venda'),
+        '2,00',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Quantidade em stock'),
+        '10',
+      );
+
+      // A categoria existente aparece como sugestão e preenche o campo.
+      final suggestion = find.descendant(
+        of: find.byType(AddProductSheet),
+        matching: find.text('Bebidas'),
+      );
+      await tester.ensureVisible(suggestion);
+      await tester.pumpAndSettle();
+      await tester.tap(suggestion);
+      await tester.pumpAndSettle();
+
+      final submit = find.descendant(
+        of: find.byType(AddProductSheet),
+        matching: find.byType(AppButton),
+      );
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+      await tester.tap(submit);
+      await tester.pumpAndSettle();
+
+      expect(repository.products, hasLength(1));
+      expect(repository.products.single.category, 'Bebidas');
+    });
+
+    testWidgets('cadastro guarda QR alfanumérico (URL) inteiro, sem truncar', (
+      tester,
+    ) async {
+      // Regressão do "produto não encontrado": o QR de URL era rejeitado
+      // pela validação "só dígitos" e truncado em 13 caracteres. Agora o
+      // campo aceita o conteúdo opaco do QR e guarda o texto bruto.
+      usePortraitViewport(tester);
+      const qr = 'https://tareqo.app/p/7891000315507?lote=42';
+      final repository = _InMemoryProductRepository();
+      await tester.pumpWidget(
+        _buildApp(_FakeGetProductsUseCase(const []), addRepository: repository),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Novo produto'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Nome'),
+        'Leite',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço de compra'),
+        '40,00',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Preço de venda'),
+        '70,00',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Quantidade em stock'),
+        '10',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Código de barras'),
+        qr,
+      );
+
+      final submit = find.descendant(
+        of: find.byType(AddProductSheet),
+        matching: find.byType(AppButton),
+      );
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+      await tester.tap(submit);
+      await tester.pumpAndSettle();
+
+      expect(repository.products, hasLength(1));
+      expect(repository.products.single.barcode, qr);
     });
 
     testWidgets('tocar no produto abre a edição (dono/gerente)', (
@@ -636,6 +962,54 @@ void main() {
       expect(repository.products.single.salePriceCents, 250);
       expect(repository.products.single.stockQuantity, 0);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('editar categoria guarda a alteração', (tester) async {
+      usePortraitViewport(tester);
+      final repository = _InMemoryProductRepository()
+        ..add(
+          const Product(
+            id: '1',
+            name: 'Caneta',
+            purchasePriceCents: 100,
+            salePriceCents: 200,
+            category: 'Papelaria',
+          ),
+        );
+
+      await tester.pumpWidget(
+        _buildApp(
+          _FakeGetProductsUseCase(const [
+            Product(
+              id: '1',
+              name: 'Caneta',
+              purchasePriceCents: 100,
+              salePriceCents: 200,
+              category: 'Papelaria',
+            ),
+          ]),
+          updateUseCase: _updateUseCase(repository),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Caneta'));
+      await tester.pumpAndSettle();
+
+      // Campo pré-preenchido com a categoria atual e editável.
+      final field = find.widgetWithText(TextFormField, 'Papelaria');
+      await tester.ensureVisible(field);
+      await tester.pumpAndSettle();
+      await tester.enterText(field, 'Escritório');
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Guardar alterações'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Guardar alterações'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
+
+      expect(repository.products.single.category, 'Escritório');
     });
 
     testWidgets('desativar produto marca Inativo e salva', (tester) async {

@@ -112,7 +112,10 @@ class _AdminShellState extends ConsumerState<AdminShell> {
           ],
         ),
         titleSpacing: AppSpacing.md,
-        actions: const [SignOutButton(), SizedBox(width: AppSpacing.xs)],
+        actions: const [
+          SignOutButton(),
+          SizedBox(width: AppSpacing.xs),
+        ],
       ),
       body: wide
           ? Row(
@@ -381,7 +384,9 @@ class _NavBottomSheet extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: MediaQuery.of(context).padding.bottom + AppSpacing.md),
+          SizedBox(
+            height: MediaQuery.of(context).padding.bottom + AppSpacing.md,
+          ),
         ],
       ),
     );

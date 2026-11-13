@@ -70,10 +70,7 @@ class _StoreTransfersScreenState extends ConsumerState<StoreTransfersScreen> {
   }
 
   void _openNewTransfer() {
-    showAppSheet<void>(
-      context,
-      builder: (_) => const _NewTransferSheet(),
-    );
+    showAppSheet<void>(context, builder: (_) => const _NewTransferSheet());
   }
 }
 
@@ -382,9 +379,7 @@ class _NewTransferSheetState extends ConsumerState<_NewTransferSheet> {
     return SheetForm(
       title: l10n.transfersNewFab,
       maxHeightFactor: 0.9,
-      actionLabel: _executing
-          ? l10n.transfersExecuting
-          : l10n.transfersExecute,
+      actionLabel: _executing ? l10n.transfersExecuting : l10n.transfersExecute,
       onSubmit:
           _fromStoreId == null ||
               _toStoreId == null ||

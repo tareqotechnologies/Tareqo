@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Ícone adaptativo e abertura no escuro: preto da marca (#232323). -->
-    <color name="ic_launcher_background">#232323</color>
-    <color name="splash_background">#232323</color>
+    <!-- Preto 100: ícone adaptativo e canvas escuro do splash Flutter. -->
+    <color name="ic_launcher_background">#0A0E15</color>
+    <color name="splash_background">#0A0E15</color>
 </resources>

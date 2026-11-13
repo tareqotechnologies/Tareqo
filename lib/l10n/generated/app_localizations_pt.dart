@@ -1072,6 +1072,28 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsTypeLabel => 'Tipo de produto';
 
   @override
+  String get productsCategoryLabel => 'Categoria';
+
+  @override
+  String get productsCategoryHint => 'Ex.: Bebidas, Padaria, Limpeza';
+
+  @override
+  String get productsCategorySuggestions => 'Categorias já usadas';
+
+  @override
+  String get productsCategoryError =>
+      'Categoria inválida: máximo de 60 caracteres.';
+
+  @override
+  String get productsFilterCategory => 'Categoria';
+
+  @override
+  String get productsFilterCategoryAll => 'Todas';
+
+  @override
+  String get productsFilterCategoryNone => 'Sem categoria';
+
+  @override
   String get productsTypeRawMaterial => 'Matéria-prima';
 
   @override
@@ -2228,11 +2250,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsBarcodeLabel => 'Código de barras';
 
   @override
-  String get productsBarcodeHint => 'EAN-13, EAN-8, UPC-A, UPC-E, Code 128';
+  String get productsBarcodeHint => 'EAN, UPC, Code 128 ou o conteúdo do QR';
 
   @override
   String get productsBarcodeError =>
-      'Código de barras inválido: digite dígitos válidos (8, 12 ou 13).';
+      'Código de barras inválido: máximo de 512 caracteres.';
 
   @override
   String get productsWeighLabel => 'Venda por peso (fração)';

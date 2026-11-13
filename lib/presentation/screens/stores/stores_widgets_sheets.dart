@@ -368,7 +368,8 @@ class _AddEmployeeSheetState extends ConsumerState<_AddEmployeeSheet> {
                 ChoiceChip(
                   label: Text(l10n.roleManager),
                   selected: _role == EmployeeRole.manager,
-                  onSelected: (_) => setState(() => _role = EmployeeRole.manager),
+                  onSelected: (_) =>
+                      setState(() => _role = EmployeeRole.manager),
                 ),
               ],
             ),

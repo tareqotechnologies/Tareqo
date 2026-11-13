@@ -302,13 +302,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: AppSpacing.xl),
 
                       // ── Título + subtítulo ──
-                      Text(
-                        'TAREQO',
-                        textAlign: TextAlign.center,
-                        // Large Title da escala — cor do tema (mesmos
-                        // pares auditados: branco no escuro, #161616
-                        // no claro).
-                        style: Theme.of(context).textTheme.displaySmall,
+                      Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'TAREQO',
+                            textAlign: TextAlign.center,
+                            style: AppTypography.display.copyWith(
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: 5,
+                              color: palette.textPrimary,
+                            ),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(

@@ -433,9 +433,7 @@ class _TenantInfoChip extends StatelessWidget {
           Expanded(
             child: Text(
               '${tenant.businessName} · ${planName(tenant.planId)}',
-              style: AppTypography.bodySmall.copyWith(
-                color: scheme.onSurface,
-              ),
+              style: AppTypography.bodySmall.copyWith(color: scheme.onSurface),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -649,10 +647,7 @@ class _MessagePreview extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            title,
-            style: AppTypography.labelLarge,
-          ),
+          Text(title, style: AppTypography.labelLarge),
           const SizedBox(height: AppSpacing.xs),
           Text(
             body,

@@ -13,6 +13,8 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/money.dart';
 import '../../../core/utils/quantity.dart';
+import '../../../core/utils/product_categories.dart';
+import '../../widgets/product_category_filter.dart';
 import '../../../domain/entities/product.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/dashboard_providers.dart';
@@ -53,7 +55,14 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   Future<void> _openFilterSheet() async {
     final result = await showAppSheet<_AdvancedFilters>(
       context,
-      builder: (_) => _AdvancedFilterSheet(initial: _advanced),
+      builder: (_) => _AdvancedFilterSheet(
+        initial: _advanced,
+        categories: productCategoriesOf(ref.read(productsProvider).value),
+        includeUncategorized:
+            (ref.read(productsProvider).value ?? const <Product>[]).any(
+              (product) => normalizeProductCategory(product.category).isEmpty,
+            ),
+      ),
     );
     if (result == null || !mounted) return;
     setState(() {
@@ -125,7 +134,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
             q.isEmpty ||
             product.name.toLowerCase().contains(q) ||
             product.description.toLowerCase().contains(q) ||
-            product.code.toLowerCase().contains(q);
+            product.code.toLowerCase().contains(q) ||
+            product.category.toLowerCase().contains(q);
         final matchesStatus = switch (_advanced.status) {
           _ProductFilter.all => true,
           _ProductFilter.lowStock =>
@@ -144,6 +154,10 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
         final matchesType =
             _advanced.type == _ProductTypeFilter.all ||
             product.type == _advanced.type.value;
+        final matchesCategory = matchesProductCategory(
+          product,
+          _advanced.category,
+        );
         final matchesAvailability =
             _advanced.availability == _AvailabilityFilter.all ||
             (_advanced.availability == _AvailabilityFilter.available &&
@@ -164,6 +178,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
             matchesStatus &&
             matchesStockType &&
             matchesType &&
+            matchesCategory &&
             matchesAvailability &&
             matchesPrice;
       }).toList()
@@ -243,6 +258,9 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           }
 
           final filtered = _applyFilters(products);
+          // Categorias já usadas na loja — filtro rápido (abaixo da busca)
+          // + secção do sheet avançado. Vazio = catálogo sem categorias.
+          final categories = productCategoriesOf(products);
           final hPad = AppSpacing.pagePaddingForWidth(
             MediaQuery.sizeOf(context).width,
           );
@@ -264,6 +282,27 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                     controller: _searchController,
                     onChanged: _onSearchChanged,
                     onClose: _closeSearch,
+                  ),
+                ),
+              // Filtro rápido por CATEGORIA — só aparece quando algum
+              // produto tem categoria (sem ruído em catálogo sem categorias).
+              if (categories.isNotEmpty || _advanced.category != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.xxs),
+                  child: ProductCategoryFilter(
+                    categories: categories,
+                    selected: _advanced.category,
+                    includeUncategorized: products.any(
+                      (product) =>
+                          normalizeProductCategory(product.category).isEmpty,
+                    ),
+                    horizontalPadding: hPad,
+                    onSelected: (category) => setState(
+                      () => _advanced = _advanced.copyWith(
+                        category: category,
+                        clearCategory: category == null,
+                      ),
+                    ),
                   ),
                 ),
               // Filtros ativos com resultados: limpeza a um toque, direita.
@@ -404,6 +443,7 @@ class _AdvancedFilters {
     this.stockType = _StockTypeFilter.all,
     this.availability = _AvailabilityFilter.all,
     this.type = _ProductTypeFilter.all,
+    this.category,
     this.minPriceCents,
     this.maxPriceCents,
   });
@@ -414,6 +454,9 @@ class _AdvancedFilters {
   final _AvailabilityFilter availability;
   // Fase 1: filtro por tipo estrutural do produto.
   final _ProductTypeFilter type;
+
+  /// null = todas; vazio = produtos sem categoria.
+  final String? category;
   final int? minPriceCents;
   final int? maxPriceCents;
 
@@ -423,6 +466,7 @@ class _AdvancedFilters {
       stockType != _StockTypeFilter.all ||
       availability != _AvailabilityFilter.all ||
       type != _ProductTypeFilter.all ||
+      category != null ||
       minPriceCents != null ||
       maxPriceCents != null;
 
@@ -432,6 +476,8 @@ class _AdvancedFilters {
     _StockTypeFilter? stockType,
     _AvailabilityFilter? availability,
     _ProductTypeFilter? type,
+    String? category,
+    bool clearCategory = false,
     int? minPriceCents,
     int? maxPriceCents,
   }) {
@@ -441,6 +487,7 @@ class _AdvancedFilters {
       stockType: stockType ?? this.stockType,
       availability: availability ?? this.availability,
       type: type ?? this.type,
+      category: clearCategory ? null : category ?? this.category,
       minPriceCents: minPriceCents ?? this.minPriceCents,
       maxPriceCents: maxPriceCents ?? this.maxPriceCents,
     );
@@ -562,8 +609,15 @@ class _CompactFilterChip extends StatelessWidget {
 /// centralizados: busca por nome, status, tipo de estoque,
 /// disponibilidade e faixa de preço.
 class _AdvancedFilterSheet extends ConsumerStatefulWidget {
-  const _AdvancedFilterSheet({required this.initial});
+  const _AdvancedFilterSheet({
+    required this.initial,
+    this.categories = const [],
+    this.includeUncategorized = false,
+  });
   final _AdvancedFilters initial;
+
+  final List<String> categories;
+  final bool includeUncategorized;
   @override
   ConsumerState<_AdvancedFilterSheet> createState() =>
       _AdvancedFilterSheetState();
@@ -572,6 +626,7 @@ class _AdvancedFilterSheet extends ConsumerStatefulWidget {
 class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
   late final TextEditingController _nameController;
   late _ProductFilter _status;
+  late String? _category;
   late _StockTypeFilter _stockType;
   late _AvailabilityFilter _availability;
   late _ProductTypeFilter _type;
@@ -583,6 +638,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
     super.initState();
     _nameController = TextEditingController(text: widget.initial.query);
     _status = widget.initial.status;
+    _category = widget.initial.category;
     _stockType = widget.initial.stockType;
     _availability = widget.initial.availability;
     _type = widget.initial.type;
@@ -616,6 +672,8 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
       widget.initial.copyWith(
         query: _nameController.text.trim().toLowerCase(),
         status: _status,
+        category: _category,
+        clearCategory: _category == null,
         stockType: _stockType,
         availability: _availability,
         type: _type,
@@ -629,6 +687,7 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
     setState(() {
       _nameController.clear();
       _status = _ProductFilter.all;
+      _category = null;
       _stockType = _StockTypeFilter.all;
       _availability = _AvailabilityFilter.all;
       _type = _ProductTypeFilter.all;
@@ -681,6 +740,25 @@ class _AdvancedFilterSheetState extends ConsumerState<_AdvancedFilterSheet> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
+                  if (widget.categories.isNotEmpty ||
+                      widget.includeUncategorized ||
+                      _category != null) ...[
+                    SheetSection(
+                      icon: Icons.sell_outlined,
+                      title: l10n.productsFilterCategory,
+                      children: [
+                        ProductCategoryFilter(
+                          categories: widget.categories,
+                          selected: _category,
+                          includeUncategorized: widget.includeUncategorized,
+                          wrap: true,
+                          onSelected: (category) =>
+                              setState(() => _category = category),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
                   SheetSection(
                     icon: Icons.inventory_2_outlined,
                     title: l10n.productsSectionStatus,

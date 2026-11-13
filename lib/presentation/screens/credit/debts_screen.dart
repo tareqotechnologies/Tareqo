@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/ui/haptics.dart';
+import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../domain/entities/debt.dart';
 import '../../../domain/usecases/settle_debt_use_case.dart';
@@ -75,7 +76,7 @@ class _DebtsScreenState extends ConsumerState<DebtsScreen> {
 
   /// Dívida vencida (atrasada) — a data de vencimento já passou.
   bool _isOverdue(Debt debt) {
-    final now = DateTime.now();
+    final now = AppClock.now();
     final today = DateTime(now.year, now.month, now.day);
     final due = DateTime(
       debt.dueDate.year,
@@ -420,7 +421,7 @@ class _DebtCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final now = DateTime.now();
+    final now = AppClock.now();
     final today = DateTime(now.year, now.month, now.day);
     final due = DateTime(
       debt.dueDate.year,
@@ -601,9 +602,9 @@ class _SettledDebtCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
-                // Valor — SmartAmount (design system ultra-clean): ENCOLHE
-                // para caber — nunca trunca; visível no histórico. Tabular.
-                Flexible(
+                // Ocupa toda a coluna: o alinhamento alcança a borda direita
+                // do card, mesmo quando o valor é curto. Encolhe sem truncar.
+                Expanded(
                   child: SmartAmount(
                     cents: debt.amountCents,
                     alignment: Alignment.centerRight,

@@ -20,9 +20,9 @@ import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_fr.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
-/// Total de membros do catálogo: 1188 (1052 getters + 136 métodos).
-const int kTotalMembers = 1188;
-const int kTotalGetters = 1052;
+/// Total de membros do catálogo: 1195 (1059 getters + 136 métodos).
+const int kTotalMembers = 1195;
+const int kTotalGetters = 1059;
 const int kTotalMethods = 136;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
@@ -519,6 +519,13 @@ void main() {
         'productsFilterApply': l.productsFilterApply,
         'productsFilterInactive': l.productsFilterInactive,
         'productsTypeLabel': l.productsTypeLabel,
+        'productsCategoryLabel': l.productsCategoryLabel,
+        'productsCategoryHint': l.productsCategoryHint,
+        'productsCategorySuggestions': l.productsCategorySuggestions,
+        'productsCategoryError': l.productsCategoryError,
+        'productsFilterCategory': l.productsFilterCategory,
+        'productsFilterCategoryAll': l.productsFilterCategoryAll,
+        'productsFilterCategoryNone': l.productsFilterCategoryNone,
         'productsTypeRawMaterial': l.productsTypeRawMaterial,
         'productsTypeResale': l.productsTypeResale,
         'productsTypeManufactured': l.productsTypeManufactured,
@@ -1993,6 +2000,13 @@ void main() {
         'productsFilterApply': l.productsFilterApply,
         'productsFilterInactive': l.productsFilterInactive,
         'productsTypeLabel': l.productsTypeLabel,
+        'productsCategoryLabel': l.productsCategoryLabel,
+        'productsCategoryHint': l.productsCategoryHint,
+        'productsCategorySuggestions': l.productsCategorySuggestions,
+        'productsCategoryError': l.productsCategoryError,
+        'productsFilterCategory': l.productsFilterCategory,
+        'productsFilterCategoryAll': l.productsFilterCategoryAll,
+        'productsFilterCategoryNone': l.productsFilterCategoryNone,
         'productsTypeRawMaterial': l.productsTypeRawMaterial,
         'productsTypeResale': l.productsTypeResale,
         'productsTypeManufactured': l.productsTypeManufactured,
@@ -3467,6 +3481,13 @@ void main() {
         'productsFilterApply': l.productsFilterApply,
         'productsFilterInactive': l.productsFilterInactive,
         'productsTypeLabel': l.productsTypeLabel,
+        'productsCategoryLabel': l.productsCategoryLabel,
+        'productsCategoryHint': l.productsCategoryHint,
+        'productsCategorySuggestions': l.productsCategorySuggestions,
+        'productsCategoryError': l.productsCategoryError,
+        'productsFilterCategory': l.productsFilterCategory,
+        'productsFilterCategoryAll': l.productsFilterCategoryAll,
+        'productsFilterCategoryNone': l.productsFilterCategoryNone,
         'productsTypeRawMaterial': l.productsTypeRawMaterial,
         'productsTypeResale': l.productsTypeResale,
         'productsTypeManufactured': l.productsTypeManufactured,

@@ -15,6 +15,8 @@ import '../../../core/utils/app_clock.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/utils/ids.dart';
 import '../../../core/utils/quantity.dart';
+import '../../../core/utils/product_categories.dart';
+import '../../widgets/product_category_filter.dart';
 import '../../../core/utils/scale_barcode.dart';
 import '../../../domain/entities/product.dart';
 import '../../../domain/entities/sale.dart';
@@ -42,10 +44,58 @@ import '../../widgets/search_field.dart';
 import '../../../core/observability/crash_reporting.dart';
 import '../../../data/services/offline_sync_service.dart';
 
+/// Resolve o produto de uma leitura (câmara QR/código de barras, scanner USB
+/// ou digitação) comparando com o **id**, o **PLU** (`code`) e o **código de
+/// barras** (`barcode`).
+///
+/// A comparação textual ignora caixa e QUALQUER espaço (o QR pode vir com
+/// espaços/quebras de linha, e o cadastro pode tê-los digitado). Conteúdo
+/// numérico tem uma segunda passagem (zeros à esquerda) — a mesma regra do
+/// PLU da balança: `00123` lido ≡ `123` cadastrado.
+///
+/// A segunda passagem extrai os dígitos de AMBOS os lados: um QR que embute
+/// o EAN num URL (`https://…/p/7891000315507`) casa com o barcode cadastrado
+/// só com os dígitos, e vice-versa. Sem isso, um QR não numérico guardado
+/// inteiro nunca resolveria contra um cadastro digitado (ou truncado).
+Product? _resolveScannedProduct(Iterable<Product> products, String raw) {
+  final scannedKey = _codeKey(raw);
+  if (scannedKey.isEmpty) return null;
+  final scannedDigits = _digitsKey(raw);
+
+  for (final product in products) {
+    if (product.id == raw.trim() ||
+        _codeKey(product.code) == scannedKey ||
+        _codeKey(product.barcode) == scannedKey) {
+      return product;
+    }
+  }
+
+  if (scannedDigits.isEmpty) return null;
+  for (final product in products) {
+    if (_digitsKey(product.code) == scannedDigits ||
+        _digitsKey(product.barcode) == scannedDigits) {
+      return product;
+    }
+  }
+  return null;
+}
+
+/// Chave textual de comparação: sem espaços e sem caixa. O QR do produto é
+/// opaco (pode ser URL, JSON ou um número longo) — nunca truncar/descartar.
+String _codeKey(String value) =>
+    value.replaceAll(RegExp(r'\s+'), '').toLowerCase();
+
+/// Dígitos embutidos no código, normalizados (zeros à esquerda). Vazio
+/// quando o conteúdo não tem nenhum dígito (QR de texto/URL sem número).
+String _digitsKey(String value) {
+  final digits = _codeKey(value).replaceAll(RegExp(r'\D'), '');
+  return digits.isEmpty ? '' : ScaleBarcode.lookupKey(digits);
+}
+
 /// Carrinho de nova venda: seleciona produtos, define quantidades
 /// (inteiras ou por peso, com decimais), lê códigos de barras (balanças
-/// etiquetadoras 20PPPPPWWWWW e PLUs), escolhe a forma de pagamento e
-/// confirma via [ProcessSaleUseCase].
+/// etiquetadoras 20PPPPPWWWWW, PLUs e QR/EAN do produto), escolhe a forma de
+/// pagamento e confirma via [ProcessSaleUseCase].
 ///
 /// W11: TODA quantidade no carrinho vive em MILÉSIMOS de unidade
 /// (1000 = 1 unidade/kg) — mesma convenção do domínio e do banco.
@@ -61,6 +111,7 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   final _searchFocus = FocusNode();
   final _barcodeController = TextEditingController();
   String _query = '';
+  String? _category;
   String? _barcodeError;
 
   /// Carrinho: id do produto → quantidade em MILÉSIMOS.
@@ -228,12 +279,13 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
   /// digitação manual) e preenche o carrinho:
   /// - `20PPPPPWWWWW` (balança etiquetadora) → busca o produto pelo PLU,
   ///   deriva a fração de peso do valor total ÷ preço unitário;
-  /// - outro código numérico → busca pelo campo `code` (PLU) e adiciona
-  ///   1 unidade.
+  /// - outro código → busca por `barcode` (EAN/UPC/QR) ou `code` (PLU) e
+  ///   adiciona 1 unidade.
   Future<void> _handleBarcode(String raw) async {
     final l10n = context.l10n;
-    final digits = raw.trim().replaceAll(RegExp(r'\D'), '');
-    if (digits.isEmpty) return;
+    final scanned = raw.trim();
+    if (scanned.isEmpty) return;
+    final digits = _codeKey(scanned).replaceAll(RegExp(r'\D'), '');
 
     // Só produtos ATIVOS e de papel VENDÁVEL são vendáveis no PDV
     // (desativado some; matéria-prima/embalagem não vão ao balcão)
@@ -287,20 +339,14 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       }
     }
 
-    // 2) Código simples (PLU ou id) — adiciona 1 unidade. Compara o PLU
-    // também com a chave normalizada ("00123" lido ≡ "123" cadastrado).
-    final digitsKey = ScaleBarcode.lookupKey(digits);
-    final product = products
-        .where(
-          (p) =>
-              p.id == raw.trim() ||
-              p.code == digits ||
-              ScaleBarcode.lookupKey(p.code) == digitsKey,
-        )
-        .firstOrNull;
+    // 2) Código simples (barcode EAN/UPC/QR, PLU ou id) — adiciona
+    // 1 unidade. Casa também com a chave numérica normalizada.
+    final product = _resolveScannedProduct(products, scanned);
     if (product == null) {
-      // Um código de balança legítimo cujo PLU não casa com nenhum
-      // produto de peso cai aqui sem produto — mensagem genérica.
+      // Texto de QR sem dígitos (ex.: URL/aviso) não é tentativa de código:
+      // sai em silêncio. Um código de balança legítimo cujo PLU não casa com
+      // nenhum produto de peso cai aqui com a mensagem genérica.
+      if (digits.isEmpty) return;
       setState(() => _barcodeError = l10n.salesBarcodeNotFound);
       return;
     }
@@ -318,36 +364,29 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
 
   /// Atalho de balcão: Enter no campo de BUSCA dá quick-add.
   ///
-  /// Operador digita o PLU/código do produto e aperta Enter — sem tocar no
-  /// catálogo. Reaproveita o pipeline COMPLETO de leitura de código ([_handleBarcode]):
-  /// balança `20PPPPPWWWWW`, PLU com zeros à esquerda, caps de estoque e
-  /// mensagens de erro — nada de regra duplicada. Texto que NÃO resolve
-  /// produto é ignorado silenciosamente: quem digitou estava buscando por
-  /// nome (o filtro em tempo real continua respondendo) e o Enter vira no-op
-  /// em vez de lançar "produto não encontrado" para uma busca legítima.
+  /// Operador digita o PLU/código do produto (ou cola o conteúdo de um QR) e
+  /// aperta Enter — sem tocar no catálogo. Reaproveita o pipeline COMPLETO de
+  /// leitura de código ([_handleBarcode]): balança `20PPPPPWWWWW`, PLU com
+  /// zeros à esquerda, caps de estoque e mensagens de erro — nada de regra
+  /// duplicada. Texto que NÃO resolve produto é ignorado silenciosamente:
+  /// quem digitou estava buscando por nome (o filtro em tempo real continua
+  /// respondendo) e o Enter vira no-op em vez de lançar "produto não
+  /// encontrado" para uma busca legítima.
   Future<void> _handleSearchSubmit(String raw) async {
-    final digits = raw.trim();
-    if (digits.isEmpty) return;
-    // Candidate a código: só dígitos (PLU/EAN). Nome com letras nunca
-    // dispara o pipeline de barcode.
-    if (digits.contains(RegExp(r'\D'))) return;
+    final scanned = raw.trim();
+    if (scanned.isEmpty) return;
 
     // Mesmo papel VENDÁVEL do catálogo: o quick-add por PLU nunca resolve
     // matéria-prima/embalagem (que não são vendidas no balcão).
     final active = (ref.read(productsProvider).value ?? const <Product>[])
         .where((product) => product.isActive && product.type.isSellable);
     // Resolve ANTES de delegar: se o texto não casa com nenhum produto
-    // (nem por id, nem por código), é busca por nome — sai sem tocar nada.
-    final digitsKey = ScaleBarcode.lookupKey(digits);
-    final resolves = active.any(
-      (p) =>
-          p.id == digits ||
-          p.code == digits ||
-          ScaleBarcode.lookupKey(p.code) == digitsKey,
-    );
+    // (nem por id, PLU ou barcode — inclusive QR alfanumérico), é busca por
+    // nome — sai sem tocar nada.
+    final resolves = _resolveScannedProduct(active, scanned) != null;
     if (!resolves) return;
 
-    await _handleBarcode(digits);
+    await _handleBarcode(scanned);
   }
 
   Future<void> _openScanner() async {
@@ -596,15 +635,16 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
               // de Produtos): sem isso, digitar 'CANETA' não achava o
               // produto no balcão.
               final query = _query.toLowerCase();
-              final filtered = _query.isEmpty
-                  ? active
-                  : active
-                        .where(
-                          (product) =>
-                              product.name.toLowerCase().contains(query) ||
-                              product.code.toLowerCase().contains(query),
-                        )
-                        .toList();
+              final categories = productCategoriesOf(active);
+              final filtered = active.where((product) {
+                final matchesQuery =
+                    query.isEmpty ||
+                    product.name.toLowerCase().contains(query) ||
+                    product.code.toLowerCase().contains(query) ||
+                    product.category.toLowerCase().contains(query);
+                return matchesQuery &&
+                    matchesProductCategory(product, _category);
+              }).toList();
               // Há produtos, mas NENHUM vendável (matéria-prima/embalagem)
               // → estado vazio explicativo em vez de "sem produtos".
               final roleOnly =
@@ -619,6 +659,24 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                 slivers: [
                   SliverToBoxAdapter(child: focusDim(scannerZone)),
                   SliverToBoxAdapter(child: searchField),
+                  if (categories.isNotEmpty || _category != null)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.xs),
+                        child: ProductCategoryFilter(
+                          categories: categories,
+                          selected: _category,
+                          includeUncategorized: active.any(
+                            (product) => normalizeProductCategory(
+                              product.category,
+                            ).isEmpty,
+                          ),
+                          horizontalPadding: hPad,
+                          onSelected: (category) =>
+                              setState(() => _category = category),
+                        ),
+                      ),
+                    ),
                   // Venda em progresso: UM grupo (cabeçalho + linhas) lido
                   // como um recibo. Nunca esmaece no modo foco: é o que está
                   // a ser construído.
@@ -659,6 +717,16 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                           subtitle: roleOnly
                               ? l10n.salesNoSellableSubtitle
                               : l10n.salesNoProductsSubtitle,
+                          actionLabel: _category != null || _query.isNotEmpty
+                              ? l10n.productsClearFilters
+                              : null,
+                          onAction: _category != null || _query.isNotEmpty
+                              ? () => setState(() {
+                                  _category = null;
+                                  _query = '';
+                                  _searchController.clear();
+                                })
+                              : null,
                         ),
                       ),
                     )

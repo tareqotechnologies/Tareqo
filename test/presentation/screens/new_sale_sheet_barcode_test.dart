@@ -54,6 +54,29 @@ const _sal = Product(
   code: '77777', // PLU de produto NÃO por peso
 );
 
+// Produto identificado SÓ pelo código de barras (sem PLU) — é o cenário do
+// QR/EAN impresso no produto: a leitura tem de casar com `barcode`.
+const _leite = Product(
+  id: 'p-leite',
+  name: 'Leite',
+  purchasePriceCents: 4000,
+  salePriceCents: 7000,
+  stockQuantity: 2000, // 2 unidades
+  barcode: '7891000315507',
+);
+
+// QR ALFANUMÉRICO (URL) guardado inteiro no cadastro — o caso que o antigo
+// `maxLength: 13` + validação "só dígitos" rejeitava/truncava, e que o PDV
+// precisa casar por igualdade textual normalizada (sem caixa/espaços).
+const _agua = Product(
+  id: 'p-agua',
+  name: 'Água',
+  purchasePriceCents: 1000,
+  salePriceCents: 2500,
+  stockQuantity: 1000,
+  barcode: 'https://tareqo.app/p/AGUA-001',
+);
+
 // Produto ATIVO com id CONTENDO dígitos — prova o casamento por ID
 // (p.id == raw.trim()), caminho de leitura por id numérico/alfanumérico.
 const _servico = Product(
@@ -78,14 +101,13 @@ const _inativo = Product(
 );
 
 class _FakeGetProductsUseCase implements GetProductsUseCase {
+  _FakeGetProductsUseCase([this.products]);
+  final List<Product>? products;
+
   @override
-  Future<List<Product>> call({required String storeId}) async => const [
-    _arroz,
-    _biscoito,
-    _sal,
-    _servico,
-    _inativo,
-  ];
+  Future<List<Product>> call({required String storeId}) async =>
+      products ??
+      const [_arroz, _biscoito, _sal, _leite, _agua, _servico, _inativo];
 }
 
 /// Registra a venda sem tocar em infraestrutura — aqui validamos apenas a
@@ -166,13 +188,18 @@ Future<void> _scan(WidgetTester tester, String code) async {
 }
 
 /// Monta o PDV com o catálogo fake e devolve o fake de venda para asserções.
-Future<_FakeProcessSaleUseCase> _pumpSheet(WidgetTester tester) async {
+Future<_FakeProcessSaleUseCase> _pumpSheet(
+  WidgetTester tester, {
+  List<Product>? products,
+}) async {
   final processSale = _FakeProcessSaleUseCase();
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         ...storeContextOverrides(),
-        getProductsUseCaseProvider.overrideWithValue(_FakeGetProductsUseCase()),
+        getProductsUseCaseProvider.overrideWithValue(
+          _FakeGetProductsUseCase(products),
+        ),
         processSaleUseCaseProvider.overrideWithValue(processSale),
         // Resumo de hoje no cabeçalho (sem vendas no fake).
         salesRepositoryProvider.overrideWithValue(
@@ -187,6 +214,75 @@ Future<_FakeProcessSaleUseCase> _pumpSheet(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('PDV filtra categorias sem perder carrinho nem limitar scanner', (
+    tester,
+  ) async {
+    final processSale = await _pumpSheet(
+      tester,
+      products: [
+        _agua.copyWith(category: 'Bebidas'),
+        _arroz.copyWith(category: 'Mercearia'),
+        _leite,
+        _inativo.copyWith(category: 'Oculta'),
+        _sal.copyWith(category: 'Ingredientes', type: ProductType.rawMaterial),
+      ],
+    );
+    expect(find.text('Oculta'), findsNothing);
+    expect(find.text('Ingredientes'), findsNothing);
+    await tester.tap(find.text('Bebidas'));
+    await tester.pumpAndSettle();
+    expect(find.text('Água'), findsOneWidget);
+    expect(find.text('Arroz'), findsNothing);
+    expect(find.text('Leite'), findsNothing);
+
+    // O scanner ainda resolve o catálogo inteiro vendável, não só o filtro.
+    await _scan(tester, '00123');
+    await tester.pumpAndSettle();
+    expect(find.text('Arroz'), findsOneWidget); // Carrinho, fora da categoria.
+    await tester.tap(find.text('Sem categoria'));
+    await tester.pumpAndSettle();
+    expect(find.text('Arroz'), findsOneWidget); // Carrinho permanece.
+    expect(find.text('Leite'), findsOneWidget);
+    expect(find.text('Água'), findsNothing);
+    await tester.tap(find.text('Confirmar venda'));
+    await tester.pumpAndSettle();
+    expect(processSale.lastSale!.items.single.productId, _arroz.id);
+  });
+
+  testWidgets('PDV combina categoria e busca com saída do filtro vazio', (
+    tester,
+  ) async {
+    await _pumpSheet(
+      tester,
+      products: [
+        _agua.copyWith(category: 'Bebidas'),
+        _leite.copyWith(category: ' bebidas '),
+        _arroz.copyWith(category: 'Mercearia'),
+      ],
+    );
+    await tester.tap(find.text('Bebidas'));
+    await tester.pumpAndSettle();
+    final search = find.byWidgetPredicate(
+      (widget) =>
+          widget is TextField &&
+          widget.textInputAction == TextInputAction.search,
+    );
+    await tester.enterText(search, 'leite');
+    await tester.pumpAndSettle();
+    expect(find.text('Leite'), findsOneWidget);
+    expect(find.text('Água'), findsNothing);
+    await tester.enterText(search, 'arroz');
+    await tester.pumpAndSettle();
+    expect(find.text('Limpar filtros'), findsOneWidget);
+    await tester.ensureVisible(find.text('Limpar filtros'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Limpar filtros'));
+    await tester.pumpAndSettle();
+    expect(find.text('Água'), findsOneWidget);
+    expect(find.text('Leite'), findsOneWidget);
+    expect(find.text('Arroz'), findsOneWidget);
+  });
+
   testWidgets(
     'balança 20PPPPPWWWWW preenche a fração derivada e a venda grava milésimos',
     (tester) async {
@@ -436,6 +532,95 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'QR/EAN do produto resolve pelo campo barcode (sem PLU cadastrado)',
+    (tester) async {
+      await _pumpSheet(tester);
+
+      // O QR pode trazer espaços à volta do código impresso — o pipeline
+      // normaliza antes de comparar com `product.barcode`.
+      await _scan(tester, ' 7891000315507 ');
+
+      // Código válido NÃO mostra "produto não encontrado".
+      expect(
+        find.text('Produto não encontrado para este código.'),
+        findsNothing,
+      );
+
+      await tester.scrollUntilVisible(
+        find.widgetWithText(AppCard, 'Leite'),
+        100,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.widgetWithText(AppCard, 'Leite'),
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('QR alfanumérico (URL) guardado inteiro resolve pelo barcode', (
+    tester,
+  ) async {
+    await _pumpSheet(tester);
+
+    // QR de URL é CONTEÚDO OPACO: o cadastro guarda o texto bruto e o PDV
+    // compara sem caixa/espaços. Antes, o campo rejeitava (só dígitos) e
+    // truncava em 13 caracteres — o QR correto caía em "não encontrado".
+    await _scan(tester, ' https://TAREQO.app/p/agua-001 ');
+
+    expect(find.text('Produto não encontrado para este código.'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      find.widgetWithText(AppCard, 'Água'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.widgetWithText(AppCard, 'Água'),
+        matching: find.text('1'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('QR com o EAN embutido resolve o barcode só com dígitos', (
+    tester,
+  ) async {
+    await _pumpSheet(tester);
+
+    // QR de URL com um único número: os dígitos embutidos casam com o
+    // barcode do Leite (mesma regra da etiqueta de balança, aplicada aos
+    // DOIS lados). Sem isso, um QR de URL nunca resolveria um cadastro
+    // digitado só com o EAN.
+    await _scan(tester, 'https://loja.example/produto/7891000315507');
+
+    expect(find.text('Produto não encontrado para este código.'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      find.widgetWithText(AppCard, 'Leite'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.widgetWithText(AppCard, 'Leite'),
+        matching: find.text('1'),
+      ),
+      findsOneWidget,
+    );
+  });
 
   testWidgets('leitura por ID do produto resolve quando o id contém dígitos', (
     tester,

@@ -56,6 +56,15 @@ CREATE TABLE IF NOT EXISTS public.products (
   -- W11: estoque em MILÉSIMOS de unidade (1000 = 1 unidade/kg) — inteiro
   -- exato, mesma filosofia dos centavos (W4).
   stock_quantity BIGINT NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+  -- Código de barras universal (EAN-13/8, UPC-A/E, Code 128) ou conteúdo
+  -- numérico de um QR do produto. NULL = sem código. É o campo que o PDV
+  -- compara quando a câmara lê um QR/código de barras.
+  barcode TEXT,
+  -- Categoria do produto (opcional) — agrupamento LIVRE usado para
+  -- organizar e filtrar o catálogo (ex.: Bebidas, Padaria, Limpeza).
+  -- NULL = sem categoria. Sem tabela auxiliar: as categorias do filtro
+  -- são derivadas dos próprios produtos da loja.
+  category TEXT,
   -- W11: código de barras/PLU (até 5 dígitos, opcional) das balanças
   -- etiquetadoras; venda por PESO (fração) e unidade de venda.
   code TEXT,
@@ -3451,27 +3460,23 @@ $$;
 -- por um prefixo fixo (ex.: `products/...`) sem ajustar as políticas abaixo.
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('product-images', 'product-images', TRUE)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET public = TRUE;
 
 DROP POLICY IF EXISTS product_images_public_read ON storage.objects;
--- ⚠️ Leitura SEM listing (linter 0025 public_bucket_allows_listing): a
--- policy devolve TRUE só quando o NOME exato do objeto é conhecido —
--- `name = ((storage.foldername(name))[1] || '/' ||
--- (storage.foldername(name))[2])` é sempre verdadeiro para o próprio
--- path avaliado, então o efeito prático é "acesso direto a um objeto
--- conhecido, sem enumeration". O PostgREST do Storage só devolve a
--- LISTAGEM de pastas quando a policy aceita linhas que o cliente NÃO
--- nomeou (ex.: bucket_id = 'product-images' sozinho) — com a comparação
--- self-referente, LIST/`list()`/`search()` fica vazio e o GET por URL
--- pública continua funcionando (a leitura pública do CDN não passa por
--- esta policy de SQL; vale para o Storage API).
--- O app NUNCA lista o bucket (Image.network no path exato gravado em
--- products.image_path) — não há regressão funcional.
+-- ⚠️ SELECT é OBRIGATÓRIO para upload com `upsert: true` (o Storage
+-- verifica o objeto existente antes do INSERT ... ON CONFLICT DO UPDATE).
+-- A versão anterior tentava evitar o listing do linter 0025 com
+-- `name = foldername(name)[1] || '/' || foldername(name)[2]`, mas
+-- `storage.foldername` EXCLUI o nome do arquivo: em `<storeId>/<produto>.jpg`
+-- o índice [2] é NULL, a expressão inteira vira NULL e a policy negava
+-- toda leitura — o upload respondia 403 ("sem permissão de armazenamento").
+-- Agora o SELECT usa a MESMA guarda is_my_store da escrita: o upsert
+-- funciona, a listagem só expõe objetos da própria loja e o GET pela URL
+-- pública do CDN continua sem passar por esta policy (bucket público).
 CREATE POLICY product_images_public_read ON storage.objects
   FOR SELECT USING (
     bucket_id = 'product-images'
-    AND name = ((storage.foldername(name))[1] || '/' ||
-                (storage.foldername(name))[2])
+    AND public.is_my_store((storage.foldername(name))[1])
   );
 
 -- Escrita SÓ na loja do usuário: o path é `<storeId>/<prod>.jpg` —
@@ -4511,33 +4516,40 @@ $$;
 -- chamá-la. Sem o EXECUTE, toda leitura/escrita das tabelas protegidas por
 -- esses helpers falha com 42501 "permission denied for function". O WARN
 -- 0029 remanescente desses helpers é aceito (guards booleanas, sem dados).
+-- Revogação DINÂMICA por nome: bases diferentes têm overloads diferentes
+-- (ex.: `prevent_scope_change` só existe sem args — argumentos do trigger
+-- chegam por TG_ARGV; bases antigas têm `lock_products_or_raise` com 4
+-- args). Citar assinatura inexistente aborta com 42883.
 DO $$
+DECLARE
+  fn text;
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_record_store_id() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_tenant_user_id() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_store_tenant() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_tenant_owner() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_employee_tenant() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_employee_attendance_actor() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_invoice_number() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_custom_invoice_number() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_quotation_number() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_decided_by() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_plan_request_tenant() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.log_audit_entry() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.prevent_scope_change() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.enforce_store_limit() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.enforce_employee_limit() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.lock_products_or_raise(jsonb, text, boolean) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_invoice_number(text) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_custom_invoice_number(text) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_quotation_number(text) FROM anon, authenticated';
-    -- Helpers MFA internos: chamados dentro de mfa_ok()/update_tenant_settings
-    -- (contexto SECURITY DEFINER) — não são API e não aparecem em policies.
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_enforced_for_user(uuid) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_verified_factor_count(uuid) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_satisfied(uuid) FROM anon, authenticated';
+    FOR fn IN
+      SELECT format(
+        '%I.%I(%s)', n.nspname, p.proname,
+        pg_get_function_identity_arguments(p.oid)
+      )
+      FROM pg_proc p
+      JOIN pg_namespace n ON n.oid = p.pronamespace
+      WHERE n.nspname = 'public'
+        AND p.proname IN (
+          'set_record_store_id','set_tenant_user_id','set_store_tenant',
+          'set_tenant_owner','set_employee_tenant',
+          'set_employee_attendance_actor','set_invoice_number',
+          'set_custom_invoice_number','set_quotation_number',
+          'set_decided_by','set_plan_request_tenant','log_audit_entry',
+          'prevent_scope_change','enforce_store_limit',
+          'enforce_employee_limit','lock_products_or_raise',
+          'get_next_invoice_number','get_next_custom_invoice_number',
+          'get_next_quotation_number','mfa_enforced_for_user',
+          'mfa_verified_factor_count','mfa_satisfied'
+        )
+    LOOP
+      EXECUTE format(
+        'REVOKE EXECUTE ON FUNCTION %s FROM anon, authenticated', fn
+      );
+    END LOOP;
   END IF;
   -- Corretivo idempotente p/ bases onde o fix de Sep/2026 revogou os helpers
   -- de policy (o linter 0029 deixa de apontá-los, mas o app quebra com 42501

@@ -594,9 +594,7 @@ class _AuditTile extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: theme.colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: AppRadius.sheetTop,
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetTop),
       // Thin: rotas modais não herdam o Theme local do shell.
       builder: (sheetContext) => adminThinIfNeeded(
         sheetContext,
@@ -692,10 +690,7 @@ class _AuditDetailSheet extends StatelessWidget {
             ),
 
             // ── Header ──
-            Text(
-              entry.actionLabel,
-              style: theme.textTheme.titleMedium,
-            ),
+            Text(entry.actionLabel, style: theme.textTheme.titleMedium),
             const SizedBox(height: AppSpacing.micro),
             Text(
               '${entry.entityTypeLabel}  ${entry.entityId ?? '—'}',

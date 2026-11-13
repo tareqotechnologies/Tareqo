@@ -297,9 +297,7 @@ class _PlanBadge extends StatelessWidget {
             label,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: AppTypography.bodyMedium.copyWith(
-              color: scheme.onSurface,
-            ),
+            style: AppTypography.bodyMedium.copyWith(color: scheme.onSurface),
           ),
         ],
       ),

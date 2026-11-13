@@ -10,7 +10,7 @@ import '../../domain/entities/purchase.dart';
 import 'method_badge.dart';
 import 'semantics_composed.dart';
 import 'smart_amount.dart';
-import 'payment_filter.dart' show PaymentMethodAccent, PaymentMethodIcon;
+import 'payment_filter.dart' show PaymentMethodIcon;
 import 'status_chip.dart';
 
 /// Card de compra premium — compartilhado entre a lista de compras e as
@@ -34,8 +34,6 @@ class PurchaseCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = context.l10n;
-    // Cor de destaque da forma de pagamento — identidade visual por método.
-    final accent = purchase.paymentMethod.accent(theme);
     final itemsLabel = l10n.dashboardSaleItems(purchase.items.length);
     // Total de UNIDADES adicionadas ao estoque (W11: quantidades em
     // MILÉSIMOS — converte para unidades inteiras na exibição).
@@ -70,10 +68,9 @@ class PurchaseCard extends StatelessWidget {
         label: semanticLabel,
         child: Row(
           children: [
-            PaymentMethodBadge(
-              accent: accent,
-              icon: purchase.paymentMethod.icon,
-            ),
+            // Selo padrão da app: círculo tinta sólido + ícone branco
+            // (mesmo idioma do feed da Home e do painel de Vendas).
+            PaymentMethodBadge(icon: purchase.paymentMethod.icon),
             const SizedBox(width: AppSpacing.sm),
             // 3:2 — o texto do fornecedor precisa de mais largura que a
             // coluna de valores; a divisão a meio partia o nome e o método

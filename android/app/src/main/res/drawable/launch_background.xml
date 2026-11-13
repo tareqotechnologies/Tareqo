@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Abertura Android (<12): canvas do anexo (#F9F9F9 / #232323). -->
+<!-- Abertura Android (<12): mesmo canvas e escala da marca no Flutter. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/splash_background" />
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:width="144dp"
-            android:height="144dp"
-            android:src="@drawable/launch_image" />
+    <item android:width="144dp" android:height="144dp" android:gravity="center">
+        <bitmap android:gravity="fill" android:src="@drawable/launch_image" />
     </item>
 </layer-list>

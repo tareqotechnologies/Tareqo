@@ -351,9 +351,7 @@ class _DetailChip extends StatelessWidget {
           const SizedBox(height: AppSpacing.micro),
           Text(
             value,
-            style: AppTypography.bodyMedium.copyWith(
-              color: scheme.onSurface,
-            ),
+            style: AppTypography.bodyMedium.copyWith(color: scheme.onSurface),
           ),
         ],
       ),

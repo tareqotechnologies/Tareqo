@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="pt-MZ">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FFFFFF">
+  <meta name="description" content="Vendas, stock e finanças no mesmo lugar. Conheça a Tareqo: uma forma simples de gerir o seu negócio, as suas lojas e a sua equipa.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tareqo — Menos complicação. Mais negócio.">
+  <meta property="og:description" content="Uma visão clara das vendas, do stock e das finanças. Gestão pensada para o seu dia a dia.">
+  <meta property="og:locale" content="pt_MZ">
+  <meta name="color-scheme" content="light">
+  <title>Tareqo — Menos complicação. Mais negócio.</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/Inter-Variable.ttf" as="font" type="font/ttf" crossorigin>
+  <style>
+    @font-face {
+      font-family: Inter;
+      src: url('assets/Inter-Variable.ttf') format('truetype');
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+    }
+    :root {
+      --ink: #0A0E15;
+      --ink-soft: #212631;
+      --text-secondary: #4E576A;
+      --text-muted: #667085;
+      --paper: #FFFFFF;
+      --canvas: #F0F1F5;
+      --line: #E0E4EB;
+      --on-dark-secondary: #BFC5D4;
+      --page-width: 1120px;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    a, button { -webkit-tap-highlight-color: transparent; }
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 6px;
+    }
+    img, svg { display: block; max-width: 100%; }
+    h1, h2, h3, p { margin: 0; }
+    ::selection { background: var(--ink); color: var(--paper); }
+    .container { width: min(var(--page-width), calc(100% - 64px)); margin-inline: auto; }
+    .skip-link {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 20;
+      padding: 12px 20px;
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: 12px;
+      transform: translateY(-160%);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      border: 0;
+    }
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+    .header-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; min-height: 48px; flex-shrink: 0; }
+    .brand img { width: 42px; height: 42px; }
+    .wordmark { font-size: 15px; font-weight: 500; letter-spacing: 0.25em; line-height: 1; }
+    .nav { display: flex; align-items: center; gap: 34px; }
+    .nav a { display: inline-flex; align-items: center; min-height: 48px; font-size: 13px; font-weight: 500; }
+    .nav-link { color: var(--text-secondary); }
+    .nav-link:hover { color: var(--ink); }
+    .nav-start { gap: 8px; }
+    .nav-start svg { width: 15px; height: 15px; }
+    .hero { padding-top: 92px; text-align: center; }
+    .eyebrow { font-size: 12px; letter-spacing: 0.16em; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; }
+    h1 {
+      margin-top: 22px;
+      font-size: clamp(48px, 6.5vw, 80px);
+      line-height: 1.06;
+      letter-spacing: -0.065em;
+      font-weight: 600;
+    }
+    h1 span { display: block; }
+    .hero-copy { max-width: 530px; margin: 26px auto 0; color: var(--text-secondary); font-size: 19px; line-height: 1.6; letter-spacing: -0.025em; }
+    .hero-actions { display: flex; align-items: center; justify-content: center; gap: 30px; margin-top: 30px; flex-wrap: wrap; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 52px; padding: 13px 24px; border: 1px solid transparent; border-radius: 999px; font-size: 14px; font-weight: 500; line-height: 1.4; transition: background-color 180ms ease, transform 180ms ease; }
+    .button svg { width: 18px; height: 18px; }
+    .button-dark { color: var(--paper); background: var(--ink); }
+    .button-dark:hover { background: var(--ink-soft); transform: translateY(-2px); }
+    .text-link { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; font-size: 14px; font-weight: 500; }
+    .text-link svg { width: 17px; height: 17px; transition: transform 180ms ease; }
+    .text-link:hover svg { transform: translateX(3px); }
+    .product { margin: 72px 0 0; }
+    .product-stage { position: relative; width: min(904px, 100%); margin: auto; padding: 0 178px 20px 0; text-align: left; }
+    .tablet {
+      padding: 9px;
+      border: 1px solid var(--ink-soft);
+      border-radius: 26px;
+      background: var(--ink);
+      box-shadow: 0 24px 48px -24px rgb(10 14 21 / 24%);
+    }
+    .tablet-screen { overflow: hidden; background: var(--canvas); border-radius: 17px; }
+    .app-bar { min-height: 42px; display: flex; align-items: center; gap: 8px; padding: 7px 19px; background: var(--paper); border-bottom: 1px solid var(--line); }
+    .app-bar img { width: 26px; height: 26px; }
+    .app-bar span { font-size: 9px; font-weight: 500; letter-spacing: 0.24em; }
+    .app-bar small { margin-left: auto; color: var(--text-secondary); font-size: 10px; }
+    .dashboard-image { width: 100%; height: auto; aspect-ratio: 800 / 690; }
+    .phone {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 232px;
+      padding: 7px;
+      border-radius: 31px;
+      border: 1px solid var(--ink-soft);
+      background: var(--ink);
+      box-shadow: 0 20px 40px -20px rgb(10 14 21 / 28%);
+    }
+    .phone-screen { overflow: hidden; border-radius: 23px; background: var(--canvas); }
+    .phone img { width: 100%; height: auto; }
+    .product-caption { margin-top: 25px; color: var(--text-secondary); font-size: 12px; text-align: center; }
+    .capabilities { padding-top: 142px; padding-bottom: 130px; }
+    .section-heading { display: flex; justify-content: space-between; gap: 48px; align-items: flex-end; }
+    h2 { font-size: clamp(34px, 3.8vw, 48px); font-weight: 500; letter-spacing: -0.055em; line-height: 1.14; }
+    .section-heading h2 { max-width: 620px; }
+    .section-heading p { max-width: 288px; color: var(--text-secondary); font-size: 16px; line-height: 1.65; }
+    .feature-grid { margin-top: 56px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 46px; }
+    .feature { border-top: 1px solid var(--line); padding-top: 25px; }
+    .feature-number { display: block; margin-bottom: 22px; color: var(--text-secondary); font-size: 12px; font-variant-numeric: tabular-nums; }
+    .feature h3 { font-size: 20px; font-weight: 500; letter-spacing: -0.04em; line-height: 1.35; }
+    .feature p { margin-top: 14px; color: var(--text-secondary); font-size: 15px; line-height: 1.75; max-width: 310px; }
+    .closing { background: var(--ink); color: var(--paper); padding: 84px 24px 90px; text-align: center; }
+    .closing-logo { width: 70px; height: 70px; margin: 0 auto 30px; }
+    .closing h2 { max-width: 710px; margin: auto; font-size: clamp(34px, 4.1vw, 52px); }
+    .closing-copy { max-width: 460px; margin: 22px auto 0; color: var(--on-dark-secondary); font-size: 16px; }
+    .button-light { margin-top: 32px; background: var(--paper); color: var(--ink); }
+    .button-light:hover { background: var(--canvas); transform: translateY(-2px); }
+    .contact-note { margin-top: 17px; color: var(--on-dark-secondary); font-size: 12px; }
+    .site-footer { padding: 32px 0; }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    .footer-inner .wordmark { font-size: 12px; letter-spacing: 0.23em; }
+    .footer-inner p { font-size: 12px; color: var(--text-secondary); }
+    .footer-link { min-height: 48px; display: inline-flex; align-items: center; font-size: 12px; gap: 8px; }
+    .footer-link svg { width: 14px; height: 14px; }
+    @media (min-width: 1500px) { .hero { padding-top: 112px; } }
+    @media (max-width: 900px) {
+      .hero { padding-top: 76px; }
+      .product-stage { padding-right: 125px; }
+      .phone { width: 198px; }
+      .section-heading { align-items: flex-start; flex-direction: column; gap: 22px; }
+      .section-heading p { max-width: 440px; }
+      .feature-grid { gap: 28px; }
+      .capabilities { padding-top: 110px; padding-bottom: 100px; }
+    }
+    @media (max-width: 640px) {
+      html { scroll-padding-top: 88px; }
+      .container { width: calc(100% - 40px); }
+      .header-inner { min-height: 68px; gap: 16px; }
+      .brand { gap: 7px; }
+      .brand img { width: 36px; height: 36px; }
+      .wordmark { font-size: 12px; letter-spacing: 0.22em; }
+      .nav { gap: 0; }
+      .nav .nav-link { display: none; }
+      .nav a { font-size: 12px; }
+      .hero { padding-top: 62px; }
+      .eyebrow { font-size: 10px; letter-spacing: 0.12em; }
+      h1 { font-size: clamp(39px, 9vw, 54px); letter-spacing: -0.062em; line-height: 1.08; margin-top: 20px; }
+      .hero-copy { margin-top: 22px; font-size: 16px; max-width: 340px; line-height: 1.7; }
+      .hero-actions { margin-top: 24px; gap: 9px 20px; }
+      .button { min-height: 50px; font-size: 13px; padding: 13px 20px; }
+      .text-link { font-size: 13px; }
+      .product { margin-top: 46px; }
+      .product-stage { padding-right: 0; padding-bottom: 0; }
+      .tablet { padding: 5px; border-radius: 16px; box-shadow: 0 16px 30px -20px rgb(10 14 21 / 24%); }
+      .tablet-screen { border-radius: 10px; }
+      .app-bar { min-height: 31px; padding: 4px 8px; gap: 4px; }
+      .app-bar img { width: 20px; height: 20px; }
+      .app-bar span { font-size: 7px; }
+      .app-bar small { font-size: 8px; }
+      .phone { display: none; }
+      .product-caption { margin-top: 16px; font-size: 11px; line-height: 1.6; }
+      .capabilities { padding-top: 84px; padding-bottom: 78px; }
+      h2 { font-size: 34px; }
+      .section-heading p { font-size: 15px; }
+      .feature-grid { margin-top: 38px; grid-template-columns: 1fr; gap: 34px; }
+      .feature { padding-top: 22px; }
+      .feature-number { margin-bottom: 14px; }
+      .feature h3 { font-size: 21px; }
+      .feature p { max-width: 100%; font-size: 15px; margin-top: 10px; }
+      .closing { padding: 62px 20px 64px; }
+      .closing-logo { width: 60px; height: 60px; margin-bottom: 25px; }
+      .closing h2 { font-size: 34px; }
+      .closing-copy { font-size: 15px; margin-top: 20px; }
+      .site-footer { padding: 24px 0; }
+      .footer-inner { display: grid; grid-template-columns: 1fr auto; gap: 12px; }
+      .footer-inner p { grid-column: 1 / -1; grid-row: 2; }
+    }
+    @media (max-width: 350px) {
+      .container { width: calc(100% - 32px); }
+      h1 { font-size: 36px; }
+      .hero-actions { flex-direction: column; gap: 8px; }
+      .closing h2 { font-size: 31px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+      .button:hover, .text-link:hover svg { transform: none; }
+    }
+  </style>
+</head>
+<body id="topo">
+  <a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#topo" aria-label="Tareqo — início">
+        <img src="assets/tq.svg" width="42" height="42" alt="">
+        <span class="wordmark">TAREQO</span>
+      </a>
+      <nav class="nav" aria-label="Navegação principal">
+        <a class="nav-link" href="#produto">Visão geral</a>
+        <a class="nav-link" href="#recursos">Recursos</a>
+        <a class="nav-start" href="#comecar">Começar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </nav>
+    </div>
+  </header>
+  <main id="conteudo" tabindex="-1">
+    <section class="hero container" aria-labelledby="hero-title">
+      <p class="eyebrow">Gestão para pequenos negócios</p>
+      <h1 id="hero-title"><span>Menos complicação.</span><span>Mais negócio.</span></h1>
+      <p class="hero-copy">Vendas, stock e finanças no mesmo lugar.<br>Uma visão clara. Uma gestão mais simples.</p>
+      <div class="hero-actions">
+        <a class="button button-dark" href="#produto">Conhecer a Tareqo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
+        <a class="text-link" href="https://wa.me/258846606062?text=Ol%C3%A1%21%20Quero%20conhecer%20a%20Tareqo%20para%20o%20meu%20neg%C3%B3cio." target="_blank" rel="noopener noreferrer">Falar com a equipa <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="sr-only"> (WhatsApp, abre numa nova janela)</span></a>
+      </div>
+      <figure class="product" id="produto" aria-label="Uma visão do aplicativo Tareqo">
+        <div class="product-stage">
+          <div class="tablet">
+            <div class="tablet-screen">
+              <div class="app-bar" aria-hidden="true"><img src="assets/tq.svg" width="26" height="26" alt=""><span>TAREQO</span><small>Visão geral</small></div>
+              <img class="dashboard-image" src="assets/dashboard.webp" width="800" height="690" alt="Ecrã real da Tareqo com saldo de caixa, vendas, valores a receber e atividade da loja." fetchpriority="high" decoding="async">
+            </div>
+          </div>
+          <div class="phone">
+            <div class="phone-screen"><img src="assets/vendas.webp" width="412" height="915" alt="Ecrã de vendas da Tareqo com pesquisa, filtros por categoria e forma de pagamento." decoding="async"></div>
+          </div>
+        </div>
+        <figcaption class="product-caption">Interface real da Tareqo. Dados de demonstração.</figcaption>
+      </figure>
+    </section>
+    <section class="capabilities container" id="recursos" aria-labelledby="recursos-title">
+      <div class="section-heading">
+        <h2 id="recursos-title">Cada parte do negócio.<br>No mesmo lugar.</h2>
+        <p>Do balcão ao fecho do dia, tudo o que precisa para acompanhar o seu negócio.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature">
+          <span class="feature-number" aria-hidden="true">01</span>
+          <h3>Vendas com mais fluidez.</h3>
+          <p>Encontre produtos, registe vendas e acompanhe os pagamentos. Menos passos entre atender e vender.</p>
+        </article>
+        <article class="feature">
+          <span class="feature-number" aria-hidden="true">02</span>
+          <h3>Stock sob controlo.</h3>
+          <p>Organize por categorias, acompanhe as quantidades e registe compras. Saiba o que tem e o que precisa de repor.</p>
+        </article>
+        <article class="feature">
+          <span class="feature-number" aria-hidden="true">03</span>
+          <h3>Números que fazem sentido.</h3>
+          <p>Veja o caixa, as entradas, as saídas e os valores a receber. Mais clareza para decidir o próximo passo.</p>
+        </article>
+      </div>
+    </section>
+    <section class="closing" id="comecar" aria-labelledby="comecar-title">
+      <img class="closing-logo" src="assets/tq-white.svg" width="70" height="70" alt="">
+      <h2 id="comecar-title">Um negócio mais organizado.<br>Um dia mais tranquilo.</h2>
+      <p class="closing-copy">Conheça a Tareqo e encontre uma forma mais simples de gerir o seu negócio.</p>
+      <a class="button button-light" href="https://wa.me/258846606062?text=Ol%C3%A1%21%20Quero%20conhecer%20a%20Tareqo%20para%20o%20meu%20neg%C3%B3cio." target="_blank" rel="noopener noreferrer" aria-label="Falar com a equipa no WhatsApp (abre numa nova janela)">Falar com a equipa <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <p class="contact-note">Converse connosco no WhatsApp.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span class="wordmark">TAREQO</span>
+      <p>Gestão simples para o seu negócio.</p>
+      <a class="footer-link" href="#topo">Voltar ao início <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></a>
+    </div>
+  </footer>
+</body>
+</html>

@@ -72,7 +72,10 @@ void main() {
 
       // Idempotência: re-inicializar não quebra.
       AppDatabase.initialize(db);
-      expect(db.select('PRAGMA user_version').first['user_version'], 8);
+      expect(
+        db.select('PRAGMA user_version').first['user_version'],
+        AppDatabase.currentSchemaVersion,
+      );
     });
 
     test('round-trip de ficha técnica (upsert substitui os itens)', () async {

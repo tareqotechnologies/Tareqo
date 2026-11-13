@@ -342,45 +342,45 @@ void main() {
     expect(overlay.value.systemNavigationBarIconBrightness, Brightness.light);
   });
 
-  testWidgets(
-    'Large Title (4.5): título segue a escala (displaySmall 28/Medium) e o '
-    'header desliza a meia velocidade do conteúdo (parallax)',
-    (tester) async {
-      final repository = _FakeAuthRepository();
-      await tester.pumpWidget(_buildApp(repository));
-      await tester.pumpAndSettle();
+  testWidgets('wordmark Tareqo: Inter 28/Regular com tracking e o '
+      'header desliza a meia velocidade do conteúdo (parallax)', (
+    tester,
+  ) async {
+    final repository = _FakeAuthRepository();
+    await tester.pumpWidget(_buildApp(repository));
+    await tester.pumpAndSettle();
 
-      // Título na escala tipográfica — o papel "Large Title —
-      // login/boas-vindas" do `displaySmall` (token `display`: 28/Medium).
-      final title = tester.widget<Text>(find.text('TAREQO'));
-      expect(title.style?.fontSize, 28);
-      expect(title.style?.fontWeight, FontWeight.w500);
+    // O wordmark usa o tamanho display, com peso e tracking de marca.
+    final title = tester.widget<Text>(find.text('TAREQO'));
+    expect(title.style?.fontSize, 28);
+    expect(title.style?.fontWeight, FontWeight.w400);
+    expect(title.style?.fontFamily, 'Inter');
+    expect(title.style?.letterSpacing, 5);
 
-      // Em repouso (sem scroll) o translate é 0 — a página renderiza
-      // pixel-idêntica ao layout estático.
-      Transform headerAtRest() => tester.widget<Transform>(
-        find
-            .ancestor(of: find.text('TAREQO'), matching: find.byType(Transform))
-            .first,
-      );
-      expect(headerAtRest().transform.getRow(1)[3], 0.0);
+    // Em repouso (sem scroll) o translate é 0 — a página renderiza
+    // pixel-idêntica ao layout estático.
+    Transform headerAtRest() => tester.widget<Transform>(
+      find
+          .ancestor(of: find.text('TAREQO'), matching: find.byType(Transform))
+          .first,
+    );
+    expect(headerAtRest().transform.getRow(1)[3], 0.0);
 
-      // Viewport curta → scroll real; arrastar 120px desliza o header
-      // só 60px (0.5× — profundidade iOS do item 4.5 do plano).
-      tester.view.physicalSize = const Size(800, 400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-      await tester.pumpAndSettle();
+    // Viewport curta → scroll real; arrastar 120px desliza o header
+    // só 60px (0.5× — profundidade iOS do item 4.5 do plano).
+    tester.view.physicalSize = const Size(800, 400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    await tester.pumpAndSettle();
 
-      await tester.drag(
-        find.byType(SingleChildScrollView),
-        const Offset(0, -120),
-      );
-      await tester.pumpAndSettle();
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -120),
+    );
+    await tester.pumpAndSettle();
 
-      expect(headerAtRest().transform.getRow(1)[3], 60.0);
-    },
-  );
+    expect(headerAtRest().transform.getRow(1)[3], 60.0);
+  });
 
   testWidgets(
     'disableAnimations (acessibilidade): parallax desligado — o header rola '

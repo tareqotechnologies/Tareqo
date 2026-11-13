@@ -68,8 +68,8 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
                 .from(_table)
                 .select(
                   'id, store_id, name, description, image_path, purchase_price, '
-                  'sale_price, stock_quantity, code, venda_por_fracao, '
-                  'unit_label, is_active, type',
+                  'sale_price, stock_quantity, barcode, code, category, '
+                  'venda_por_fracao, unit_label, is_active, type',
                 )
                 .eq('store_id', storeId),
           )
@@ -88,8 +88,8 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
         .from(_table)
         .select(
           'id, store_id, name, description, image_path, purchase_price, '
-          'sale_price, stock_quantity, code, venda_por_fracao, unit_label, '
-          'is_active, type',
+          'sale_price, stock_quantity, barcode, code, category, '
+          'venda_por_fracao, unit_label, is_active, type',
         )
         .eq('id', id)
         .eq('store_id', storeId)
@@ -109,7 +109,9 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
       'purchase_price': product.purchasePriceCents,
       'sale_price': product.salePriceCents,
       'stock_quantity': product.stockQuantity,
+      'barcode': product.barcode.isEmpty ? null : product.barcode,
       'code': product.code.isEmpty ? null : product.code,
+      'category': product.category.isEmpty ? null : product.category,
       'venda_por_fracao': product.vendaPorFracao,
       'unit_label': product.unitLabel,
       'is_active': product.isActive,
@@ -130,7 +132,9 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
           'image_path': product.imagePath.isEmpty ? null : product.imagePath,
           'purchase_price': product.purchasePriceCents,
           'sale_price': product.salePriceCents,
+          'barcode': product.barcode.isEmpty ? null : product.barcode,
           'code': product.code.isEmpty ? null : product.code,
+          'category': product.category.isEmpty ? null : product.category,
           'venda_por_fracao': product.vendaPorFracao,
           'unit_label': product.unitLabel,
           'is_active': product.isActive,
@@ -176,7 +180,9 @@ final class ProductSupabaseDataSourceImpl implements ProductLocalDataSource {
     purchasePriceCents: (row['purchase_price'] as num).toInt(),
     salePriceCents: (row['sale_price'] as num).toInt(),
     stockQuantity: (row['stock_quantity'] as num).toInt(),
+    barcode: (row['barcode'] as String?) ?? '',
     code: (row['code'] as String?) ?? '',
+    category: (row['category'] as String?) ?? '',
     vendaPorFracao: row['venda_por_fracao'] as bool? ?? false,
     unitLabel: (row['unit_label'] as String?) ?? 'un',
     // Default true: linhas criadas antes do campo preservam produtos como

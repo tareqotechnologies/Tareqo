@@ -2760,20 +2760,22 @@ ALTER TABLE public.products
 -- 27.2 Bucket público de imagens (no-op se já existir).
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('product-images', 'product-images', TRUE)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET public = TRUE;
 
 -- 27.3 Políticas de acesso ao storage (DROP + CREATE — reexecutável).
 DROP POLICY IF EXISTS product_images_public_read ON storage.objects;
--- ⚠️ Leitura SEM listing (linter 0025 public_bucket_allows_listing): a
--- comparação self-referente `name = foldername[1] || '/' || foldername[2]`
--- só aceita o objeto cujo nome exato foi pedido — GET por URL pública
--- continua, LIST fica vazio. O app nunca lista o bucket (Image.network no
--- path exato de products.image_path). Espelha o schema.sql (FOTOS).
+-- ⚠️ SELECT é OBRIGATÓRIO para upload com `upsert: true` (o Storage
+-- verifica o objeto existente antes do INSERT ... ON CONFLICT DO UPDATE).
+-- A comparação self-referente anterior (`name = foldername[1] || '/' ||
+-- foldername[2]`) era sempre NULL em `<storeId>/<produto>.jpg` — foldername
+-- exclui o nome do arquivo, então [2] não existe — e negava TODA leitura:
+-- todo upload respondia 403 ("sem permissão de armazenamento"). Agora usa
+-- a MESMA guarda is_my_store da escrita; o GET pela URL pública do CDN
+-- continua sem passar por esta policy (bucket público). Espelha schema.sql.
 CREATE POLICY product_images_public_read ON storage.objects
   FOR SELECT USING (
     bucket_id = 'product-images'
-    AND name = ((storage.foldername(name))[1] || '/' ||
-                (storage.foldername(name))[2])
+    AND public.is_my_store((storage.foldername(name))[1])
   );
 
 DROP POLICY IF EXISTS product_images_auth_insert ON storage.objects;
@@ -3816,33 +3818,40 @@ $$;
 -- chamá-la. Sem o EXECUTE, toda leitura/escrita das tabelas protegidas por
 -- esses helpers falha com 42501 "permission denied for function". O WARN
 -- 0029 remanescente desses helpers é aceito (guards booleanas, sem dados).
+-- Revogação DINÂMICA por nome: bases diferentes têm overloads diferentes
+-- (ex.: `prevent_scope_change` só existe sem args — argumentos do trigger
+-- chegam por TG_ARGV; bases antigas têm `lock_products_or_raise` com 4
+-- args). Citar assinatura inexistente aborta com 42883.
 DO $$
+DECLARE
+  fn text;
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_record_store_id() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_tenant_user_id() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_store_tenant() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_tenant_owner() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_employee_tenant() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_employee_attendance_actor() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_invoice_number() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_custom_invoice_number() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_quotation_number() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_decided_by() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.set_plan_request_tenant() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.log_audit_entry() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.prevent_scope_change() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.enforce_store_limit() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.enforce_employee_limit() FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.lock_products_or_raise(jsonb, text, boolean) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_invoice_number(text) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_custom_invoice_number(text) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.get_next_quotation_number(text) FROM anon, authenticated';
-    -- Helpers MFA internos: chamados dentro de mfa_ok()/update_tenant_settings
-    -- (contexto SECURITY DEFINER) — não são API e não aparecem em policies.
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_enforced_for_user(uuid) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_verified_factor_count(uuid) FROM anon, authenticated';
-    EXECUTE 'REVOKE EXECUTE ON FUNCTION public.mfa_satisfied(uuid) FROM anon, authenticated';
+    FOR fn IN
+      SELECT format(
+        '%I.%I(%s)', n.nspname, p.proname,
+        pg_get_function_identity_arguments(p.oid)
+      )
+      FROM pg_proc p
+      JOIN pg_namespace n ON n.oid = p.pronamespace
+      WHERE n.nspname = 'public'
+        AND p.proname IN (
+          'set_record_store_id','set_tenant_user_id','set_store_tenant',
+          'set_tenant_owner','set_employee_tenant',
+          'set_employee_attendance_actor','set_invoice_number',
+          'set_custom_invoice_number','set_quotation_number',
+          'set_decided_by','set_plan_request_tenant','log_audit_entry',
+          'prevent_scope_change','enforce_store_limit',
+          'enforce_employee_limit','lock_products_or_raise',
+          'get_next_invoice_number','get_next_custom_invoice_number',
+          'get_next_quotation_number','mfa_enforced_for_user',
+          'mfa_verified_factor_count','mfa_satisfied'
+        )
+    LOOP
+      EXECUTE format(
+        'REVOKE EXECUTE ON FUNCTION %s FROM anon, authenticated', fn
+      );
+    END LOOP;
   END IF;
   -- Corretivo idempotente p/ bases onde o fix de Sep/2026 revogou os helpers
   -- de policy (o linter 0029 deixa de apontá-los, mas o app quebra com 42501
@@ -4273,6 +4282,51 @@ GRANT EXECUTE ON FUNCTION public.process_production(jsonb, jsonb)
 ANALYZE public.recipes;
 ANALYZE public.production_orders;
 
+-- ============================================================================
+-- PARTE 36 — PRODUTO: CÓDIGO DE BARRAS UNIVERSAL (products.barcode)
+-- ============================================================================
+-- O campo barcode já existia na entidade/UI mas nunca era persistido: o
+-- valor lido pela câmara (QR/EAN/UPC/Code 128) era descartado ao guardar o
+-- produto, e a leitura no PDV respondia "Produto não encontrado". Coluna
+-- aditiva e idempotente — bancos existentes recebem NULL (sem código).
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS barcode TEXT;
+
+-- ============================================================================
+-- PARTE 37 — STORAGE: POLÍTICA DE LEITURA DO product-images (upload 403)
+-- ============================================================================
+-- O cliente sobe a foto com `upsert: true`; o Storage exige SELECT + INSERT
+-- + UPDATE nesse modo. A política de SELECT da PARTE 27 usava
+-- `name = foldername(name)[1] || '/' || foldername(name)[2]`, que é sempre
+-- NULL em `<storeId>/<produto>.jpg` (foldername exclui o nome do arquivo,
+-- então [2] não existe) — TODA leitura era negada e o upload respondia 403
+-- ("sem permissão de armazenamento"), mesmo com `is_my_store` correto.
+--
+-- A PARTE 27 já foi corrigida para instalações novas; esta parte reaplica a
+-- política em bancos que rodaram a versão anterior (e é idempotente).
+-- Restringe a leitura à própria loja: o upsert funciona, a listagem não
+-- expõe outras lojas e o GET pela URL pública continua no CDN (bucket
+-- público não passa por esta policy).
+DROP POLICY IF EXISTS product_images_public_read ON storage.objects;
+CREATE POLICY product_images_public_read ON storage.objects
+  FOR SELECT USING (
+    bucket_id = 'product-images'
+    AND public.is_my_store((storage.foldername(name))[1])
+  );
+
+-- Garante o helper executável pelo papel autenticado (policies dependem dele).
+GRANT EXECUTE ON FUNCTION public.is_my_store(text) TO authenticated;
+
+-- ============================================================================
+-- PARTE 38 — PRODUTO: CATEGORIZAÇÃO (products.category)
+-- ============================================================================
+-- Coluna TEXT opcional (NULL = sem categoria) para organizar e FILTRAR o
+-- catálogo. O filtro da lista deriva as categorias dos próprios produtos —
+-- não há tabela auxiliar nem RLS nova (a linha continua protegida pelas
+-- policies das PARTES 27/33). Aditiva e idempotente: bancos existentes
+-- recebem NULL (sem categoria) e o app trata vazio = sem categoria.
+ALTER TABLE public.products
+  ADD COLUMN IF NOT EXISTS category TEXT;
 
 COMMIT;
 

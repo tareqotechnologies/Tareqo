@@ -72,10 +72,7 @@ class _StatsStrip extends StatelessWidget {
               children: [
                 for (var i = 0; i < stats.length; i++) ...[
                   if (i > 0)
-                    Divider(
-                      height: 1,
-                      color: PremiumDecor.hairline(scheme),
-                    ),
+                    Divider(height: 1, color: PremiumDecor.hairline(scheme)),
                   _StatCell(stat: stats[i], inline: true),
                 ],
               ],
@@ -753,9 +750,7 @@ class _DistributionCard extends StatelessWidget {
                   ),
                   child: Text(
                     '$approvalRate%',
-                    style: AppTypography.labelMedium.copyWith(
-                      color: rateColor,
-                    ),
+                    style: AppTypography.labelMedium.copyWith(color: rateColor),
                   ),
                 ),
               ],

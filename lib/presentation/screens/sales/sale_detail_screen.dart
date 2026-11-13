@@ -176,7 +176,9 @@ class _SaleFeedRow extends StatelessWidget {
                     Formatters.signedAmount(subtotal),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.amountInRow(theme.colorScheme.onSurface),
+                    style: AppTypography.amountInRow(
+                      theme.colorScheme.onSurface,
+                    ),
                   ),
             ),
           ),

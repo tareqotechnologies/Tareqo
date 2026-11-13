@@ -87,6 +87,48 @@ void main() {
     );
   });
 
+  for (final dark in [false, true]) {
+    testWidgets('crédito (histórico) — ${dark ? 'dark' : 'light'}', (
+      tester,
+    ) async {
+      usePortraitViewport(tester, size: const Size(412, 915));
+      await tester.pumpWidget(
+        debtsGoldenApp(
+          theme: dark ? AppTheme.dark : AppTheme.light,
+          settledDebts: [
+            demoDebts.first.copyWith(
+              id: 'history1',
+              number: 1,
+              personName: 'Ana Lima',
+              amountCents: 1500,
+              isPaid: true,
+              paidAt: kGoldenNow,
+            ),
+            demoDebts.first.copyWith(
+              id: 'history2',
+              number: 2,
+              personName: 'Carlos Fernandes',
+              amountCents: 123456789,
+              isPaid: true,
+              paidAt: kGoldenNow,
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Quitadas'));
+      await tester.pumpAndSettle();
+      expect(find.text('Ana Lima'), findsOneWidget);
+      expect(find.text('Carlos Fernandes'), findsOneWidget);
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile(
+          'goldens/credito_historico_${dark ? 'dark' : 'light'}.png',
+        ),
+      );
+    });
+  }
+
   testWidgets('financeiro — dark', (tester) async {
     await golden(
       tester,

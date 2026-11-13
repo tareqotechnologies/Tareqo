@@ -418,10 +418,12 @@ class _FixedGetPendingDebtsUseCase implements GetPendingDebtsUseCase {
 }
 
 class _FixedGetSettledDebtsUseCase implements GetSettledDebtsUseCase {
-  const _FixedGetSettledDebtsUseCase();
+  const _FixedGetSettledDebtsUseCase([this.debts = const []]);
+
+  final List<Debt> debts;
 
   @override
-  Future<List<Debt>> call({required String storeId}) async => const [];
+  Future<List<Debt>> call({required String storeId}) async => debts;
 }
 
 /// ─── Telas de comércio (Fase 2.3 — baseline golden) ───────────────────
@@ -591,7 +593,11 @@ class _FakeSettleDebt implements SettleDebtUseCase {
   Future<void> call(String debtId, {required String storeId}) async {}
 }
 
-Widget debtsGoldenApp({ThemeData? theme, Locale? locale}) {
+Widget debtsGoldenApp({
+  ThemeData? theme,
+  Locale? locale,
+  List<Debt> settledDebts = const [],
+}) {
   return ProviderScope(
     overrides: [
       ...storeContextOverrides(),
@@ -599,7 +605,7 @@ Widget debtsGoldenApp({ThemeData? theme, Locale? locale}) {
         const _FixedGetPendingDebtsUseCase(),
       ),
       getSettledDebtsUseCaseProvider.overrideWithValue(
-        const _FixedGetSettledDebtsUseCase(),
+        _FixedGetSettledDebtsUseCase(settledDebts),
       ),
       settleDebtUseCaseProvider.overrideWithValue(const _FakeSettleDebt()),
     ],
