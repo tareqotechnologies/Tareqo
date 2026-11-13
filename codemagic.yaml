@@ -44,6 +44,10 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m2
     environment:
+      # Grupo de variáveis da app (Codemagic > Environment variables).
+      # Sem este import os scripts não recebem SUPABASE_URL/SUPABASE_ANON_KEY.
+      groups:
+        - tareqo_prod
       flutter: 3.47.7
       xcode: latest
       cocoapods: default
@@ -132,6 +136,8 @@ workflows:
       # Nome do App Store Connect API key configurado no Codemagic.
       app_store_connect: tareqo_asc
     environment:
+      groups:
+        - tareqo_prod
       flutter: 3.47.7
       xcode: latest
       cocoapods: default
@@ -196,6 +202,8 @@ workflows:
     max_build_duration: 120
     instance_type: linux_x2
     environment:
+      groups:
+        - tareqo_prod
       flutter: 3.47.7
       java: 17
       android_signing:
@@ -260,6 +268,8 @@ workflows:
     # windows_x2 exige faturação ativa na conta Codemagic.
     instance_type: windows_x2
     environment:
+      groups:
+        - tareqo_prod
       flutter: 3.47.7
     scripts:
       # O runner Windows usa PowerShell por padrão: variáveis em $env:NOME.
