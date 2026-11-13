@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// uma prova visual fiel da tela. Carregamos:
 ///
 /// * **Inter** (`assets/fonts/Inter-Variable.ttf`) — família do app;
-/// * **MaterialIcons** (`materialicons-regular.otf` do SDK) — todos os
+/// * **MaterialIcons** (`MaterialIcons-Regular.otf` do SDK) — todos os
 ///   `Icon`/`IconData` do Material.
 ///
 /// A fonte de ícones vive no cache do SDK, fora do bundle do projeto; o
@@ -32,7 +32,7 @@ Future<void> loadGoldenFonts() async {
   }
   await _loadFile(
     'MaterialIcons',
-    '$root/bin/cache/artifacts/material_fonts/materialicons-regular.otf',
+    '$root/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
   );
 }
 
@@ -56,7 +56,7 @@ String? _flutterRoot() {
   var dir = File(Platform.resolvedExecutable).parent;
   for (var i = 0; i < 7; i++) {
     final marker = File(
-      '${dir.path}/bin/cache/artifacts/material_fonts/materialicons-regular.otf',
+      '${dir.path}/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
     );
     if (marker.existsSync()) return dir.path;
     final parent = dir.parent;
