@@ -10,13 +10,16 @@
 #   Settings → Secrets and variables → Actions: SUPABASE_URL_PROD e
 #   SUPABASE_ANON_KEY_PROD (os mesmos usados por downloads.yml/release.yml).
 #
-# Dispara em tags `v*` (acompanha a release) e manualmente via
-# workflow_dispatch — o primeiro deploy tem de correr depois de os secrets
-# estarem configurados.
+# Dispara a cada push na branch principal, em tags `v*` (acompanha a
+# release) e manualmente via workflow_dispatch. Só corre com os secrets
+# acima configurados — sem eles o job aborta no primeiro passo.
 name: Web (GitHub Pages)
 
 on:
   push:
+    branches:
+      # Branch principal do repositório (default branch): cada push publica.
+      - feat/ui-standardization-telas
     tags:
       - "v*"
   workflow_dispatch:
