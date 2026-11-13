@@ -46,7 +46,7 @@ jobs:
         run: flutter build apk --flavor prod --release --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" --dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true --obfuscate --split-debug-info=build/symbols
       - name: Rename APK
         run: cp build/app/outputs/flutter-apk/app-prod-release.apk build/app/outputs/flutter-apk/tareqo-android.apk
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: build/app/outputs/flutter-apk/tareqo-android.apk
           generate_release_notes: true
@@ -77,6 +77,6 @@ jobs:
       - name: Package Windows app
         shell: pwsh
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath build/windows/tareqo-windows.zip
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: build/windows/tareqo-windows.zip
