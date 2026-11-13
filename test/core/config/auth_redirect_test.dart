@@ -44,6 +44,16 @@ void main() {
       );
     });
 
+    test('acrescenta a barra final em /app sem barra', () {
+      expect(
+        authRedirectUrl(
+          isWeb: true,
+          baseUri: Uri.parse('https://tareqotechnologies.github.io/Tareqo/app'),
+        ),
+        'https://tareqotechnologies.github.io/Tareqo/app/',
+      );
+    });
+
     test('normaliza path vazio para a raiz', () {
       expect(
         authRedirectUrl(isWeb: true, baseUri: Uri.parse('https://tareqo.app')),

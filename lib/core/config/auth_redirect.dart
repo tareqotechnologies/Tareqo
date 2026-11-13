@@ -19,6 +19,13 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 String authRedirectUrl({bool isWeb = kIsWeb, Uri? baseUri}) {
   if (!isWeb) return 'tareqo://callback';
   final base = baseUri ?? Uri.base;
-  final path = base.path.isEmpty ? '/' : base.path;
+  // Termina sempre em `/`: a página pode ser aberta sem barra final
+  // (`/Tareqo/app`) e a allow-list do Supabase distingue os dois URLs.
+  var path = base.path;
+  if (path.isEmpty) {
+    path = '/';
+  } else if (!path.endsWith('/')) {
+    path = '$path/';
+  }
   return '${base.origin}$path';
 }
