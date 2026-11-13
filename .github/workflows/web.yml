@@ -1,0 +1,69 @@
+# Publica a versão web (Flutter web) da Tareqo no GitHub Pages.
+#
+# URL pública: https://tareqotechnologies.github.io/Tareqo/
+# (o base-href abaixo tem de acompanhar o nome do repositório).
+#
+# Pré-requisitos, uma única vez:
+#   Settings → Pages → Source: GitHub Actions;
+#   Settings → Secrets and variables → Actions: SUPABASE_URL_PROD e
+#   SUPABASE_ANON_KEY_PROD (os mesmos usados por downloads.yml/release.yml).
+#
+# Dispara em tags `v*` (acompanha a release) e manualmente via
+# workflow_dispatch — o primeiro deploy tem de correr depois de os secrets
+# estarem configurados.
+name: Web (GitHub Pages)
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.7'
+          cache: true
+      - name: Validate production secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_PROD }}
+        run: |
+          test -n "$SUPABASE_URL" && test -n "$SUPABASE_ANON_KEY" || { echo '::error::Configure SUPABASE_URL_PROD e SUPABASE_ANON_KEY_PROD (Settings → Secrets and variables → Actions).'; exit 1; }
+      - run: flutter pub get
+      - name: Build web
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_PROD }}
+        # Sem --obfuscate: o build web não suporta a flag de ofuscação AOT.
+        run: flutter build web --release --base-href=/Tareqo/ --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" --dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    name: Publicar no Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#FFFFFF">
-  <meta name="description" content="Descarregue a Tareqo para Android e Windows. A versão para iPhone estará disponível em breve.">
+  <meta name="description" content="Use a Tareqo no navegador ou descarregue para Android e Windows. A versão para iPhone estará disponível em breve.">
   <title>Downloads — Tareqo</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/Inter-Variable.ttf" as="font" type="font/ttf" crossorigin>
@@ -15,7 +15,7 @@
     a{color:inherit;text-decoration:none} a:focus-visible{outline:2px solid currentColor;outline-offset:5px} .container{width:min(var(--width),calc(100% - 40px));margin:auto}
     header{border-bottom:1px solid var(--line)} .header{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:10px}.brand img{width:40px;height:40px}.wordmark{font-size:14px;font-weight:600;letter-spacing:.24em}.back{font-size:14px;color:var(--secondary)}
     main{padding:88px 0 110px}.eyebrow{text-transform:uppercase;letter-spacing:.15em;font-size:12px;color:var(--secondary)}h1{margin:16px 0 0;font-size:clamp(42px,7vw,68px);line-height:1.06;letter-spacing:-.06em;font-weight:600}.intro{max-width:560px;color:var(--secondary);font-size:18px;margin:22px 0 0}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:48px}.card{border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;min-height:260px}.platform{font-size:12px;color:var(--secondary);text-transform:uppercase;letter-spacing:.12em}.card h2{font-size:23px;letter-spacing:-.04em;margin:12px 0 8px}.card p{font-size:14px;color:var(--secondary);margin:0 0 24px}.button{margin-top:auto;min-height:48px;padding:12px 18px;background:var(--ink);color:white;border-radius:999px;text-align:center;font-size:14px;font-weight:500}.button:hover{background:#212631}.soon{background:var(--canvas);color:var(--secondary);cursor:default}.note{margin-top:26px;font-size:13px;color:var(--secondary)}footer{border-top:1px solid var(--line);padding:24px 0;color:var(--secondary);font-size:12px}.footer{display:flex;justify-content:space-between;gap:16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:48px}.card{border:1px solid var(--line);border-radius:20px;padding:28px;display:flex;flex-direction:column;min-height:260px}.platform{font-size:12px;color:var(--secondary);text-transform:uppercase;letter-spacing:.12em}.card h2{font-size:23px;letter-spacing:-.04em;margin:12px 0 8px}.card p{font-size:14px;color:var(--secondary);margin:0 0 24px}.button{margin-top:auto;min-height:48px;padding:12px 18px;background:var(--ink);color:white;border-radius:999px;text-align:center;font-size:14px;font-weight:500}.button:hover{background:#212631}.soon{background:var(--canvas);color:var(--secondary);cursor:default}.note{margin-top:26px;font-size:13px;color:var(--secondary)}footer{border-top:1px solid var(--line);padding:24px 0;color:var(--secondary);font-size:12px}.footer{display:flex;justify-content:space-between;gap:16px}
     @media(max-width:700px){main{padding:64px 0 76px}.grid{grid-template-columns:1fr;margin-top:34px}.card{min-height:220px}.intro{font-size:16px}.footer{flex-direction:column}}
   </style>
 </head>
@@ -24,13 +24,14 @@
   <main class="container">
     <p class="eyebrow">Instale a Tareqo</p>
     <h1>Downloads</h1>
-    <p class="intro">Escolha o seu dispositivo para obter a aplicação. Use sempre a versão mais recente publicada pela equipa Tareqo.</p>
+    <p class="intro">Abra a Tareqo no navegador ou instale no seu dispositivo. Use sempre a versão mais recente publicada pela equipa Tareqo.</p>
     <section class="grid" aria-label="Aplicações disponíveis">
+      <article class="card"><span class="platform">Web</span><h2>No navegador</h2><p>Use a Tareqo sem instalar nada. Funciona em computador, tablet e telemóvel.</p><a class="button" href="https://tareqotechnologies.github.io/Tareqo/" aria-label="Abrir a versão web da Tareqo no navegador">Abrir versão web</a></article>
       <article class="card"><span class="platform">Android</span><h2>Telemóvel ou tablet</h2><p>Descarregue o ficheiro APK e abra-o no dispositivo Android para instalar.</p><a class="button" href="https://github.com/tareqotechnologies/Tareqo/releases/latest/download/tareqo-android.apk" aria-label="Descarregar APK da versão mais recente da Tareqo para Android">Descarregar APK</a></article>
       <article class="card"><span class="platform">Windows</span><h2>Computador</h2><p>Obtenha a versão para Windows na página da versão mais recente.</p><a class="button" href="https://github.com/tareqotechnologies/Tareqo/releases/latest/download/tareqo-windows.zip" aria-label="Descarregar aplicação da versão mais recente da Tareqo para Windows">Descarregar para Windows</a></article>
       <article class="card"><span class="platform">iPhone e iPad</span><h2>iOS</h2><p>A versão para iOS estará disponível em breve. Estamos a preparar a distribuição.</p><span class="button soon" aria-label="Versão iOS em breve">Disponível em breve</span></article>
     </section>
-    <p class="note">Ao clicar em Android ou Windows, será encaminhado para a página oficial de versões da Tareqo no GitHub. Se não encontrar o instalador, contacte a nossa equipa pelo WhatsApp.</p>
+    <p class="note">A versão web abre diretamente no navegador. Em Android e Windows, será encaminhado para a página oficial de versões da Tareqo no GitHub. Se não encontrar o instalador, contacte a nossa equipa pelo WhatsApp.</p>
   </main>
   <footer><div class="container footer"><span class="wordmark">TAREQO</span><span>Gestão simples para o seu negócio.</span></div></footer>
 </body>
