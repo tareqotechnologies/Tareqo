@@ -50,6 +50,9 @@ app.*.map.json
 /android/build/
 
 # Assinatura de release (keystore de produção) — nunca versionar
+# Artefatos de distribuição gerados localmente (APK/ZIP de release)
+/dist/
+
 android/key.properties
 *.jks
 
