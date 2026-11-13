@@ -7,6 +7,8 @@
 #   ios-unsigned — IPA sem assinatura. Não precisa de conta Apple nem de
 #                  certificados; serve para validar o build e distribuir
 #                  internamente (assinar depois com Xcode/fastlane).
+#   windows-prod — EXE de produção empacotado em zip (mesmo artefato que a
+#                  release publica como tareqo-windows.zip).
 #   android-prod — APK + AAB de produção (flavor prod, assinado). Requer o
 #                  keystore registado em Team settings > codemagic.yaml
 #                  settings > Code signing identities com a referência
@@ -251,3 +253,47 @@ workflows:
       - build/app/outputs/bundle/**/*.aab
       - build/symbols/**
       - build/app/outputs/logs/*.txt
+
+  windows-prod:
+    name: Tareqo Windows (EXE de produção)
+    max_build_duration: 120
+    # windows_x2 exige faturação ativa na conta Codemagic.
+    instance_type: windows_x2
+    environment:
+      flutter: 3.47.7
+    scripts:
+      # O runner Windows usa PowerShell por padrão: variáveis em $env:NOME.
+      - name: Validar credenciais de produção
+        script: |
+          if (-not $env:SUPABASE_URL -or -not $env:SUPABASE_ANON_KEY) {
+            Write-Error "Defina SUPABASE_URL e SUPABASE_ANON_KEY (encrypted) no Codemagic."
+            exit 1
+          }
+
+      - name: Dependências
+        script: flutter pub get
+
+      - name: Build Windows (release)
+        script: |
+          $defines = @(
+            "--dart-define=SUPABASE_URL=$env:SUPABASE_URL",
+            "--dart-define=SUPABASE_ANON_KEY=$env:SUPABASE_ANON_KEY",
+            "--dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true",
+            "--obfuscate",
+            "--split-debug-info=build/symbols"
+          )
+          if ($env:SENTRY_DSN) {
+            $defines += "--dart-define=SENTRY_DSN=$env:SENTRY_DSN"
+          }
+          flutter build windows --release $defines
+
+      # Mesmo nome de artefato usado pelos links da landing page
+      # (releases/latest/download/tareqo-windows.zip).
+      - name: Empacotar EXE em zip
+        script: |
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" `
+            -DestinationPath "build/windows/tareqo-windows.zip" -Force
+
+    artifacts:
+      - build/windows/tareqo-windows.zip
+      - build/symbols/**
