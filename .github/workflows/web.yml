@@ -1,7 +1,9 @@
-# Publica a versão web (Flutter web) da Tareqo no GitHub Pages.
+# Publica a landing page e a versão web da app no GitHub Pages.
 #
-# URL pública: https://tareqotechnologies.github.io/Tareqo/
-# (o base-href abaixo tem de acompanhar o nome do repositório).
+# URLs públicas:
+#   site (raiz): https://tareqotechnologies.github.io/Tareqo/
+#   app:         https://tareqotechnologies.github.io/Tareqo/app/
+# (o base-href abaixo tem de acompanhar o nome do repositório + /app/).
 #
 # Pré-requisitos, uma única vez:
 #   Settings → Pages → Source: GitHub Actions;
@@ -51,11 +53,18 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_PROD }}
         # Sem --obfuscate: o build web não suporta a flag de ofuscação AOT.
-        run: flutter build web --release --base-href=/Tareqo/ --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" --dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true
+        run: flutter build web --release --base-href=/Tareqo/app/ --dart-define=SUPABASE_URL="$SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" --dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true
+      - name: Montar site publicado
+        # Landing page na raiz do Pages e a app isolada em /app/ (o build web
+        # também tem um assets/, por isso não pode ser misturado na raiz).
+        run: |
+          mkdir -p public/app
+          cp -r website/. public/
+          cp -r build/web/. public/app/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: build/web
+          path: public
 
   deploy:
     name: Publicar no Pages

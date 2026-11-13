@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 /// gotrue (`getSessionFromUrl`) para trocar o `code` PKCE.
 ///
 /// **Web:** a origem da própria página (ex.:
-/// `https://tareqotechnologies.github.io/Tareqo/`). O browser não abre um
+/// `https://tareqotechnologies.github.io/Tareqo/app/`). O browser não abre um
 /// scheme próprio, então o link tem de voltar para o app servido em HTTP.
 /// Nesse caso o `supabase_flutter` lê o `?code=` no arranque, troca-o por
 /// sessão (`exchangeCodeForSession` — que emite `passwordRecovery` quando o
