@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/config/auth_redirect.dart';
 import '../../../domain/entities/app_user.dart';
 import '../../../domain/entities/auth_event.dart';
 import 'auth_remote_data_source.dart';
@@ -23,11 +24,12 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       email: email,
       password: password,
       data: fullName == null ? null : {'full_name': fullName},
-      // O link de confirmação do e-mail reabre o app (deep link do mesmo
-      // scheme do recovery — ver DeepLinkHandler). Sem isso, o gotrue
+      // O link de confirmação tem de voltar para o app: deep link nativo
+      // (`tareqo://callback` — ver DeepLinkHandler) ou a própria origem no
+      // web, onde o browser não abre um scheme próprio. Sem isso, o gotrue
       // SEMPRE usa o site_url do projeto (default: localhost:3000) e a
-      // confirmação nunca completa no app.
-      emailRedirectTo: 'tareqo://callback',
+      // confirmação nunca completa.
+      emailRedirectTo: authRedirectUrl(),
     );
     // Se a confirmação por e-mail estiver ativa, o `user` pode ser null
     // (a conta é criada, mas a sessão só vem após confirmar).
@@ -60,7 +62,7 @@ final class SupabaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> signOut() => _auth.signOut();
   @override
   Future<void> resetPassword({required String email}) =>
-      _auth.resetPasswordForEmail(email, redirectTo: 'tareqo://callback');
+      _auth.resetPasswordForEmail(email, redirectTo: authRedirectUrl());
 
   @override
   Future<void> changePassword({
