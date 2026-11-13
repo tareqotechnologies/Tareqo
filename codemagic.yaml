@@ -40,8 +40,6 @@ workflows:
       flutter: 3.47.7
       xcode: latest
       cocoapods: default
-      vars:
-        BUNDLE_ID: com.tareqo.tareqo
     scripts:
       - name: Validar credenciais de produção
         script: |
@@ -123,8 +121,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.tareqo.tareqo
-      vars:
-        BUNDLE_ID: com.tareqo.tareqo
     scripts:
       - name: Validar credenciais de produção
         script: |
