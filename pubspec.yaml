@@ -74,9 +74,9 @@ dependencies:
   pdf: ^3.13.0
   image_picker: ^1.2.3
   # Autenticação biométrica (W10 — auditoria 2026-08)
-  local_auth: ^2.3.0
-  local_auth_android: ^1.0.46
-  local_auth_darwin: ^1.2.8
+  local_auth: ^3.0.2
+  local_auth_android: ^2.3.0
+  local_auth_darwin: ^2.0.5
 
   # MFA/TOTP + QR code para configurar autenticador
   otp: ^3.1.1
