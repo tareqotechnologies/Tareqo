@@ -68,7 +68,7 @@ dependencies:
   # migração upstream (getsentry/sentry-dart#3738, DART-382) — aí, subir para
   # ^10.0.0.
   sentry_flutter: ^9.30.0
-  mobile_scanner: ^7.4.0
+  mobile_scanner: ^7.5.0
   share_plus: ^13.3.0
   url_launcher: ^6.3.2
   pdf: ^3.13.0
