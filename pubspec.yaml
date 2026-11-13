@@ -45,7 +45,7 @@ dependencies:
   # precisar de sqlite3_flutter_libs nem de sqlite3_android (o loader
   # manual/open.overrideFor foi removido de AppDatabase). Ver changelog
   # 3.0.0: "Use build hooks to load SQLite instead of DynamicLibrary".
-  sqlite3: ^3.5.1
+  sqlite3: ^3.9.1
   path_provider: ^2.1.6
   path: ^1.9.1
 
