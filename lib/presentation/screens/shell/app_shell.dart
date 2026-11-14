@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -101,6 +102,9 @@ class AppShell extends ConsumerWidget {
     // Rail persistente a partir do corte de sidebar (token único — o mesmo
     // 880 usado pelo shell do admin). Below it, barra inferior + FAB.
     final wide = MediaQuery.sizeOf(context).width >= AppBreakpoints.sidebarRail;
+    // No desktop web, exponha todas as áreas diretamente na navegação.
+    // O rail compacto continua igual em tablets e nas restantes plataformas.
+    final webDesktop = kIsWeb && MediaQuery.sizeOf(context).width >= 1100;
     // Trigger add-on expiry check when tenant is known.
     ref.watch(addonExpiryCheckProvider);
 
@@ -249,11 +253,40 @@ class AppShell extends ConsumerWidget {
                     child: SafeArea(
                       top: false,
                       child: NavigationRail(
-                        selectedIndex: _barIndex(index),
-                        onDestinationSelected: onSelect,
-                        labelType: NavigationRailLabelType.all,
+                        extended: webDesktop,
+                        minExtendedWidth: 224,
+                        selectedIndex: webDesktop ? index : _barIndex(index),
+                        onDestinationSelected: webDesktop
+                            ? (value) => ref
+                                  .read(shellIndexProvider.notifier)
+                                  .goTo(AppSection.values[value])
+                            : onSelect,
+                        labelType: webDesktop
+                            ? null
+                            : NavigationRailLabelType.all,
                         destinations: [
-                          for (final (icon, selected, label) in destinations)
+                          for (final (icon, selected, label)
+                              in webDesktop
+                                  ? [
+                                      ...destinations.take(3),
+                                      (
+                                        Icons.inventory_2_outlined,
+                                        Icons.inventory_2_rounded,
+                                        l10n.appNavProducts,
+                                      ),
+                                      (
+                                        Icons.account_balance_outlined,
+                                        Icons.account_balance_rounded,
+                                        l10n.appNavCredit,
+                                      ),
+                                      (
+                                        Icons.people_outline_rounded,
+                                        Icons.people_rounded,
+                                        l10n.appNavCustomers,
+                                      ),
+                                      destinations[3],
+                                    ]
+                                  : destinations)
                             NavigationRailDestination(
                               icon: Icon(icon),
                               selectedIcon: Icon(selected),
