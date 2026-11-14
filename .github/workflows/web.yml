@@ -25,6 +25,7 @@ on:
       - "v*"
     # Evita um build de ~4 min em pushes que não mudam o site nem a app.
     paths:
+      - '.github/workflows/web.yml'
       - 'lib/**'
       - 'web/**'
       - 'pubspec.yaml'
