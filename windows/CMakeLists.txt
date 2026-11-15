@@ -32,6 +32,12 @@ set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
 # Use Unicode for all projects.
 add_definitions(-DUNICODE -D_UNICODE)
 
+# VS 18 / MSVC 14.51 makes the deprecation notice for the experimental
+# coroutine header an error in local_auth_windows 1.0.x. The plugin still
+# uses that header; silence only this compatibility diagnostic until the
+# plugin migrates to the standard C++ coroutine header.
+add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 # Compilation settings that should be applied to most targets.
 #
 # Be cautious about adding new options here, as plugins use this function by
