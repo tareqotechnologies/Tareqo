@@ -3,6 +3,12 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.6.2+33] — 2026-11-15
+
+### Corrigido
+- Corrigida a compilação Windows com MSVC 14.51, que tratava o aviso de descontinuação de coroutines experimentais do plugin `local_auth_windows` como erro.
+- Preparada nova chave de assinatura Android de upload para o primeiro lançamento público; configuração local permanece fora do controlo de versão.
+
 ## [2.5.0+30] — 2026-09-27
 
 ### Aplicação no live — DEV vs. PRODUÇÃO (migrações 34/35)
