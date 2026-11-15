@@ -2,7 +2,7 @@
 ; Build the Flutter release before compiling this script (see README.md).
 
 #define AppName "Tareqo"
-#define AppVersion "2.6.0"
+#define AppVersion "2.6.3"
 #define AppPublisher "TAREQO"
 #define AppExeName "tareqo.exe"
 #define BuildDir "..\build\windows\x64\runner\Release"

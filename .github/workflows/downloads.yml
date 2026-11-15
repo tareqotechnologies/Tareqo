@@ -76,7 +76,15 @@ jobs:
         run: flutter build windows --release --dart-define=SUPABASE_URL="$env:SUPABASE_URL" --dart-define=SUPABASE_ANON_KEY="$env:SUPABASE_ANON_KEY" --dart-define=SUPABASE_CREDENTIALS_EXPLICIT=true
       - name: Package Windows app
         shell: pwsh
-        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath build/windows/tareqo-windows.zip
+        run: |
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath build/windows/tareqo-windows.zip
+          choco install innosetup --yes --no-progress
+          $iscc = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path $iscc)) { throw "Inno Setup compiler not found at $iscc" }
+          & $iscc installer\tareqo.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE" }
       - uses: softprops/action-gh-release@v2
         with:
-          files: build/windows/tareqo-windows.zip
+          files: |
+            build/windows/tareqo-windows.zip
+            dist/TAREQO_SETUP.exe
