@@ -1,8 +1,7 @@
-; Instalador Windows do TAREQO.
-; Gere primeiro o build com: flutter build windows --release
-; Compile este ficheiro no Inno Setup Compiler.
+; TAREQO Windows x64 installer
+; Build the Flutter release before compiling this script (see README.md).
 
-#define AppName "TAREQO"
+#define AppName "Tareqo"
 #define AppVersion "2.6.0"
 #define AppPublisher "TAREQO"
 #define AppExeName "tareqo.exe"
@@ -13,35 +12,48 @@ AppId={{C48C982B-87D2-4E20-994F-A35AE2937641}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
-DefaultDirName={autopf}\TAREQO
+AppVerName={#AppName} {#AppVersion}
+DefaultDirName={autopf}\Tareqo
 DefaultGroupName={#AppName}
 UninstallDisplayName={#AppName}
 UninstallDisplayIcon={app}\{#AppExeName}
 SetupIconFile=..\windows\runner\resources\app_icon.ico
-OutputDir=..\build\installer
-OutputBaseFilename=tareqo-setup-{#AppVersion}-windows-x64
+OutputDir=..\dist
+OutputBaseFilename=TAREQO_SETUP
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
+MinVersion=10.0.10240
 PrivilegesRequired=admin
+PrivilegesRequiredOverridesAllowed=dialog
 DisableProgramGroupPage=yes
 WizardStyle=modern
 CloseApplications=yes
-Compression=lzma2
+Compression=lzma2/ultra64
 SolidCompression=yes
 SetupLogging=yes
+Uninstallable=yes
+UninstallFilesDir={app}\{#AppName} Uninstaller
+UsePreviousAppDir=yes
+; The app's SQLite database is stored in the user's Documents folder, outside {app}.
+; Updating/uninstalling therefore leaves user data intact.
 
 [Languages]
 Name: "portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
 
-[Tasks]
-Name: "desktopicon"; Description: "Criar um atalho no ambiente de trabalho"; GroupDescription: "Atalhos adicionais:"; Flags: unchecked
-
 [Files]
 Source: "{#BuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+[InstallDelete]
+; Remove stale Flutter assets left by older builds before copying the current bundle.
+Type: filesandordirs; Name: "{app}\data"
+
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExeName}"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"
 
 [Run]
-Filename: "{app}\{#AppExeName}"; Description: "Abrir o TAREQO"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\{#AppExeName}"; Description: "Iniciar o Tareqo"; Flags: postinstall nowait skipifsilent
+
+[UninstallDelete]
+; Flutter resources are application files; the SQLite database lives in Documents.
+Type: filesandordirs; Name: "{app}\data"
