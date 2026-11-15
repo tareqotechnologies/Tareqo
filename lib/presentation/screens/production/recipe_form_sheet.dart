@@ -150,14 +150,19 @@ class _RecipeFormSheetState extends ConsumerState<RecipeFormSheet> {
       for (final product in products)
         if (product.isActive && product.type.isProducible) product,
     ];
-    // Componentes possíveis: ativos, exceto o acabado e os já escolhidos.
+    // Mantém visíveis componentes já gravados ao editar a ficha, mas novas
+    // sugestões ficam restritas a matérias-primas.
     final selected = {
       for (final draft in _components)
         if (draft.productId != null) draft.productId!,
     };
     final componentOptions = [
       for (final product in products)
-        if (product.isActive && product.id != _productId) product,
+        if (product.isActive &&
+            product.id != _productId &&
+            (product.type == ProductType.rawMaterial ||
+                selected.contains(product.id)))
+          product,
     ];
 
     return Column(
