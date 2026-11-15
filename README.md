@@ -41,6 +41,34 @@ O **TAREQO ERP** é um aplicativo para pequenos comerciantes administrarem o neg
 
 ## Começando
 
+## Instalador Windows (x64)
+
+O instalador autónomo para distribuição é `dist/TAREQO_SETUP.exe`. Para o
+recriar num Windows com Flutter, Visual Studio Build Tools (C++ para desktop)
+e Inno Setup 7 instalados:
+
+```powershell
+flutter pub get
+flutter build windows --release
+& "C:\Program Files\Inno Setup 7\ISCC.exe" installer\tareqo.iss
+```
+
+A compilação Flutter produz `build/windows/x64/runner/Release`. O script
+`installer/tareqo.iss` inclui recursivamente esse diretório, incluindo
+`tareqo.exe`, DLLs de Flutter/plugins/SQLite, `crashpad_handler.exe` e
+`data/flutter_assets`. O instalador instala em Program Files, cria o atalho do
+Menu Iniciar e no ambiente de trabalho, além da opção de iniciar a aplicação no
+fim. A instalação anterior é atualizada pelo mesmo `AppId`.
+
+O banco SQLite é criado em Documentos do utilizador (`tareqo.db`), fora da
+pasta da aplicação. Atualizar ou desinstalar preserva esse banco e os restantes
+dados do utilizador. A desinstalação remove os ficheiros instalados e os
+atalhos; faça cópia de segurança dos dados antes de os apagar manualmente.
+
+O `TAREQO_SETUP.exe` final contém os binários da aplicação e não requer Flutter,
+Dart, Python ou Inno Setup na máquina de destino. A criação do instalador requer
+Inno Setup e a compilação Release exige o toolchain Windows do Flutter.
+
 ```bash
 flutter pub get
 # Desenvolvimento (debug/hot reload) — flavor dev + defines do env/dev.env
