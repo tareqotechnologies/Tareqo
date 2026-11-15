@@ -339,6 +339,7 @@ class SheetHeader extends StatelessWidget {
     this.actionLabel,
     this.isSaving = false,
     this.onClose,
+    this.showBottomBorder = true,
   });
 
   final String title;
@@ -351,6 +352,7 @@ class SheetHeader extends StatelessWidget {
   final String? actionLabel;
   final bool isSaving;
   final VoidCallback? onClose;
+  final bool showBottomBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -367,9 +369,11 @@ class SheetHeader extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: scheme.surface,
-        border: Border(
-          bottom: BorderSide(color: PremiumDecor.hairline(scheme)),
-        ),
+        border: showBottomBorder
+            ? Border(
+                bottom: BorderSide(color: PremiumDecor.hairline(scheme)),
+              )
+            : null,
       ),
       child: Row(
         children: [
