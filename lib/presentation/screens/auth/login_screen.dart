@@ -443,9 +443,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: AppSpacing.xs),
                 Center(
                   child: TextButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : _toggleAuthMode,
+                    onPressed: _isSubmitting ? null : _toggleAuthMode,
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
