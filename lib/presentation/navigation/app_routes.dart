@@ -16,6 +16,7 @@ import '../screens/addons/quotation_screen.dart';
 import '../screens/addons/store_transfers_screen.dart';
 import '../screens/account/security_settings_screen.dart';
 import '../screens/auth/mfa_setup_screen.dart';
+import '../screens/auth/auth_link_error_screen.dart';
 import '../screens/credit/debts_screen.dart';
 import '../screens/customers/customers_screen.dart';
 
@@ -134,6 +135,14 @@ abstract final class AppRoutes {
     final name = settings.name;
     if (name == null) return null;
 
+    final authError = _authCallbackError(name);
+    if (authError != null) {
+      return MaterialPageRoute<dynamic>(
+        settings: settings,
+        builder: (_) => AuthLinkErrorScreen(errorCode: authError),
+      );
+    }
+
     WidgetBuilder builder;
     switch (name) {
       case purchases:
@@ -197,6 +206,25 @@ abstract final class AppRoutes {
     }
 
     return MaterialPageRoute<dynamic>(settings: settings, builder: builder);
+  }
+
+  /// Supabase can return auth errors to the configured site URL as query
+  /// parameters or as a URL fragment. Treat those as an auth result, not as
+  /// an unknown named route (the fragment format is used by older flows).
+  static String? _authCallbackError(String name) {
+    final uri = Uri.tryParse(name);
+    if (uri == null) return null;
+
+    final params = <String, String>{...uri.queryParameters};
+    if (uri.fragment.isNotEmpty) {
+      try {
+        params.addAll(Uri.splitQueryString(uri.fragment));
+      } on FormatException {
+        // Ignore malformed fragment data and continue with the query.
+      }
+    }
+    final code = params['error_code'];
+    return params.containsKey('error') && code != null ? code : null;
   }
 
   static T? _arg<T>(RouteSettings settings, String key) {
