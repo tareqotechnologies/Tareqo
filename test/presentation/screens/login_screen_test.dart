@@ -342,11 +342,13 @@ void main() {
     expect(overlay.value.systemNavigationBarIconBrightness, Brightness.light);
   });
 
-  testWidgets('wordmark Tareqo: Inter 28/Regular com tracking e o '
-      'header desliza a meia velocidade do conteúdo (parallax)', (
+  testWidgets('wordmark Tareqo mantém o estilo e rola no fluxo normal', (
     tester,
   ) async {
     final repository = _FakeAuthRepository();
+    tester.view.physicalSize = const Size(360, 560);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(_buildApp(repository));
     await tester.pumpAndSettle();
 
@@ -357,61 +359,51 @@ void main() {
     expect(title.style?.fontFamily, 'Inter');
     expect(title.style?.letterSpacing, 5);
 
-    // Em repouso (sem scroll) o translate é 0 — a página renderiza
-    // pixel-idêntica ao layout estático.
-    Transform headerAtRest() => tester.widget<Transform>(
-      find
-          .ancestor(of: find.text('TAREQO'), matching: find.byType(Transform))
-          .first,
-    );
-    expect(headerAtRest().transform.getRow(1)[3], 0.0);
-
-    // Viewport curta → scroll real; arrastar 120px desliza o header
-    // só 60px (0.5× — profundidade iOS do item 4.5 do plano).
-    tester.view.physicalSize = const Size(800, 400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-    await tester.pumpAndSettle();
-
     await tester.drag(
       find.byType(SingleChildScrollView),
-      const Offset(0, -120),
+      const Offset(0, -180),
     );
     await tester.pumpAndSettle();
 
-    expect(headerAtRest().transform.getRow(1)[3], 60.0);
+    expect(find.byType(Transform), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
-    'disableAnimations (acessibilidade): parallax desligado — o header rola '
-    'à velocidade normal, nada se move sozinho',
+    'cadastro em ecrã curto com teclado: campos e ações continuam acessíveis',
     (tester) async {
-      tester.platformDispatcher.accessibilityFeaturesTestValue =
-          const FakeAccessibilityFeatures(disableAnimations: true);
-      addTearDown(
-        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
-      );
-
       final repository = _FakeAuthRepository();
-      tester.view.physicalSize = const Size(800, 400);
+      tester.view.physicalSize = const Size(320, 600);
       tester.view.devicePixelRatio = 1.0;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 260);
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(_buildApp(repository));
       await tester.pumpAndSettle();
 
-      await tester.drag(
-        find.byType(SingleChildScrollView),
-        const Offset(0, -120),
+      final signUpLink = find.textContaining(
+        'Ainda não tem uma conta?',
+        findRichText: true,
       );
+      await tester.ensureVisible(signUpLink);
+      await tester.tap(signUpLink);
       await tester.pumpAndSettle();
 
-      final header = tester.widget<Transform>(
-        find
-            .ancestor(of: find.text('TAREQO'), matching: find.byType(Transform))
-            .first,
-      );
-      expect(header.transform.getRow(1)[3], 0.0);
+      expect(find.byType(TextField), findsNWidgets(4));
+      final fields = find.byType(TextField);
+      for (var index = 0; index < fields.evaluate().length; index++) {
+        final field = fields.at(index);
+        await tester.ensureVisible(field);
+        await tester.enterText(field, 'Teste');
+        await tester.pump();
+      }
+      final submit = find.text('Cadastrar');
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+
+      expect(tester.getTopLeft(submit).dy, greaterThanOrEqualTo(0));
+      expect(tester.getBottomRight(submit).dy, lessThanOrEqualTo(600));
+      expect(tester.takeException(), isNull);
     },
   );
 }
