@@ -276,21 +276,32 @@ class _TenantGate extends ConsumerStatefulWidget {
 
 class _TenantGateState extends ConsumerState<_TenantGate> {
   bool _timedOut = false;
+  bool _tenantLoadInProgress = false;
   Timer? _timeoutTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    // Timeout de 3 segundos — mostrar tela de erro em vez de ficar preso.
-    _timeoutTimer = Timer(const Duration(seconds: 3), () {
-      if (mounted && !_timedOut) setState(() => _timedOut = true);
-    });
-  }
 
   @override
   void dispose() {
     _timeoutTimer?.cancel();
     super.dispose();
+  }
+
+  /// O tenant pode ser recarregado depois de enviar o pedido de acesso.
+  /// O timeout precisa acompanhar cada carregamento; um timer iniciado no
+  /// primeiro login não pode deixar um erro antigo aparecer numa atualização
+  /// que está a decorrer normalmente.
+  void _trackTenantLoading(bool isLoading) {
+    if (_tenantLoadInProgress == isLoading) return;
+    _tenantLoadInProgress = isLoading;
+    _timeoutTimer?.cancel();
+    _timedOut = false;
+
+    if (isLoading) {
+      _timeoutTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted && _tenantLoadInProgress) {
+          setState(() => _timedOut = true);
+        }
+      });
+    }
   }
 
   @override
@@ -301,6 +312,7 @@ class _TenantGateState extends ConsumerState<_TenantGate> {
     // cancela tudo no sign-out.
     ref.watch(employeesPollingProvider);
     final tenantAsync = ref.watch(myTenantProvider(widget.user.id));
+    _trackTenantLoading(tenantAsync.isLoading);
     // Se excedeu o timeout e ainda está loading, mostrar erro com retry.
     if (_timedOut && tenantAsync.isLoading) {
       return _TenantErrorScreen(
