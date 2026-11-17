@@ -68,22 +68,6 @@ abstract class AppLocalizations {
 
   final String localeName;
 
-  String get reportsComparisonHeading;
-  String reportsComparisonValue(String amount, String percent);
-  String get reportsComparisonNoBaseline;
-  String get notificationsTabAlerts;
-  String get notificationsNoActiveAlerts;
-  String get notificationsAlertsLoadError;
-  String get notificationAlertLabel;
-  String notificationOutOfStockTitle(String product);
-  String get notificationOutOfStockBody;
-  String notificationLowStockTitle(String product);
-  String notificationLowStockBody(String quantity);
-  String notificationExpiryExpiredTitle(String product);
-  String notificationExpiryExpiredBody(String quantity, String date);
-  String notificationExpirySoonTitle(String product);
-  String notificationExpirySoonBody(int days, String quantity, String date);
-
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
@@ -2558,6 +2542,24 @@ abstract class AppLocalizations {
   /// **'Registe vendas para ver o relatório.'**
   String get reportsEmptySubtitle;
 
+  /// No description provided for @reportsComparisonHeading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comparação com o período anterior'**
+  String get reportsComparisonHeading;
+
+  /// No description provided for @reportsComparisonValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'{amount} · {percent} vs. período anterior'**
+  String reportsComparisonValue(String amount, String percent);
+
+  /// No description provided for @reportsComparisonNoBaseline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem dados do período anterior para comparar.'**
+  String get reportsComparisonNoBaseline;
+
   /// No description provided for @reportsSalesPerDay.
   ///
   /// In pt, this message translates to:
@@ -4751,7 +4753,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationNoNotificationsHint.
   ///
   /// In pt, this message translates to:
-  /// **'As notificações de facturas aparecerão aqui.'**
+  /// **'Avisos da conta e da loja aparecerão aqui.'**
   String get notificationNoNotificationsHint;
 
   /// No description provided for @notificationTabAll.
@@ -4765,6 +4767,78 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não lidas'**
   String get notificationTabUnread;
+
+  /// No description provided for @notificationsTabAlerts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alertas activos'**
+  String get notificationsTabAlerts;
+
+  /// No description provided for @notificationsNoActiveAlerts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não há alertas activos nesta loja.'**
+  String get notificationsNoActiveAlerts;
+
+  /// No description provided for @notificationsAlertsLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar os alertas da loja.'**
+  String get notificationsAlertsLoadError;
+
+  /// No description provided for @notificationAlertLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alerta'**
+  String get notificationAlertLabel;
+
+  /// No description provided for @notificationOutOfStockTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem stock: {product}'**
+  String notificationOutOfStockTitle(String product);
+
+  /// No description provided for @notificationOutOfStockBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este produto está sem stock.'**
+  String get notificationOutOfStockBody;
+
+  /// No description provided for @notificationLowStockTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Stock baixo: {product}'**
+  String notificationLowStockTitle(String product);
+
+  /// No description provided for @notificationLowStockBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Restam {quantity}.'**
+  String notificationLowStockBody(String quantity);
+
+  /// No description provided for @notificationExpiryExpiredTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto vencido: {product}'**
+  String notificationExpiryExpiredTitle(String product);
+
+  /// No description provided for @notificationExpiryExpiredBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lote vencido; stock: {quantity}. Validade: {date}.'**
+  String notificationExpiryExpiredBody(String quantity, String date);
+
+  /// No description provided for @notificationExpirySoonTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade próxima: {product}'**
+  String notificationExpirySoonTitle(String product);
+
+  /// No description provided for @notificationExpirySoonBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lote vence em {days} dias; stock: {quantity}. Validade: {date}.'**
+  String notificationExpirySoonBody(int days, String quantity, String date);
 
   /// No description provided for @notificationTitle.
   ///

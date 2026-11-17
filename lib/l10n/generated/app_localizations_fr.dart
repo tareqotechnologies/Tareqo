@@ -9,72 +9,6 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get reportsComparisonHeading =>
-      'Comparaison avec la période précédente';
-
-  @override
-  String reportsComparisonValue(String amount, String percent) {
-    return '$amount · $percent vs. période précédente';
-  }
-
-  @override
-  String get reportsComparisonNoBaseline =>
-      'Aucune donnée de la période précédente à comparer.';
-
-  @override
-  String get notificationsTabAlerts => 'Alertes actives';
-
-  @override
-  String get notificationsNoActiveAlerts =>
-      'Aucune alerte active pour ce magasin.';
-
-  @override
-  String get notificationsAlertsLoadError =>
-      'Impossible de charger les alertes de ce magasin.';
-
-  @override
-  String get notificationAlertLabel => 'Alerte';
-
-  @override
-  String notificationOutOfStockTitle(String product) {
-    return 'Rupture de stock : $product';
-  }
-
-  @override
-  String get notificationOutOfStockBody =>
-      'Ce produit est en rupture de stock.';
-
-  @override
-  String notificationLowStockTitle(String product) {
-    return 'Stock faible : $product';
-  }
-
-  @override
-  String notificationLowStockBody(String quantity) {
-    return 'Stock restant : $quantity.';
-  }
-
-  @override
-  String notificationExpiryExpiredTitle(String product) {
-    return 'Produit expiré : $product';
-  }
-
-  @override
-  String notificationExpiryExpiredBody(String quantity, String date) {
-    return 'Lot expiré ; stock : $quantity. Expiration : $date.';
-  }
-
-  @override
-  String notificationExpirySoonTitle(String product) {
-    return 'Expiration proche : $product';
-  }
-
-  @override
-  String notificationExpirySoonBody(int days, String quantity, String date) {
-    return 'Lot expire dans $days jours ; stock : $quantity. Expiration : $date.';
-  }
-
-  @override
   String get onboardingTitle => 'Bienvenue !';
 
   @override
@@ -1488,6 +1422,19 @@ class AppLocalizationsFr extends AppLocalizations {
       'Enregistrez des ventes pour voir le rapport.';
 
   @override
+  String get reportsComparisonHeading =>
+      'Comparaison avec la période précédente';
+
+  @override
+  String reportsComparisonValue(String amount, String percent) {
+    return '$amount · $percent vs. période précédente';
+  }
+
+  @override
+  String get reportsComparisonNoBaseline =>
+      'Aucune donnée de la période précédente à comparer.';
+
+  @override
   String get reportsSalesPerDay => 'Ventes par jour';
 
   @override
@@ -2809,6 +2756,59 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get notificationTabUnread => 'Non lues';
+
+  @override
+  String get notificationsTabAlerts => 'Alertes actives';
+
+  @override
+  String get notificationsNoActiveAlerts =>
+      'Aucune alerte active pour ce magasin.';
+
+  @override
+  String get notificationsAlertsLoadError =>
+      'Impossible de charger les alertes de ce magasin.';
+
+  @override
+  String get notificationAlertLabel => 'Alerte';
+
+  @override
+  String notificationOutOfStockTitle(String product) {
+    return 'Rupture de stock : $product';
+  }
+
+  @override
+  String get notificationOutOfStockBody =>
+      'Ce produit est en rupture de stock.';
+
+  @override
+  String notificationLowStockTitle(String product) {
+    return 'Stock faible : $product';
+  }
+
+  @override
+  String notificationLowStockBody(String quantity) {
+    return 'Stock restant : $quantity.';
+  }
+
+  @override
+  String notificationExpiryExpiredTitle(String product) {
+    return 'Produit expiré : $product';
+  }
+
+  @override
+  String notificationExpiryExpiredBody(String quantity, String date) {
+    return 'Lot expiré ; stock : $quantity. Expiration : $date.';
+  }
+
+  @override
+  String notificationExpirySoonTitle(String product) {
+    return 'Expiration proche : $product';
+  }
+
+  @override
+  String notificationExpirySoonBody(int days, String quantity, String date) {
+    return 'Lot expire dans $days jours ; stock : $quantity. Expiration : $date.';
+  }
 
   @override
   String get notificationTitle => 'Notifications';

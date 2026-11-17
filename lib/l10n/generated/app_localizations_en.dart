@@ -9,70 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get reportsComparisonHeading => 'Compared with the previous period';
-
-  @override
-  String reportsComparisonValue(String amount, String percent) {
-    return '$amount · $percent vs. previous period';
-  }
-
-  @override
-  String get reportsComparisonNoBaseline =>
-      'No previous-period data to compare.';
-
-  @override
-  String get notificationsTabAlerts => 'Active alerts';
-
-  @override
-  String get notificationsNoActiveAlerts =>
-      'There are no active alerts for this store.';
-
-  @override
-  String get notificationsAlertsLoadError =>
-      'Could not load this store\'s alerts.';
-
-  @override
-  String get notificationAlertLabel => 'Alert';
-
-  @override
-  String notificationOutOfStockTitle(String product) {
-    return 'Out of stock: $product';
-  }
-
-  @override
-  String get notificationOutOfStockBody => 'This product is out of stock.';
-
-  @override
-  String notificationLowStockTitle(String product) {
-    return 'Low stock: $product';
-  }
-
-  @override
-  String notificationLowStockBody(String quantity) {
-    return 'Remaining stock: $quantity.';
-  }
-
-  @override
-  String notificationExpiryExpiredTitle(String product) {
-    return 'Expired product: $product';
-  }
-
-  @override
-  String notificationExpiryExpiredBody(String quantity, String date) {
-    return 'Expired lot; stock: $quantity. Expiry: $date.';
-  }
-
-  @override
-  String notificationExpirySoonTitle(String product) {
-    return 'Expiring soon: $product';
-  }
-
-  @override
-  String notificationExpirySoonBody(int days, String quantity, String date) {
-    return 'Lot expires in $days days; stock: $quantity. Expiry: $date.';
-  }
-
-  @override
   String get onboardingTitle => 'Welcome!';
 
   @override
@@ -1464,6 +1400,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportsEmptySubtitle => 'Record sales to see the report.';
 
   @override
+  String get reportsComparisonHeading => 'Compared with the previous period';
+
+  @override
+  String reportsComparisonValue(String amount, String percent) {
+    return '$amount · $percent vs. previous period';
+  }
+
+  @override
+  String get reportsComparisonNoBaseline =>
+      'No previous-period data to compare.';
+
+  @override
   String get reportsSalesPerDay => 'Sales per day';
 
   @override
@@ -2758,6 +2706,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationTabUnread => 'Unread';
+
+  @override
+  String get notificationsTabAlerts => 'Active alerts';
+
+  @override
+  String get notificationsNoActiveAlerts =>
+      'There are no active alerts for this store.';
+
+  @override
+  String get notificationsAlertsLoadError =>
+      'Could not load this store\'s alerts.';
+
+  @override
+  String get notificationAlertLabel => 'Alert';
+
+  @override
+  String notificationOutOfStockTitle(String product) {
+    return 'Out of stock: $product';
+  }
+
+  @override
+  String get notificationOutOfStockBody => 'This product is out of stock.';
+
+  @override
+  String notificationLowStockTitle(String product) {
+    return 'Low stock: $product';
+  }
+
+  @override
+  String notificationLowStockBody(String quantity) {
+    return 'Remaining stock: $quantity.';
+  }
+
+  @override
+  String notificationExpiryExpiredTitle(String product) {
+    return 'Expired product: $product';
+  }
+
+  @override
+  String notificationExpiryExpiredBody(String quantity, String date) {
+    return 'Expired lot; stock: $quantity. Expiry: $date.';
+  }
+
+  @override
+  String notificationExpirySoonTitle(String product) {
+    return 'Expiring soon: $product';
+  }
+
+  @override
+  String notificationExpirySoonBody(int days, String quantity, String date) {
+    return 'Lot expires in $days days; stock: $quantity. Expiry: $date.';
+  }
 
   @override
   String get notificationTitle => 'Notifications';

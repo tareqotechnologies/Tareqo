@@ -9,70 +9,6 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
-  String get reportsComparisonHeading => 'Comparação com o período anterior';
-
-  @override
-  String reportsComparisonValue(String amount, String percent) {
-    return '$amount · $percent vs. período anterior';
-  }
-
-  @override
-  String get reportsComparisonNoBaseline =>
-      'Sem dados do período anterior para comparar.';
-
-  @override
-  String get notificationsTabAlerts => 'Alertas activos';
-
-  @override
-  String get notificationsNoActiveAlerts =>
-      'Não há alertas activos nesta loja.';
-
-  @override
-  String get notificationsAlertsLoadError =>
-      'Não foi possível carregar os alertas da loja.';
-
-  @override
-  String get notificationAlertLabel => 'Alerta';
-
-  @override
-  String notificationOutOfStockTitle(String product) {
-    return 'Sem stock: $product';
-  }
-
-  @override
-  String get notificationOutOfStockBody => 'Este produto está sem stock.';
-
-  @override
-  String notificationLowStockTitle(String product) {
-    return 'Stock baixo: $product';
-  }
-
-  @override
-  String notificationLowStockBody(String quantity) {
-    return 'Restam $quantity.';
-  }
-
-  @override
-  String notificationExpiryExpiredTitle(String product) {
-    return 'Produto vencido: $product';
-  }
-
-  @override
-  String notificationExpiryExpiredBody(String quantity, String date) {
-    return 'Lote vencido; stock: $quantity. Validade: $date.';
-  }
-
-  @override
-  String notificationExpirySoonTitle(String product) {
-    return 'Validade próxima: $product';
-  }
-
-  @override
-  String notificationExpirySoonBody(int days, String quantity, String date) {
-    return 'Lote vence em $days dias; stock: $quantity. Validade: $date.';
-  }
-
-  @override
   String get onboardingTitle => 'Bem-vindo!';
 
   @override
@@ -1483,6 +1419,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportsEmptySubtitle => 'Registe vendas para ver o relatório.';
 
   @override
+  String get reportsComparisonHeading => 'Comparação com o período anterior';
+
+  @override
+  String reportsComparisonValue(String amount, String percent) {
+    return '$amount · $percent vs. período anterior';
+  }
+
+  @override
+  String get reportsComparisonNoBaseline =>
+      'Sem dados do período anterior para comparar.';
+
+  @override
   String get reportsSalesPerDay => 'Vendas por dia';
 
   @override
@@ -2801,6 +2749,58 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get notificationTabUnread => 'Não lidas';
+
+  @override
+  String get notificationsTabAlerts => 'Alertas activos';
+
+  @override
+  String get notificationsNoActiveAlerts =>
+      'Não há alertas activos nesta loja.';
+
+  @override
+  String get notificationsAlertsLoadError =>
+      'Não foi possível carregar os alertas da loja.';
+
+  @override
+  String get notificationAlertLabel => 'Alerta';
+
+  @override
+  String notificationOutOfStockTitle(String product) {
+    return 'Sem stock: $product';
+  }
+
+  @override
+  String get notificationOutOfStockBody => 'Este produto está sem stock.';
+
+  @override
+  String notificationLowStockTitle(String product) {
+    return 'Stock baixo: $product';
+  }
+
+  @override
+  String notificationLowStockBody(String quantity) {
+    return 'Restam $quantity.';
+  }
+
+  @override
+  String notificationExpiryExpiredTitle(String product) {
+    return 'Produto vencido: $product';
+  }
+
+  @override
+  String notificationExpiryExpiredBody(String quantity, String date) {
+    return 'Lote vencido; stock: $quantity. Validade: $date.';
+  }
+
+  @override
+  String notificationExpirySoonTitle(String product) {
+    return 'Validade próxima: $product';
+  }
+
+  @override
+  String notificationExpirySoonBody(int days, String quantity, String date) {
+    return 'Lote vence em $days dias; stock: $quantity. Validade: $date.';
+  }
 
   @override
   String get notificationTitle => 'Notificações';
