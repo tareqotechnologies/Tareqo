@@ -76,6 +76,7 @@
 .intro .eyebrow,.platform-inner>.eyebrow{justify-content:center}
 .intro h2,.platform-inner h2{margin-top:20px;font-size:clamp(46px,6vw,72px);font-weight:540;letter-spacing:-.075em}
 .section-copy{max-width:650px;margin-top:22px;font-size:17px;line-height:1.7}
+.app-version{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:9px;margin:22px auto 0;color:var(--muted);font-size:12px}.app-version strong{color:var(--ink);font-weight:600}.app-version span[data-build-label]{padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:10px}
 .proof-points{max-width:1040px;gap:42px;margin:68px auto 0}
 .proof-points article{gap:16px;padding-top:20px;border-color:#dfe3ea}
 .proof-points h3{font-size:14px;font-weight:620}
