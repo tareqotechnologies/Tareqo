@@ -18,7 +18,9 @@ void main() {
       expect(
         authRedirectUrl(
           isWeb: true,
-          baseUri: Uri.parse('https://tareqotechnologies.github.io/Tareqo/app/'),
+          baseUri: Uri.parse(
+            'https://tareqotechnologies.github.io/Tareqo/app/',
+          ),
         ),
         'https://tareqotechnologies.github.io/Tareqo/app/',
       );
