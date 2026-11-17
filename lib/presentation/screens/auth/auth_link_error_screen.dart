@@ -64,7 +64,8 @@ class _AuthLinkErrorScreenState extends State<AuthLinkErrorScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _message = 'Não foi possível reenviar agora. Tente novamente mais tarde.';
+        _message =
+            'Não foi possível reenviar agora. Tente novamente mais tarde.';
       });
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -90,7 +91,9 @@ class _AuthLinkErrorScreenState extends State<AuthLinkErrorScreen> {
               ),
               const SizedBox(height: 20),
               Text(
-                expired ? 'Este link expirou' : 'Não foi possível confirmar o email',
+                expired
+                    ? 'Este link expirou'
+                    : 'Não foi possível confirmar o email',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
@@ -132,9 +135,7 @@ class _AuthLinkErrorScreenState extends State<AuthLinkErrorScreen> {
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const AuthGate(),
-                  ),
+                  MaterialPageRoute<void>(builder: (_) => const AuthGate()),
                   (_) => false,
                 ),
                 child: const Text('Voltar ao início'),
