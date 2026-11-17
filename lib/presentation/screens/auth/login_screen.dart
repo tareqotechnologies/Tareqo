@@ -91,14 +91,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _confirmController = TextEditingController();
   final _nameController = TextEditingController();
 
-  /// Parallax do Large Title (item 4.5 do plano UI/UX, docs/pt/21): o
-  /// header (logo + TAREQO + tagline) desliza a MEIA velocidade do
-  /// conteúdo durante o scroll — profundidade iOS. O [Transform.translate]
-  /// não participa do layout: em repouso (offset 0) a página é
-  /// pixel-idêntica à v4; rolando, o formulário sobe por cima do header
-  /// (pintado depois na coluna).
   final _scrollController = ScrollController();
-  double _headerParallax = 0;
 
   bool _isSignUpMode = false;
   bool _isSubmitting = false;
@@ -106,14 +99,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscureConfirm = true;
 
   @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -122,23 +108,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  /// Progresso do parallax (4.5): o header acompanha o scroll a 0.5×.
-  /// Com `disableAnimations` (acessibilidade) o movimento é desligado —
-  /// o header rola à velocidade normal e nada se move "sozinho".
-  void _onScroll() {
-    final parallax = MediaQuery.disableAnimationsOf(context)
-        ? 0.0
-        : _scrollController.offset * 0.5;
-    if (parallax != _headerParallax) {
-      setState(() => _headerParallax = parallax);
-    }
-  }
-
   Future<void> _openForgotPassword() async {
     await showAppSheet<void>(
       context,
       builder: (_) => const ForgotPasswordSheet(),
     );
+  }
+
+  void _toggleAuthMode() {
+    FocusScope.of(context).unfocus();
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
+    setState(() {
+      _isSignUpMode = !_isSignUpMode;
+      _confirmController.clear();
+    });
   }
 
   Future<void> _submit() async {
@@ -263,6 +246,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Center(
         child: SingleChildScrollView(
           controller: _scrollController,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.xxl,
             vertical: AppSpacing.xl,
@@ -273,61 +257,54 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // ── Header com parallax (4.5): Large Title da escala
-                // (`displaySmall` 34/w300, tracking negativo) — a
-                // "primeira impressão" do plano. O bloco desliza a
-                // meia velocidade do conteúdo; o formulário sobe por
-                // cima (pintado depois). Em repouso, translate 0 —
-                // layout/pixels idênticos ao login anterior.
-                Transform.translate(
-                  offset: Offset(0, _headerParallax),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // ── Logo ──
-                      // Marca em superfície limpa: o ícone oficial sem
-                      // brilho, halo ou sombra colorida.
-                      Center(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(AppRadius.xl),
-                          child: Image.asset(
-                            'assets/branding/icon_official.png',
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.contain,
-                          ),
+                // O cabeçalho participa no fluxo normal da rolagem para
+                // nunca se sobrepor aos campos, mesmo com o teclado aberto.
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ── Logo ──
+                    // Marca em superfície limpa: o ícone oficial sem
+                    // brilho, halo ou sombra colorida.
+                    Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                        child: Image.asset(
+                          'assets/branding/icon_official.png',
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.contain,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xl),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
 
-                      // ── Título + subtítulo ──
-                      Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            'TAREQO',
-                            textAlign: TextAlign.center,
-                            style: AppTypography.display.copyWith(
-                              fontWeight: FontWeight.w400,
-                              letterSpacing: 5,
-                              color: palette.textPrimary,
-                            ),
+                    // ── Título + subtítulo ──
+                    Center(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'TAREQO',
+                          textAlign: TextAlign.center,
+                          style: AppTypography.display.copyWith(
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 5,
+                            color: palette.textPrimary,
                           ),
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        _isSignUpMode
-                            ? l10n.loginSubtitleSignUp
-                            : l10n.loginTagline,
-                        textAlign: TextAlign.center,
-                        style: AppTypography.bodyMedium.copyWith(
-                          color: palette.textSecondary,
-                        ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      _isSignUpMode
+                          ? l10n.loginSubtitleSignUp
+                          : l10n.loginTagline,
+                      textAlign: TextAlign.center,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: palette.textSecondary,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 40),
 
@@ -468,10 +445,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: TextButton(
                     onPressed: _isSubmitting
                         ? null
-                        : () => setState(() {
-                            _isSignUpMode = !_isSignUpMode;
-                            _confirmController.clear();
-                          }),
+                        : _toggleAuthMode,
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
@@ -573,6 +547,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       onSubmitted: onSubmitted,
+      scrollPadding: const EdgeInsets.only(bottom: 120),
       // Texto digitado = bodyLarge (16) — o mesmo do corpo dos formulários.
       style: AppTypography.bodyLarge.copyWith(color: palette.textPrimary),
       cursorColor: palette.accent,
