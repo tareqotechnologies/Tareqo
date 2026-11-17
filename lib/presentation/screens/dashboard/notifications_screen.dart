@@ -6,20 +6,28 @@ import '../../../core/i18n/l10n_ext.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/formatters.dart';
+import '../../../core/utils/quantity.dart';
 import '../../../domain/entities/invoice_notification.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
+import '../../controllers/business_alerts_provider.dart';
 import '../../controllers/notification_providers.dart';
 import '../../controllers/admin_message_providers.dart';
 import '../../../domain/entities/admin_message.dart';
+import '../../navigation/app_routes.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/premium_decor.dart';
+import '../products/product_form_sheets.dart' show EditProductSheet;
+import '../shell/app_shell.dart' show AppSection;
 
 /// Tela de notificações do tenant — lista as notificações de facturas
 /// e mensagens do super admin com visual minimalista e detalhes em bottom sheet.
+enum _NotificationFilter { all, unread, alerts }
+
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
@@ -29,7 +37,7 @@ class NotificationsScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
-  bool _showUnreadOnly = false;
+  _NotificationFilter _filter = _NotificationFilter.all;
 
   @override
   Widget build(BuildContext context) {
@@ -38,21 +46,34 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final l10n = context.l10n;
     final notificationsAsync = ref.watch(tenantNotificationsProvider);
     final adminMessagesAsync = ref.watch(tenantAdminMessagesProvider);
+    final businessAlertsAsync = ref.watch(businessAlertsProvider);
 
     final allNotifications =
         notificationsAsync.value ?? const <InvoiceNotification>[];
     final allAdminMessages = adminMessagesAsync.value ?? const <AdminMessage>[];
-    final filteredNotifications = _showUnreadOnly
+    final allBusinessAlerts =
+        businessAlertsAsync.value ?? const <BusinessAlert>[];
+    final filteredNotifications = _filter == _NotificationFilter.unread
         ? allNotifications.where((n) => !n.isRead).toList()
+        : _filter == _NotificationFilter.alerts
+        ? const <InvoiceNotification>[]
         : allNotifications;
-    final filteredAdminMessages = _showUnreadOnly
+    final filteredAdminMessages = _filter == _NotificationFilter.unread
         ? allAdminMessages.where((m) => !m.isRead).toList()
+        : _filter == _NotificationFilter.alerts
+        ? const <AdminMessage>[]
         : allAdminMessages;
+    final filteredBusinessAlerts =
+        _filter == _NotificationFilter.alerts ||
+            _filter == _NotificationFilter.all
+        ? allBusinessAlerts
+        : const <BusinessAlert>[];
     final unreadInvoiceCount = allNotifications.where((n) => !n.isRead).length;
     final unreadAdminCount = allAdminMessages.where((m) => !m.isRead).length;
     final unreadCount = unreadInvoiceCount + unreadAdminCount;
+    final activeAlertCount = allBusinessAlerts.length;
     final totalCount =
-        filteredNotifications.length + filteredAdminMessages.length;
+        allNotifications.length + allAdminMessages.length + activeAlertCount;
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,
     );
@@ -60,7 +81,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     return AppPage(
       backgroundColor: scheme.surface,
       title: l10n.notificationTitle,
-      badge: unreadCount,
+      badge: unreadCount + activeAlertCount,
       useSafeArea: false,
       actions: [
         if (unreadCount > 0)
@@ -88,16 +109,27 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               children: [
                 _Pill(
                   label: l10n.notificationTabAll,
-                  selected: !_showUnreadOnly,
+                  selected: _filter == _NotificationFilter.all,
                   count: totalCount,
-                  onTap: () => setState(() => _showUnreadOnly = false),
+                  onTap: () =>
+                      setState(() => _filter = _NotificationFilter.all),
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 _Pill(
                   label: l10n.notificationTabUnread,
-                  selected: _showUnreadOnly,
+                  selected: _filter == _NotificationFilter.unread,
                   count: unreadCount,
-                  onTap: () => setState(() => _showUnreadOnly = true),
+                  onTap: () =>
+                      setState(() => _filter = _NotificationFilter.unread),
+                  accent: true,
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                _Pill(
+                  label: l10n.notificationsTabAlerts,
+                  selected: _filter == _NotificationFilter.alerts,
+                  count: activeAlertCount,
+                  onTap: () =>
+                      setState(() => _filter = _NotificationFilter.alerts),
                   accent: true,
                 ),
               ],
@@ -110,18 +142,42 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               onRefresh: () async {
                 await ref.read(tenantNotificationsProvider.notifier).refresh();
                 await ref.read(tenantAdminMessagesProvider.notifier).refresh();
+                ref.invalidate(businessAlertsProvider);
+                await ref.read(businessAlertsProvider.future);
               },
-              child: totalCount == 0 && !notificationsAsync.isLoading
+              child:
+                  (filteredNotifications.isEmpty &&
+                          filteredAdminMessages.isEmpty &&
+                          filteredBusinessAlerts.isEmpty) &&
+                      !notificationsAsync.isLoading &&
+                      !adminMessagesAsync.isLoading &&
+                      !businessAlertsAsync.isLoading
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [
                         const SizedBox(height: 120),
                         EmptyState(
-                          icon: Icons.notifications_none_outlined,
-                          title: _showUnreadOnly
+                          icon: businessAlertsAsync.hasError
+                              ? Icons.cloud_off_outlined
+                              : _filter == _NotificationFilter.alerts
+                              ? Icons.check_circle_outline
+                              : Icons.notifications_none_outlined,
+                          title: _filter == _NotificationFilter.unread
                               ? l10n.notificationTabUnread
+                              : _filter == _NotificationFilter.alerts
+                              ? l10n.notificationsTabAlerts
                               : l10n.notificationNoNotifications,
-                          subtitle: l10n.notificationNoNotificationsHint,
+                          subtitle: _filter == _NotificationFilter.alerts
+                              ? businessAlertsAsync.hasError
+                                    ? l10n.notificationsAlertsLoadError
+                                    : l10n.notificationsNoActiveAlerts
+                              : l10n.notificationNoNotificationsHint,
+                          actionLabel: businessAlertsAsync.hasError
+                              ? l10n.commonRetry
+                              : null,
+                          onAction: businessAlertsAsync.hasError
+                              ? () => ref.invalidate(businessAlertsProvider)
+                              : null,
                         ),
                       ],
                     )
@@ -136,13 +192,19 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       itemCount: _buildItemList(
                         filteredAdminMessages,
                         filteredNotifications,
-                        notificationsAsync.isLoading,
+                        filteredBusinessAlerts,
+                        notificationsAsync.isLoading ||
+                            adminMessagesAsync.isLoading ||
+                            businessAlertsAsync.isLoading,
                       ).length,
                       itemBuilder: (context, index) {
                         final item = _buildItemList(
                           filteredAdminMessages,
                           filteredNotifications,
-                          notificationsAsync.isLoading,
+                          filteredBusinessAlerts,
+                          notificationsAsync.isLoading ||
+                              adminMessagesAsync.isLoading ||
+                              businessAlertsAsync.isLoading,
                         )[index];
                         return item;
                       },
@@ -154,13 +216,28 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
   }
 
-  /// Build a flat list of widgets from admin messages + invoice notifications.
+  /// Builds the current alerts and persistent notifications in one inbox.
   List<Widget> _buildItemList(
     List<AdminMessage> adminMessages,
     List<InvoiceNotification> notifications,
+    List<BusinessAlert> businessAlerts,
     bool isLoading,
   ) {
     final items = <Widget>[];
+
+    for (var i = 0; i < businessAlerts.length; i++) {
+      items.add(
+        _NotificationTile.businessAlert(
+          alert: businessAlerts[i],
+          l10n: context.l10n,
+          onTap: () => _openBusinessAlert(businessAlerts[i]),
+          showDivider:
+              i < businessAlerts.length - 1 ||
+              adminMessages.isNotEmpty ||
+              notifications.isNotEmpty,
+        ),
+      );
+    }
 
     for (var i = 0; i < adminMessages.length; i++) {
       items.add(
@@ -200,6 +277,17 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     }
 
     return items;
+  }
+
+  void _openBusinessAlert(BusinessAlert alert) {
+    if (ref.read(currentAccessLevelProvider) == UserAccessLevel.employee) {
+      AppNavigator.pushSection(context, AppSection.products);
+      return;
+    }
+    showAppSheet<void>(
+      context,
+      builder: (_) => EditProductSheet(product: alert.product),
+    );
   }
 
   // ── Detail bottom sheets ──
@@ -390,11 +478,73 @@ class _NotificationTile extends StatelessWidget {
     );
   }
 
+  factory _NotificationTile.businessAlert({
+    required BusinessAlert alert,
+    required AppLocalizations l10n,
+    required VoidCallback onTap,
+    bool showDivider = true,
+  }) {
+    final product = alert.product;
+    final quantity = Quantity.format(
+      alert.quantity,
+      unitLabel: product.vendaPorFracao ? product.unitLabel : null,
+      language: Formatters.currentLanguage,
+    );
+    final expiryDate = alert.expiryDate == null
+        ? ''
+        : Formatters.day(alert.expiryDate!);
+    final color = switch (alert.type) {
+      BusinessAlertType.outOfStock ||
+      BusinessAlertType.expired => AppColors.alertError,
+      BusinessAlertType.lowStock ||
+      BusinessAlertType.expiring => AppColors.neutralInfo,
+    };
+    final (icon, title, subtitle) = switch (alert.type) {
+      BusinessAlertType.outOfStock => (
+        Icons.remove_shopping_cart_outlined,
+        l10n.notificationOutOfStockTitle(product.name),
+        l10n.notificationOutOfStockBody,
+      ),
+      BusinessAlertType.lowStock => (
+        Icons.warning_amber_rounded,
+        l10n.notificationLowStockTitle(product.name),
+        l10n.notificationLowStockBody(quantity),
+      ),
+      BusinessAlertType.expired => (
+        Icons.event_busy_outlined,
+        l10n.notificationExpiryExpiredTitle(product.name),
+        l10n.notificationExpiryExpiredBody(quantity, expiryDate),
+      ),
+      BusinessAlertType.expiring => (
+        Icons.event_outlined,
+        l10n.notificationExpirySoonTitle(product.name),
+        l10n.notificationExpirySoonBody(
+          alert.daysRemaining ?? 0,
+          quantity,
+          expiryDate,
+        ),
+      ),
+    };
+
+    return _NotificationTile(
+      icon: icon,
+      iconBg: color,
+      title: title,
+      subtitle: subtitle,
+      time: null,
+      typeLabel: l10n.notificationAlertLabel,
+      typeColor: color,
+      isRead: false,
+      onTap: onTap,
+      showDivider: showDivider,
+    );
+  }
+
   final IconData icon;
   final Color iconBg;
   final String title;
   final String subtitle;
-  final DateTime time;
+  final DateTime? time;
   final String typeLabel;
   final Color typeColor;
   final bool isRead;
@@ -486,13 +636,15 @@ class _NotificationTile extends StatelessWidget {
                         const SizedBox(height: AppSpacing.xs),
                         Row(
                           children: [
-                            Text(
-                              _formatTime(time, l10n),
-                              style: AppTypography.bodySmall.copyWith(
-                                color: scheme.onSurfaceVariant,
+                            if (time != null) ...[
+                              Text(
+                                _formatTime(time!, l10n),
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: AppSpacing.xs),
+                              const SizedBox(width: AppSpacing.xs),
+                            ],
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppSpacing.xs,

@@ -640,6 +640,15 @@
   "reportsLoadError": "Could not load the report.",
   "reportsEmptyTitle": "No sales in the period",
   "reportsEmptySubtitle": "Record sales to see the report.",
+  "reportsComparisonHeading": "Compared with the previous period",
+  "reportsComparisonValue": "{amount} · {percent} vs. previous period",
+  "@reportsComparisonValue": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "percent": { "type": "String" }
+    }
+  },
+  "reportsComparisonNoBaseline": "No previous-period data to compare.",
   "reportsSalesPerDay": "Sales per day",
   "reportsRevenueLabel": "{amount} sold",
   "@reportsRevenueLabel": {
@@ -1341,9 +1350,49 @@
   "notificationMarkAllRead": "Mark all as read",
   "notificationMarkRead": "Mark as read",
   "notificationNoNotifications": "No notifications",
-  "notificationNoNotificationsHint": "You'll see invoice notifications here.",
+  "notificationNoNotificationsHint": "Account and store notices will appear here.",
   "notificationTabAll": "All",
   "notificationTabUnread": "Unread",
+  "notificationsTabAlerts": "Active alerts",
+  "notificationsNoActiveAlerts": "There are no active alerts for this store.",
+  "notificationsAlertsLoadError": "Could not load this store's alerts.",
+  "notificationAlertLabel": "Alert",
+  "notificationOutOfStockTitle": "Out of stock: {product}",
+  "@notificationOutOfStockTitle": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "notificationOutOfStockBody": "This product is out of stock.",
+  "notificationLowStockTitle": "Low stock: {product}",
+  "@notificationLowStockTitle": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "notificationLowStockBody": "Remaining stock: {quantity}.",
+  "@notificationLowStockBody": {
+    "placeholders": { "quantity": { "type": "String" } }
+  },
+  "notificationExpiryExpiredTitle": "Expired product: {product}",
+  "@notificationExpiryExpiredTitle": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "notificationExpiryExpiredBody": "Expired lot; stock: {quantity}. Expiry: {date}.",
+  "@notificationExpiryExpiredBody": {
+    "placeholders": {
+      "quantity": { "type": "String" },
+      "date": { "type": "String" }
+    }
+  },
+  "notificationExpirySoonTitle": "Expiring soon: {product}",
+  "@notificationExpirySoonTitle": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "notificationExpirySoonBody": "Lot expires in {days} days; stock: {quantity}. Expiry: {date}.",
+  "@notificationExpirySoonBody": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "quantity": { "type": "String" },
+      "date": { "type": "String" }
+    }
+  },
   "notificationTitle": "Notifications",
   "menuNotifications": "Notifications",
   "notificationSinceDaysAgo": "{count} days ago",

@@ -21,6 +21,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_menu_option.dart';
 import '../../widgets/app_page.dart';
+import '../../widgets/period_comparison_card.dart';
 
 /// Fluxo de caixa REAL do período seleccionado (entradas/saídas pagas),
 /// via [GetCashFlowUseCase] — o tab financeiro usava zeros fixos antes.
@@ -42,6 +43,24 @@ final advancedSalesReportProvider =
       return ref
           .watch(getSalesReportUseCaseProvider)
           .call(storeId: storeId, start: start, end: end);
+    });
+
+final advancedPreviousSalesReportProvider =
+    FutureProvider.family<SalesReport?, (String, String)>((ref, key) async {
+      final (storeId, periodKey) = key;
+      final range = _previousPeriodRange(periodKey, DateTime.now());
+      return ref
+          .watch(getSalesReportUseCaseProvider)
+          .call(storeId: storeId, start: range.$1, end: range.$2);
+    });
+
+final advancedPreviousCashFlowProvider =
+    FutureProvider.family<CashFlow?, (String, String)>((ref, key) async {
+      final (storeId, periodKey) = key;
+      final range = _previousPeriodRange(periodKey, DateTime.now());
+      return ref
+          .watch(getCashFlowUseCaseProvider)
+          .call(storeId: storeId, start: range.$1, end: range.$2);
     });
 
 /// Ecra de relatórios avançados — dashboards, filtros e exportação.
@@ -141,6 +160,12 @@ class _SalesReportTab extends ConsumerWidget {
         ? null
         : ref.watch(advancedSalesReportProvider((storeId, selectedPeriod)));
     final report = reportAsync?.value;
+    final previousReportAsync = storeId == null
+        ? null
+        : ref.watch(
+            advancedPreviousSalesReportProvider((storeId, selectedPeriod)),
+          );
+    final previousReport = previousReportAsync?.value;
 
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,
@@ -225,6 +250,26 @@ class _SalesReportTab extends ConsumerWidget {
           color: theme.income,
           fullWidth: true,
         ),
+        if (report != null &&
+            !(reportAsync?.hasError ?? false) &&
+            !(previousReportAsync?.hasError ?? false) &&
+            previousReport != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          PeriodComparisonCard(
+            metrics: [
+              PeriodComparisonMetric(
+                label: l10n.reportsRevenue,
+                currentCents: report.totalRevenueCents,
+                previousCents: previousReport.totalRevenueCents,
+              ),
+              PeriodComparisonMetric(
+                label: l10n.reportsProfit,
+                currentCents: report.totalProfitCents,
+                previousCents: previousReport.totalProfitCents,
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: AppSpacing.lg),
 
         // Mais vendidos do período (top 5 por quantidade) — mesmo padrão
@@ -402,6 +447,12 @@ class _FinancialReportTab extends ConsumerWidget {
         ? null
         : ref.watch(advancedReportCashFlowProvider((storeId, selectedPeriod)));
     final cashFlow = cashFlowAsync?.value;
+    final previousCashFlowAsync = storeId == null
+        ? null
+        : ref.watch(
+            advancedPreviousCashFlowProvider((storeId, selectedPeriod)),
+          );
+    final previousCashFlow = previousCashFlowAsync?.value;
 
     final horizontal = AppSpacing.pagePaddingForWidth(
       MediaQuery.sizeOf(context).width,
@@ -485,6 +536,21 @@ class _FinancialReportTab extends ConsumerWidget {
           color: scheme.primary,
           fullWidth: true,
         ),
+        if (cashFlow != null &&
+            !(cashFlowAsync?.hasError ?? false) &&
+            !(previousCashFlowAsync?.hasError ?? false) &&
+            previousCashFlow != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          PeriodComparisonCard(
+            metrics: [
+              PeriodComparisonMetric(
+                label: l10n.reportsKpiNetProfit,
+                currentCents: cashFlow.balanceCents,
+                previousCents: previousCashFlow.balanceCents,
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: AppSpacing.lg),
 
         // Comparativo de fluxo de caixa do período (dados reais).
@@ -927,6 +993,66 @@ class _PeriodChip extends StatelessWidget {
       return (DateTime(now.year, now.month), now);
     default: // 'Este Ano' (ou chave desconhecida)
       return (DateTime(now.year), now);
+  }
+}
+
+(DateTime, DateTime) _previousPeriodRange(String periodKey, DateTime now) {
+  final today = DateTime(now.year, now.month, now.day);
+  switch (periodKey) {
+    case 'Hoje':
+      final yesterday = today.subtract(const Duration(days: 1));
+      return (
+        yesterday,
+        yesterday.add(
+          Duration(
+            hours: now.hour,
+            minutes: now.minute,
+            seconds: now.second,
+            milliseconds: now.millisecond,
+            microseconds: now.microsecond,
+          ),
+        ),
+      );
+    case 'Esta Semana':
+      final currentStart = today.subtract(Duration(days: today.weekday - 1));
+      return (
+        currentStart.subtract(const Duration(days: 7)),
+        now.subtract(const Duration(days: 7)),
+      );
+    case 'Este Mês':
+      final previousStart = DateTime(now.year, now.month - 1, 1);
+      final lastDay = DateTime(now.year, now.month, 0).day;
+      final matchingDay = now.day < lastDay ? now.day : lastDay;
+      return (
+        previousStart,
+        DateTime(
+          previousStart.year,
+          previousStart.month,
+          matchingDay,
+          now.hour,
+          now.minute,
+          now.second,
+          now.millisecond,
+          now.microsecond,
+        ),
+      );
+    default: // Ano anterior até à data equivalente.
+      final previousStart = DateTime(now.year - 1);
+      final lastDay = DateTime(now.year, now.month + 1, 0).day;
+      final matchingDay = now.day < lastDay ? now.day : lastDay;
+      return (
+        previousStart,
+        DateTime(
+          now.year - 1,
+          now.month,
+          matchingDay,
+          now.hour,
+          now.minute,
+          now.second,
+          now.millisecond,
+          now.microsecond,
+        ),
+      );
   }
 }
 

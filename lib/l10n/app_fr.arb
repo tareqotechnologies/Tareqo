@@ -640,6 +640,15 @@
   "reportsLoadError": "Impossible de charger le rapport.",
   "reportsEmptyTitle": "Aucune vente sur la période",
   "reportsEmptySubtitle": "Enregistrez des ventes pour voir le rapport.",
+  "reportsComparisonHeading": "Comparaison avec la période précédente",
+  "reportsComparisonValue": "{amount} · {percent} vs. période précédente",
+  "@reportsComparisonValue": {
+    "placeholders": {
+      "amount": { "type": "String" },
+      "percent": { "type": "String" }
+    }
+  },
+  "reportsComparisonNoBaseline": "Aucune donnée de la période précédente à comparer.",
   "reportsSalesPerDay": "Ventes par jour",
   "reportsRevenueLabel": "{amount} vendus",
   "@reportsRevenueLabel": {
@@ -1341,9 +1350,49 @@
   "notificationMarkAllRead": "Tout marquer comme lu",
   "notificationMarkRead": "Marquer comme lu",
   "notificationNoNotifications": "Aucune notification",
-  "notificationNoNotificationsHint": "Les notifications de factures apparaîtront ici.",
+  "notificationNoNotificationsHint": "Les avis du compte et du magasin apparaîtront ici.",
   "notificationTabAll": "Toutes",
   "notificationTabUnread": "Non lues",
+  "notificationsTabAlerts": "Alertes actives",
+  "notificationsNoActiveAlerts": "Aucune alerte active pour ce magasin.",
+  "notificationsAlertsLoadError": "Impossible de charger les alertes de ce magasin.",
+  "notificationAlertLabel": "Alerte",
+  "notificationOutOfStockTitle": "Rupture de stock : {product}",
+  "@notificationOutOfStockTitle": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "notificationOutOfStockBody": "Ce produit est en rupture de stock.",
+  "notificationLowStockTitle": "Stock faible : {product}",
+  "@notificationLowStockTitle": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "notificationLowStockBody": "Stock restant : {quantity}.",
+  "@notificationLowStockBody": {
+    "placeholders": { "quantity": { "type": "String" } }
+  },
+  "notificationExpiryExpiredTitle": "Produit expiré : {product}",
+  "@notificationExpiryExpiredTitle": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "notificationExpiryExpiredBody": "Lot expiré ; stock : {quantity}. Expiration : {date}.",
+  "@notificationExpiryExpiredBody": {
+    "placeholders": {
+      "quantity": { "type": "String" },
+      "date": { "type": "String" }
+    }
+  },
+  "notificationExpirySoonTitle": "Expiration proche : {product}",
+  "@notificationExpirySoonTitle": {
+    "placeholders": { "product": { "type": "String" } }
+  },
+  "notificationExpirySoonBody": "Lot expire dans {days} jours ; stock : {quantity}. Expiration : {date}.",
+  "@notificationExpirySoonBody": {
+    "placeholders": {
+      "days": { "type": "int" },
+      "quantity": { "type": "String" },
+      "date": { "type": "String" }
+    }
+  },
   "notificationTitle": "Notifications",
   "menuNotifications": "Notifications",
   "notificationSinceDaysAgo": "Il y a {count} jours",

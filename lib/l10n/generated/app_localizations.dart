@@ -68,6 +68,22 @@ abstract class AppLocalizations {
 
   final String localeName;
 
+  String get reportsComparisonHeading;
+  String reportsComparisonValue(String amount, String percent);
+  String get reportsComparisonNoBaseline;
+  String get notificationsTabAlerts;
+  String get notificationsNoActiveAlerts;
+  String get notificationsAlertsLoadError;
+  String get notificationAlertLabel;
+  String notificationOutOfStockTitle(String product);
+  String get notificationOutOfStockBody;
+  String notificationLowStockTitle(String product);
+  String notificationLowStockBody(String quantity);
+  String notificationExpiryExpiredTitle(String product);
+  String notificationExpiryExpiredBody(String quantity, String date);
+  String notificationExpirySoonTitle(String product);
+  String notificationExpirySoonBody(int days, String quantity, String date);
+
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }

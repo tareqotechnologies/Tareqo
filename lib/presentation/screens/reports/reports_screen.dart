@@ -28,6 +28,7 @@ import '../../widgets/premium_decor.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/status_chip.dart';
 import '../../widgets/store_scoped_content.dart';
+import '../../widgets/period_comparison_card.dart';
 
 /// Tela de relatórios — lucro bruto, margem, produtos mais vendidos e
 /// vendas por dia, com seletor de período.
@@ -52,6 +53,10 @@ class ReportsScreen extends ConsumerWidget {
     final activeStoreId = user == null
         ? null
         : ref.watch(activeStoreIdProvider(user.id));
+    final previousReportAsync = activeStoreId == null
+        ? null
+        : ref.watch(previousSalesReportProvider(activeStoreId));
+    final previousReport = previousReportAsync?.value;
     final stores = tenant == null
         ? const <Store>[]
         : ref.watch(storesProvider(tenant.id)).value ?? const <Store>[];
@@ -112,6 +117,9 @@ class ReportsScreen extends ConsumerWidget {
           // W8: puxar para atualizar — recarrega o relatório.
           onRefresh: () async {
             ref.invalidate(salesReportProvider);
+            if (activeStoreId != null) {
+              ref.invalidate(previousSalesReportProvider(activeStoreId));
+            }
             await Future<void>.delayed(const Duration(milliseconds: 300));
           },
           child: ListView(
@@ -181,6 +189,25 @@ class ReportsScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
+              if (report != null &&
+                  !reportAsync.hasError &&
+                  previousReport != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                PeriodComparisonCard(
+                  metrics: [
+                    PeriodComparisonMetric(
+                      label: l10n.reportsRevenue,
+                      currentCents: report.totalRevenueCents,
+                      previousCents: previousReport.totalRevenueCents,
+                    ),
+                    PeriodComparisonMetric(
+                      label: l10n.reportsProfit,
+                      currentCents: report.totalProfitCents,
+                      previousCents: previousReport.totalProfitCents,
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: AppSpacing.xl),
               SectionHeader(title: l10n.reportsBestSellers),
               const SizedBox(height: AppSpacing.sm),

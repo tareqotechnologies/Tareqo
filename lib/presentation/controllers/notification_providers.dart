@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
 import '../../domain/entities/invoice_notification.dart';
+import 'business_alerts_provider.dart';
+import 'admin_message_providers.dart';
 import '../../domain/usecases/get_tenant_notifications_use_case.dart';
 import '../../domain/usecases/mark_notification_as_read_use_case.dart';
 import '../../domain/usecases/mark_all_notifications_as_read_use_case.dart';
@@ -60,15 +62,11 @@ class TenantNotificationsNotifier
 
 /// Estado: contagem de notificações não lidas do tenant logado.
 final unreadNotificationsCountProvider = FutureProvider<int>((ref) async {
-  final user = ref.watch(authStateProvider).value;
-  if (user == null) return 0;
-
-  // Usa o myTenantProvider existente para obter o tenantId.
-  final tenantAsync = ref.watch(myTenantProvider(user.id));
-  final tenant = tenantAsync.value;
-  if (tenant == null) return 0;
-
-  final notifications =
-      ref.watch(tenantNotificationsProvider).value ?? const [];
-  return notifications.where((n) => !n.isRead).length;
+  final notifications = await ref.watch(tenantNotificationsProvider.future);
+  final unreadAdminCount = await ref.watch(
+    unreadAdminMessagesCountProvider.future,
+  );
+  final activeAlertCount = ref.watch(businessAlertsProvider).value?.length ?? 0;
+  final unreadInvoiceCount = notifications.where((n) => !n.isRead).length;
+  return unreadInvoiceCount + unreadAdminCount + activeAlertCount;
 });

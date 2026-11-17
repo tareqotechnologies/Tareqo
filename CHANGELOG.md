@@ -3,6 +3,13 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.6.6+37] — 2026-11-17
+
+### Melhorado
+- Relatórios de vendas e fluxo de caixa com comparação ao período anterior.
+- Centro de notificações reúne avisos de facturas, mensagens administrativas e alertas activos de stock e validade.
+- Contador global de notificações inclui alertas activos da loja.
+
 ## [2.6.5+36] — 2026-11-17
 
 ### Corrigido e melhorado

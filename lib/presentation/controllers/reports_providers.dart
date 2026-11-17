@@ -52,6 +52,24 @@ final salesReportProvider =
       SalesReportNotifier.new,
     );
 
+/// Sales metrics for the matching interval immediately before the selected
+/// reporting period. The all-time view has no comparison interval.
+final previousSalesReportProvider = FutureProvider.autoDispose
+    .family<SalesReport?, String>((ref, storeId) async {
+      final period = ref.watch(reportPeriodProvider);
+      if (period == ReportPeriod.all) return null;
+
+      final now = DateTime.now();
+      final previousRange = _previousReportRange(period, now);
+      return ref
+          .read(getSalesReportUseCaseProvider)
+          .call(
+            storeId: storeId,
+            start: previousRange.$1,
+            end: previousRange.$2,
+          );
+    });
+
 class SalesReportNotifier extends AsyncNotifier<SalesReport> {
   @override
   Future<SalesReport> build() {
@@ -62,12 +80,7 @@ class SalesReportNotifier extends AsyncNotifier<SalesReport> {
         ? null
         : ref.watch(activeStoreIdProvider(user.id));
 
-    final start = switch (period) {
-      ReportPeriod.today => startOfDay(now),
-      ReportPeriod.week => startOfDay(now.subtract(const Duration(days: 7))),
-      ReportPeriod.month => DateTime(now.year, now.month, 1),
-      ReportPeriod.all => DateTime(2000),
-    };
+    final start = _currentReportStart(period, now);
 
     if (storeId == null) {
       return Future.value(
@@ -88,5 +101,58 @@ class SalesReportNotifier extends AsyncNotifier<SalesReport> {
   Future<void> refresh() async {
     ref.invalidateSelf();
     await future;
+  }
+}
+
+DateTime _currentReportStart(ReportPeriod period, DateTime now) =>
+    switch (period) {
+      ReportPeriod.today => startOfDay(now),
+      // Seven calendar days including today (rather than eight dates).
+      ReportPeriod.week => startOfDay(now.subtract(const Duration(days: 6))),
+      ReportPeriod.month => DateTime(now.year, now.month, 1),
+      ReportPeriod.all => DateTime(2000),
+    };
+
+(DateTime, DateTime) _previousReportRange(ReportPeriod period, DateTime now) {
+  switch (period) {
+    case ReportPeriod.today:
+      final yesterday = DateTime(now.year, now.month, now.day - 1);
+      return (
+        yesterday,
+        yesterday.add(
+          Duration(
+            hours: now.hour,
+            minutes: now.minute,
+            seconds: now.second,
+            milliseconds: now.millisecond,
+            microseconds: now.microsecond,
+          ),
+        ),
+      );
+    case ReportPeriod.week:
+      final currentStart = _currentReportStart(ReportPeriod.week, now);
+      return (
+        currentStart.subtract(const Duration(days: 7)),
+        now.subtract(const Duration(days: 7)),
+      );
+    case ReportPeriod.month:
+      final previousStart = DateTime(now.year, now.month - 1, 1);
+      final lastDay = DateTime(now.year, now.month, 0).day;
+      final matchingDay = now.day < lastDay ? now.day : lastDay;
+      return (
+        previousStart,
+        DateTime(
+          previousStart.year,
+          previousStart.month,
+          matchingDay,
+          now.hour,
+          now.minute,
+          now.second,
+          now.millisecond,
+          now.microsecond,
+        ),
+      );
+    case ReportPeriod.all:
+      throw StateError('All-time reports do not have a previous period.');
   }
 }
