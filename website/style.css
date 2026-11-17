@@ -77,6 +77,7 @@
 .intro h2,.platform-inner h2{margin-top:20px;font-size:clamp(46px,6vw,72px);font-weight:540;letter-spacing:-.075em}
 .section-copy{max-width:650px;margin-top:22px;font-size:17px;line-height:1.7}
 .app-version{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:9px;margin:22px auto 0;color:var(--muted);font-size:12px}.app-version strong{color:var(--ink);font-weight:600}.app-version span[data-build-label]{padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:10px}
+.faq-section{padding:112px 0;background:#f5f6f8}.faq-inner{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(42px,8vw,100px);align-items:start}.faq-heading .eyebrow{margin-bottom:22px}.faq-heading h2{font-size:clamp(42px,5.4vw,64px);font-weight:540;line-height:1.02;letter-spacing:-.075em}.faq-heading>p:last-child{max-width:360px;margin-top:20px;color:var(--muted);font-size:14px;line-height:1.7}.faq-list{border-top:1px solid #dfe3ea}.faq-item{border-bottom:1px solid #dfe3ea}.faq-item summary{position:relative;padding:21px 34px 21px 0;cursor:pointer;list-style:none;font-size:14px;font-weight:570;line-height:1.5}.faq-item summary::-webkit-details-marker{display:none}.faq-item summary::after{position:absolute;right:2px;top:18px;content:'+';color:#6f7888;font-size:20px;font-weight:400}.faq-item[open] summary::after{content:'−'}.faq-item p{max-width:600px;margin:-4px 32px 22px 0;color:var(--muted);font-size:13px;line-height:1.75}
 .proof-points{max-width:1040px;gap:42px;margin:68px auto 0}
 .proof-points article{gap:16px;padding-top:20px;border-color:#dfe3ea}
 .proof-points h3{font-size:14px;font-weight:620}
@@ -122,6 +123,7 @@
   .screen-card{width:min(360px,100%)}
   .dashboard-card,.finance-card{width:min(560px,100%)}
   .platform-section{padding:92px 0}
+  .faq-section{padding:82px 0}.faq-inner{grid-template-columns:1fr;gap:34px}
   .demo-section{padding:82px 0}
   .closing{padding-top:88px;padding-bottom:90px}
 }
@@ -146,6 +148,7 @@
   .screen-card{width:min(330px,100%);border-radius:18px}
   .dashboard-card,.finance-card{width:100%;border-radius:18px}
   .platform-section{padding:76px 0}
+  .faq-section{padding:70px 0}.faq-heading h2{font-size:clamp(42px,11vw,56px)}.faq-item summary{font-size:13px}
   .platform-grid{margin-top:36px}
   .platform-card{min-height:unset;padding:18px}
   .demo-section{padding:70px 0}
