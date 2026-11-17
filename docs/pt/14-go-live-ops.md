@@ -10,8 +10,8 @@
 
 - ✓ Keystore de upload gerado (`android/app/upload-keystore.jks`, gitignored)
  + `android/key.properties` — assinatura Android pronta.
-- ✓ `release.yml` (Android → Play *Internal testing*) pronto e disparado
- por tag `v*`.
+- ✓ `downloads.yml` publica APK Android e pacote Windows em GitHub Releases
+ por tag `v*`; Google Play Internal fica manual e não é acionado por tags.
 - ✓ iOS construído no **Codemagic** (`codemagic.yaml`, workflow
  `ios-appstore`) — também automático em tags `v*`. O GitHub Actions já não
  faz builds de iOS.

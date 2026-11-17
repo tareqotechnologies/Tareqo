@@ -46,7 +46,7 @@ flutter build appbundle --flavor prod --release \
 
 - **JDK 17** (o `build.gradle.kts` usa `JavaVersion.VERSION_17` — o CI usa Temurin 17);
 - **Android SDK** (instalado pelo Android Studio); `compileSdk`, `minSdk` e `targetSdk` seguem os padrões do Flutter (`flutter.compileSdkVersion` etc.);
-- Para publicar: **keystore de assinatura** (ver abaixo) e conta de desenvolvedor no **Google Play Console** (taxa única de US$ 25).
+- Para distribuir o APK por GitHub Releases: **keystore de assinatura** (ver abaixo). Conta de desenvolvedor e configuração da Google Play só são necessárias se essa distribuição for activada.
 
 ### Assinatura de release
 
@@ -99,29 +99,24 @@ flutter run --flavor dev --dart-define-from-file=env/dev.env
 > - **Ação quando o v10 sair:** subir `sentry_flutter` para `^10.0.0` no `pubspec.yaml` — o aviso desaparece sozinho.
 > - **Histórico (Aug 8):** até 17 de set, o projeto rodava em modo legado (`android.builtInKotlin=false`, adicionado pelo migrator do 3.44). Nesse modo o `mobile_scanner` quebrava o build release (o FGP aplicava KGP ao subprojeto depois da avaliação do script e o `GeneratedPluginRegistrant` não achava a classe do plugin). A migração para built-in Kotlin (Sep 18) desbloqueou o build de release.
 
-### Publicação via CI (Fastlane)
+### Distribuição externa por GitHub Releases
 
-O passo final antes de publicar é o workflow **`.github/workflows/release.yml`**, disparado por uma tag `v*`:
+A distribuição normal é feita pelo workflow **`.github/workflows/downloads.yml`**. Depois de actualizar `version` no `pubspec.yaml`, enviar a tag da mesma versão cria uma GitHub Release com o APK Android e o pacote Windows:
 
 ```bash
-git tag v1.1.0
-git push origin v1.1.0
+git tag v2.6.5+36
+git push origin v2.6.5+36
 ```
 
-O workflow roda `flutter analyze` + `flutter test` e, em seguida, o **Fastlane** (`fastlane/Fastfile`, lane `deploy`), que:
+O workflow valida as credenciais de produção, assina o APK com `KEYSTORE_BASE64`, compila o flavor `prod` e anexa `tareqo-android.apk` à release. Também prepara `TAREQO_SETUP.exe` para Windows. O site de downloads aponta automaticamente para os artefactos da release mais recente.
 
-1. valida os defines/credenciais de produção (fail-fast — `UI.user_error!` se faltar algum secret);
-2. descodifica o upload keystore do secret `KEYSTORE_BASE64` e monta `android/key.properties`;
-3. builda o **AAB** (`--flavor prod --release --obfuscate --split-debug-info=build/symbols`);
-4. faz upload para o track **Internal testing** do Play Console (service account do secret `PLAY_SERVICE_ACCOUNT_JSON`).
+**Secrets exigidos** (GitHub → Settings → Secrets and variables → Actions): `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD` e `KEY_ALIAS` (opcional, predefinido como `upload`).
 
-**Secrets exigidos** (GitHub → Settings → Secrets and variables → Actions): `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `PLAY_SERVICE_ACCOUNT_JSON`, e `SENTRY_DSN` (opcional).
-
-**Pré-requisito único manual:** o app `com.tareqo.tareqo` tem de existir no Play Console com o primeiro AAB/APK enviado e o **Play App Signing** ativado (upload key registada). Depois disso, todas as atualizações podem sair pela tag `v*`. Para enviar os símbolos Dart ao Sentry: `sentry-cli debug-files upload --org <org> --project <proj> build/symbols`.
+Enviar uma tag `v*` **não publica na Google Play**. O workflow `.github/workflows/release.yml` pode ser iniciado manualmente para o track Internal testing quando essa distribuição for activada. A compilação AAB e o envio ao Sentry são passos separados.
 
 #### Preparação dos secrets do GitHub
 
-Crie os secrets em **GitHub → Settings → Secrets and variables → Actions** antes do primeiro `v*`:
+Crie os secrets em **GitHub → Settings → Secrets and variables → Actions** antes de enviar uma tag de distribuição:
 
 | Secret | Valor | Como obter |
 | --- | --- | --- |
@@ -130,10 +125,6 @@ Crie os secrets em **GitHub → Settings → Secrets and variables → Actions**
 | `KEY_ALIAS` | alias da chave | `android/key.properties` (padrão `upload`) |
 | `SUPABASE_URL_PROD` | URL do projeto de produção | Supabase → Project Settings → API |
 | `SUPABASE_ANON_KEY_PROD` | anon key (pública por design — RLS é a segurança) | Supabase → Project Settings → API |
-| `PLAY_SERVICE_ACCOUNT_JSON` | JSON da service account do Play | Play Console → Setup and testing → API access → criar/associar service account (papel de upload/release do app) → gerar chave JSON → colar o conteúdo na íntegra |
-| `SENTRY_DSN` (opcional) | DSN do Sentry | Sentry → Settings → Projects → Client Keys (DSN) |
-
-> **Atenção:** A **service account** precisa de permissão de **upload/release** no app (papel "Release manager" do app no Play Console). O secret `PLAY_SERVICE_ACCOUNT_JSON` é o ficheiro JSON da chave na íntegra.
 
 ---
 
@@ -250,7 +241,7 @@ Para gerar artefatos **publicáveis** no CI, decodifique o keystore de um secret
 
 - [ ] `flutter analyze` e `flutter test` verdes;
 - [ ] `flutter doctor -v` sem pendências críticas na plataforma alvo;
-- [ ] **Android:** Application ID definitivo + `key.properties` + AAB testado no Play Console (Internal testing);
+- [ ] **Android:** Application ID definitivo + chave de assinatura verificada + APK validado; GitHub Release publicada;
 - [ ] **iOS:** team de assinatura no Xcode + arquivo testado no TestFlight;
 - [ ] **Windows/Web:** build release local validado e artefato distribuível;
 - [ ] **SaaS:** `--dart-define` apontando para o Supabase de produção;

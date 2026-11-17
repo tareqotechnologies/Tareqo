@@ -76,7 +76,7 @@ La signature de release lit `android/key.properties` (jamais versionné — voir
 - **Attention : PKCS12 (JDK 9+) :** le store et la clé partagent UN SEUL mot de passe — `storePassword` et `keyPassword` doivent être égaux ;
 - **Sans `key.properties`** (CI/dev) : le build de release retombe sur le keystore **debug** — non publiable. **Garde Gradle :** un build `prodRelease` **échoue** à la configuration sans `key.properties` (un AAB de production ne peut jamais être signé debug) ;
 - **Play Console :** publiez le premier AAB avec cette clé, activez *Play App Signing*, et enregistrez l'empreinte SHA-256 de la clé d'upload dans *Setup → App integrity* ;
-- **CI/CD :** `.github/workflows/ci.yml` ne construit que le flavor **dev** (validation). Les artefacts publiables viennent de `.github/workflows/release.yml` (tag `v*` → **Fastlane**) : il décode le keystore depuis le secret `KEYSTORE_BASE64`, construit l'AAB prod (`--obfuscate --split-debug-info`) et l'upload vers **Internal testing** (compte de service depuis `PLAY_SERVICE_ACCOUNT_JSON`). Voir `docs/pt/13-build-e-publicacao.md` pour la liste complète des secrets.
+- **CI/CD :** `.github/workflows/ci.yml` valide chaque push. L'envoi d'un tag `v*` lance `.github/workflows/downloads.yml`, qui publie l'APK Android signé et le paquet Windows dans une GitHub Release. Google Play Internal testing reste séparé et manuel (`.github/workflows/release.yml`). Voir `docs/pt/13-build-e-publicacao.md` pour les secrets.
 
 Pour inspecter la clé :
 

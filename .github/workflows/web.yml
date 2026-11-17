@@ -9,7 +9,7 @@
 #   Settings → Secrets and variables → Actions: SUPABASE_URL_PROD e
 #   SUPABASE_ANON_KEY_PROD (os mesmos usados por downloads.yml/release.yml).
 #
-# Dispara em pushes na branch de deploy que alterem o conteúdo publicado
+# Dispara em pushes nas branches de produção que alterem o conteúdo publicado
 # (`lib/`, `web/`, `pubspec.*`), em tags `v*` (acompanha a
 # release — o filtro de paths não se aplica a tags) e manualmente via
 # workflow_dispatch. Só corre com os secrets acima configurados — sem eles
@@ -19,7 +19,8 @@ name: Web (GitHub Pages)
 on:
   push:
     branches:
-      # Branch de produção do GitHub Pages: cada push publica.
+      # Main e branch de deploy mantêm a mesma app publicada.
+      - main
       - feat/ui-standardization-telas
     tags:
       - "v*"

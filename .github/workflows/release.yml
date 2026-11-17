@@ -1,6 +1,8 @@
-# Release — passo final antes da publicação (auditoria 2.4).
+# Release Google Play — manual, desactivado para distribuição normal.
 #
-# Disparado por tag `v*` (ex.: `git tag v1.1.0 && git push --tags`):
+# As versões distribuídas fora da Play Store são publicadas como GitHub
+# Releases pelo workflow `.github/workflows/downloads.yml` ao enviar `v*`.
+# Este workflow só corre quando iniciado manualmente:
 # 1. test — valida a suíte completa (flutter analyze + flutter test);
 # 2. deploy — Fastlane: builda o AAB de PRODUÇÃO (--flavor prod, ofuscado,
 #    assinado com o upload keystore) e faz upload para o track
@@ -17,12 +19,10 @@
 # Atenção: Pré-requisito único (manual): o app `com.tareqo.tareqo`
 # precisa de existir no Play Console com o primeiro AAB/APK enviado e o
 # "Play App Signing" ativado (ver docs/13-build-e-publicacao.md).
-name: Release (Play Internal)
+name: Google Play Internal (manual)
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: read

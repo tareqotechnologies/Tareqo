@@ -202,14 +202,9 @@ Then run `flutter build linux --release` (requires GTK/clang) and `flutter build
 3. **build** — `flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env` (dev-only, compile validation — debug signing) + APK artifact;
 4. **sql-check** — `scripts/sql_check.sh` against a real Postgres 16 service (schema apply + super admin + RLS by store + **atomic RPC execution**).
 
-**`.github/workflows/release.yml`** (tag `v*` — publishable AAB): runs analyze + test, then **Fastlane** (`fastlane/Fastfile`, lane `deploy`):
+**`.github/workflows/downloads.yml`** publishes the signed Android APK and Windows package as a GitHub Release whenever a `v*` tag is pushed. It requires `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `KEYSTORE_BASE64`, and `KEYSTORE_PASSWORD` (`KEY_ALIAS` is optional). A tag does not publish to Google Play.
 
-1. validates the production defines/secrets (fail-fast);
-2. decodes the upload keystore from `KEYSTORE_BASE64` and writes `android/key.properties`;
-3. builds the **prod AAB** (`--flavor prod --release --obfuscate --split-debug-info=build/symbols`);
-4. uploads to the **Internal testing** track via the service account from `PLAY_SERVICE_ACCOUNT_JSON`.
-
-> Secrets required: `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `PLAY_SERVICE_ACCOUNT_JSON` (+ optional `SENTRY_DSN`). Full setup: `docs/pt/13-build-e-publicacao.md`.
+**`.github/workflows/release.yml`** is a separate manual workflow for Google Play Internal testing. Full setup: `docs/pt/13-build-e-publicacao.md`.
 
 ---
 
@@ -217,7 +212,7 @@ Then run `flutter build linux --release` (requires GTK/clang) and `flutter build
 
 - [ ] `flutter analyze` and `flutter test` green;
 - [ ] `flutter doctor -v` with no critical issues for the target platform;
-- [ ] **Android:** final Application ID + `key.properties` + AAB tested in Play Console (Internal testing);
+- [ ] **Android:** final Application ID + signing key verified; APK attached to the GitHub Release;
 - [ ] **iOS:** signing team in Xcode + archive tested on TestFlight;
 - [ ] **Windows/Web:** local release build validated and artifact distributable;
 - [ ] **SaaS:** prod flavor + `env/prod.env` pointing to the production Supabase project;

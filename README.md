@@ -96,7 +96,7 @@ flutter analyze
 flutter test
 ```
 
-O projeto tem **mais de 280 testes** (unitários de domínio, repositórios, providers e widgets) e CI no GitHub Actions (analyze → test+coverage → build APK dev → SQL/RLS check). Publicação via tag `v*` → Fastlane (ver `docs/pt/13-build-e-publicacao.md`).
+O projecto tem testes unitários de domínio, repositórios, providers e widgets, com CI no GitHub Actions (análise → testes → build de validação → SQL/RLS). Para distribuição externa, enviar uma tag `v*` publica o APK Android e o instalador Windows numa GitHub Release. O workflow de Google Play fica manual (ver `docs/pt/13-build-e-publicacao.md`).
 
 ## Documentação
 

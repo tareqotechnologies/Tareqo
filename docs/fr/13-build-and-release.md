@@ -202,14 +202,9 @@ Puis exécutez `flutter build linux --release` (exige GTK/clang) et `flutter bui
 3. **build** — `flutter build apk --release --flavor dev --dart-define-from-file=env/dev.env` (dev uniquement, validation de compilation — signature debug) + artefact APK ;
 4. **sql-check** — `scripts/sql_check.sh` contre un vrai service Postgres 16 (application du schéma + super admin + RLS par magasin + **exécution des RPC atomiques**).
 
-**`.github/workflows/release.yml`** (tag `v*` — AAB publiable) : exécute analyze + test, puis **Fastlane** (`fastlane/Fastfile`, lane `deploy`) :
+**`.github/workflows/downloads.yml`** publie l'APK Android signé et le paquet Windows dans une GitHub Release lorsqu'un tag `v*` est envoyé. Secrets requis : `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `KEYSTORE_BASE64` et `KEYSTORE_PASSWORD` (`KEY_ALIAS` est facultatif). Un tag ne publie rien sur Google Play.
 
-1. valide les defines/secrets de production (fail-fast) ;
-2. décode le keystore d'upload depuis `KEYSTORE_BASE64` et écrit `android/key.properties` ;
-3. construit l'**AAB prod** (`--flavor prod --release --obfuscate --split-debug-info=build/symbols`) ;
-4. uploade vers le track **Internal testing** via le compte de service de `PLAY_SERVICE_ACCOUNT_JSON`.
-
-> Secrets requis : `SUPABASE_URL_PROD`, `SUPABASE_ANON_KEY_PROD`, `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `PLAY_SERVICE_ACCOUNT_JSON` (+ `SENTRY_DSN` facultatif). Configuration complète : `docs/pt/13-build-e-publicacao.md`.
+**`.github/workflows/release.yml`** est un workflow manuel séparé pour Google Play Internal testing. Configuration complète : `docs/pt/13-build-e-publicacao.md`.
 
 ---
 
@@ -217,7 +212,7 @@ Puis exécutez `flutter build linux --release` (exige GTK/clang) et `flutter bui
 
 - [ ] `flutter analyze` et `flutter test` verts ;
 - [ ] `flutter doctor -v` sans problème critique pour la plateforme cible ;
-- [ ] **Android :** Application ID final + `key.properties` + AAB testé dans Play Console (Internal testing) ;
+- [ ] **Android :** Application ID final + clé de signature vérifiée ; APK joint à la GitHub Release ;
 - [ ] **iOS :** équipe de signature dans Xcode + archive testée sur TestFlight ;
 - [ ] **Windows/Web :** build de release local validé et artefact distribuable ;
 - [ ] **SaaS :** flavor prod + `env/prod.env` pointant vers le projet Supabase de production ;

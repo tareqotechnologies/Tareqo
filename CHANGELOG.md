@@ -3,6 +3,15 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.6.5+36] — 2026-11-17
+
+### Corrigido e melhorado
+- Corrige o falso aviso de falha de rede ao actualizar o pedido de acesso.
+- Login e cadastro adaptam-se a ecrãs pequenos; o cabeçalho não se sobrepõe aos campos durante a rolagem e o teclado fecha ao arrastar.
+- Links web de confirmação e recuperação regressam ao endereço publicado. Links expirados oferecem reenvio da confirmação.
+- Publicação manual do APK Android e do instalador Windows em GitHub Releases; tags não enviam builds para a Google Play.
+- Site e app web sincronizados com a `main` de produção.
+
 ## [2.6.4+35] — 2026-11-15
 
 ### Corrigido

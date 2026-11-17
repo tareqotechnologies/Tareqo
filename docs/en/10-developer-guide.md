@@ -76,7 +76,7 @@ Release signing reads `android/key.properties` (never versioned — see `.gitign
 - **Warning: PKCS12 (JDK 9+):** the store and the key share a SINGLE password — `storePassword` and `keyPassword` must be equal;
 - **Without `key.properties`** (CI/dev): the release build falls back to the **debug** keystore — not publishable. **Gradle guard:** a `prodRelease` build **fails** at configuration time without `key.properties` (a production AAB can never be debug-signed);
 - **Play Console:** publish the first AAB with this key, enable *Play App Signing*, and register the upload key's SHA-256 fingerprint in *Setup → App integrity*;
-- **CI/CD:** `.github/workflows/ci.yml` builds only the **dev** flavor (validation). Publishable artifacts come from `.github/workflows/release.yml` (tag `v*` → **Fastlane**): it decodes the keystore from the `KEYSTORE_BASE64` secret, builds the prod AAB (`--obfuscate --split-debug-info`) and uploads to **Internal testing** (service account from `PLAY_SERVICE_ACCOUNT_JSON`). See `docs/pt/13-build-e-publicacao.md` for the full secrets list.
+- **CI/CD:** `.github/workflows/ci.yml` validates each push. Sending a `v*` tag runs `.github/workflows/downloads.yml`, which publishes the signed Android APK and Windows package as a GitHub Release. Google Play Internal testing is separate and manual (`.github/workflows/release.yml`). See `docs/pt/13-build-e-publicacao.md` for the secrets list.
 
 To inspect the key:
 
