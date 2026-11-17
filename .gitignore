@@ -67,6 +67,11 @@ env/db.env
 # Nunca versionar: a senha do dono foi rotacionada (Sep 2026) após exposição
 # em chat; o novo valor vive apenas aqui, localmente.
 env/test_accounts.env
+# Segredos locais do bot Python de WhatsApp.
+whatsapp_bot/.env
+whatsapp_bot/.venv/
+# Metadados de execução/autenticação do Supabase CLI.
+supabase/.temp/
 # QR SVG de matrícula de MFA (contém o secret TOTP como imagem) — nunca versionar
 env/mfa_qr_*.svg
 # Visual Studio (pasta .vs/ local do Windows)

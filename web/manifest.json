@@ -2,6 +2,7 @@
     "name": "TAREQO",
     "short_name": "TAREQO",
     "start_url": ".",
+    "display_override": ["fullscreen", "standalone"],
     "display": "standalone",
     "background_color": "#F0F1F5",
     "theme_color": "#0A0E15",

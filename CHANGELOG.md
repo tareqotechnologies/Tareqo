@@ -3,6 +3,14 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.6.4+35] — 2026-11-15
+
+### Corrigido
+- **Build Windows no MSVC 14.51**: silenciado o aviso de descontinuação de coroutines experimentais do `local_auth_windows` que interrompia a compilação.
+- **Instalador no site**: o workflow oficial gera o instalador autónomo `TAREQO_SETUP.exe` e o publica com o APK no release, no mesmo link usado pelo site.
+- **Release mais recente**: inclui os ajustes de ícone/nome do Tareqo, correção do fecho de caixa, integração WhatsApp e filtro de matérias-primas nas receitas.
+- **Identidade visual**: o aplicativo mantém a paleta preto e branco da versão atual.
+
 ## [2.5.0+30] — 2026-09-27
 
 ### Aplicação no live — DEV vs. PRODUÇÃO (migrações 34/35)
