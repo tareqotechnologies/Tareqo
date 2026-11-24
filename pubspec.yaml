@@ -16,7 +16,7 @@ dependencies:
 
   # --- Gerenciamento de estado (Riverpod 3) ---
   # Consumido pela camada de apresentação (providers, notifiers).
-  flutter_riverpod: ^3.4.2
+  flutter_riverpod: ^3.5.0
 
   # --- Injeção de dependência (Service Locator) ---
   # Registra datasources, repositórios e casos de uso no bootstrap.
