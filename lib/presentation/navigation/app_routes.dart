@@ -135,6 +135,10 @@ abstract final class AppRoutes {
     final name = settings.name;
     if (name == null) return null;
 
+    // Cold start por deep link de autenticação (`tareqo://callback?code=…`):
+    // o Flutter passa a URI completa como rota inicial. Tratamos-a como um
+    // AuthGate (que reage ao stream de sessão) em vez de "Rota não
+    // encontrada"; o [DeepLinkHandler] processa o callback em paralelo.
     final authError = _authCallbackError(name);
     if (authError != null) {
       return MaterialPageRoute<dynamic>(

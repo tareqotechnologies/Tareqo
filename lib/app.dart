@@ -41,18 +41,24 @@ class TareqoApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const AuthGate(),
-      // Cold start por deep link (ex.: `tareqo://callback?code=…`): o Flutter
-      // passa a URI completa como rota inicial. Sem isto, o Navigator tenta
-      // resolver `tareqo://callback?code=…` como rota nomeada e mostra
-      // "Rota não encontrada". Ignoramos a rota inicial e deixamos o
-      // [DeepLinkHandler] tratar o link (cold start + warm start).
-      onGenerateInitialRoutes: (initialRoute) => <Route<dynamic>>[
-        MaterialPageRoute<dynamic>(builder: (_) => const AuthGate()),
-      ],
       // U-09: rotas nomeadas para telas empurradas (Menu/Dashboard/
       // Marketplace/Suporte/…). As secções do shell continuam em
       // IndexedStack via `goTo(AppSection)` — sem rota.
-      onGenerateRoute: AppRoutes.onGenerateRoute,
+      onGenerateRoute: (settings) {
+        // Cold start por deep link de autenticação (`tareqo://callback?code=…`):
+        // o Flutter passa a URI completa como rota inicial. Tratamos-a como um
+        // AuthGate (que reage ao stream de sessão) em vez de "Rota não
+        // encontrada"; o [DeepLinkHandler] processa o callback em paralelo.
+        final name = settings.name;
+        final uri = name == null ? null : Uri.tryParse(name);
+        if (uri != null && DeepLinkHandler.isAuthCallbackUri(uri)) {
+          return MaterialPageRoute<dynamic>(
+            settings: settings,
+            builder: (_) => const AuthGate(),
+          );
+        }
+        return AppRoutes.onGenerateRoute(settings);
+      },
       onUnknownRoute: AppRoutes.unknownRoute,
       // O bloqueio biométrico vive no `builder` (acima do Navigator): cobre
       // também sheets/diálogos abertos quando o app é bloqueado em segundo
