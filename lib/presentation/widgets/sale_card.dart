@@ -10,6 +10,7 @@ import '../../domain/entities/sale.dart';
 import '../screens/sales/sale_detail_screen.dart';
 import 'app_page.dart' show HoverableTile;
 import 'focus_ring.dart';
+import 'smart_amount.dart';
 import 'semantics_composed.dart';
 
 /// Linha de venda no padrão do feed de atividade — ícone circular tinta,
@@ -110,8 +111,7 @@ class _SalesCardState extends State<SalesCard> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Título: método de pagamento — labelSmall para
-                              // reduzir o tamanho da fonte em relação ao card anterior.
+                              // Título: método de pagamento — labelMedium.
                               Text(
                                 _sale.paymentMethod.labelFor(l10n),
                                 maxLines: 1,
@@ -121,13 +121,13 @@ class _SalesCardState extends State<SalesCard> {
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.micro),
-                              // Referência + data — labelSmall discreto.
+                              // Referência + data — bodySmall discreto.
                               Text(
                                 '${Formatters.saleLabel(_sale.number)} · '
                                 '${Formatters.time(_sale.dateTime)}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppTypography.labelSmall.copyWith(
+                                style: AppTypography.bodySmall.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
@@ -136,19 +136,18 @@ class _SalesCardState extends State<SalesCard> {
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         // Total à direita — valor de linha de transação
-                        // (15/w500, tabular) em tinta: num histórico de
-                        // vendas um total nunca é "ganho/perda", por isso
-                        // as cores de alerta ficam fora da linha.
+                        // (15/w500, tabular) em tinta. [SmartAmount] é a
+                        // autoridade de renderização de dinheiro: encolhe
+                        // sem truncar e garante tabular.
                         Flexible(
                           child: Align(
                             alignment: Alignment.centerRight,
-                            child: Text(
-                              Formatters.currency(_sale.totalAmountCents),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            child: SmartAmount(
+                              cents: _sale.totalAmountCents,
                               style: AppTypography.amountInRow(
                                 theme.colorScheme.onSurface,
                               ),
+                              alignment: Alignment.centerRight,
                             ),
                           ),
                         ),

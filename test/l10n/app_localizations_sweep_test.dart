@@ -20,9 +20,9 @@ import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_fr.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
-/// Total de membros do catálogo: 1225 (1081 getters + 144 métodos).
-const int kTotalMembers = 1225;
-const int kTotalGetters = 1081;
+/// Total de membros do catálogo: 1224 (1080 getters + 144 métodos).
+const int kTotalMembers = 1224;
+const int kTotalGetters = 1080;
 const int kTotalMethods = 144;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
@@ -493,6 +493,7 @@ void main() {
         'productsFilterAll': l.productsFilterAll,
         'productsSearchHint': l.productsSearchHint,
         'productsLoadError': l.productsLoadError,
+        'productsCatalogSection': l.productsCatalogSection,
         'productsEmptyTitle': l.productsEmptyTitle,
         'productsEmptySubtitle': l.productsEmptySubtitle,
         'productsAddNew': l.productsAddNew,
@@ -528,8 +529,6 @@ void main() {
         'productsFilterInactive': l.productsFilterInactive,
         'productsTypeLabel': l.productsTypeLabel,
         'productsCategoryLabel': l.productsCategoryLabel,
-        'productsCategoryHint': l.productsCategoryHint,
-        'productsCategorySuggestions': l.productsCategorySuggestions,
         'productsCategoryError': l.productsCategoryError,
         'productsFilterCategory': l.productsFilterCategory,
         'productsFilterCategoryAll': l.productsFilterCategoryAll,
@@ -614,6 +613,7 @@ void main() {
         'purchasesSupplierLabel': l.purchasesSupplierLabel,
         'purchasesNoProductsTitle': l.purchasesNoProductsTitle,
         'purchasesNoProductsSubtitle': l.purchasesNoProductsSubtitle,
+        'purchasesItemsSection': l.purchasesItemsSection,
         'purchasesNoPurchasableTitle': l.purchasesNoPurchasableTitle,
         'purchasesNoPurchasableSubtitle': l.purchasesNoPurchasableSubtitle,
         'purchasesConfirm': l.purchasesConfirm,
@@ -829,7 +829,6 @@ void main() {
         'adminPlanRequested': l.adminPlanRequested,
         'adminPlanCurrent': l.adminPlanCurrent,
         'productsCodeLabel': l.productsCodeLabel,
-        'productsCodeHint': l.productsCodeHint,
         'productsCodeError': l.productsCodeError,
         'productsBarcodeLabel': l.productsBarcodeLabel,
         'productsBarcodeHint': l.productsBarcodeHint,
@@ -2018,6 +2017,7 @@ void main() {
         'productsFilterAll': l.productsFilterAll,
         'productsSearchHint': l.productsSearchHint,
         'productsLoadError': l.productsLoadError,
+        'productsCatalogSection': l.productsCatalogSection,
         'productsEmptyTitle': l.productsEmptyTitle,
         'productsEmptySubtitle': l.productsEmptySubtitle,
         'productsAddNew': l.productsAddNew,
@@ -2053,8 +2053,6 @@ void main() {
         'productsFilterInactive': l.productsFilterInactive,
         'productsTypeLabel': l.productsTypeLabel,
         'productsCategoryLabel': l.productsCategoryLabel,
-        'productsCategoryHint': l.productsCategoryHint,
-        'productsCategorySuggestions': l.productsCategorySuggestions,
         'productsCategoryError': l.productsCategoryError,
         'productsFilterCategory': l.productsFilterCategory,
         'productsFilterCategoryAll': l.productsFilterCategoryAll,
@@ -2139,6 +2137,7 @@ void main() {
         'purchasesSupplierLabel': l.purchasesSupplierLabel,
         'purchasesNoProductsTitle': l.purchasesNoProductsTitle,
         'purchasesNoProductsSubtitle': l.purchasesNoProductsSubtitle,
+        'purchasesItemsSection': l.purchasesItemsSection,
         'purchasesNoPurchasableTitle': l.purchasesNoPurchasableTitle,
         'purchasesNoPurchasableSubtitle': l.purchasesNoPurchasableSubtitle,
         'purchasesConfirm': l.purchasesConfirm,
@@ -2354,7 +2353,6 @@ void main() {
         'adminPlanRequested': l.adminPlanRequested,
         'adminPlanCurrent': l.adminPlanCurrent,
         'productsCodeLabel': l.productsCodeLabel,
-        'productsCodeHint': l.productsCodeHint,
         'productsCodeError': l.productsCodeError,
         'productsBarcodeLabel': l.productsBarcodeLabel,
         'productsBarcodeHint': l.productsBarcodeHint,
@@ -3543,6 +3541,7 @@ void main() {
         'productsFilterAll': l.productsFilterAll,
         'productsSearchHint': l.productsSearchHint,
         'productsLoadError': l.productsLoadError,
+        'productsCatalogSection': l.productsCatalogSection,
         'productsEmptyTitle': l.productsEmptyTitle,
         'productsEmptySubtitle': l.productsEmptySubtitle,
         'productsAddNew': l.productsAddNew,
@@ -3578,8 +3577,6 @@ void main() {
         'productsFilterInactive': l.productsFilterInactive,
         'productsTypeLabel': l.productsTypeLabel,
         'productsCategoryLabel': l.productsCategoryLabel,
-        'productsCategoryHint': l.productsCategoryHint,
-        'productsCategorySuggestions': l.productsCategorySuggestions,
         'productsCategoryError': l.productsCategoryError,
         'productsFilterCategory': l.productsFilterCategory,
         'productsFilterCategoryAll': l.productsFilterCategoryAll,
@@ -3664,6 +3661,7 @@ void main() {
         'purchasesSupplierLabel': l.purchasesSupplierLabel,
         'purchasesNoProductsTitle': l.purchasesNoProductsTitle,
         'purchasesNoProductsSubtitle': l.purchasesNoProductsSubtitle,
+        'purchasesItemsSection': l.purchasesItemsSection,
         'purchasesNoPurchasableTitle': l.purchasesNoPurchasableTitle,
         'purchasesNoPurchasableSubtitle': l.purchasesNoPurchasableSubtitle,
         'purchasesConfirm': l.purchasesConfirm,
@@ -3879,7 +3877,6 @@ void main() {
         'adminPlanRequested': l.adminPlanRequested,
         'adminPlanCurrent': l.adminPlanCurrent,
         'productsCodeLabel': l.productsCodeLabel,
-        'productsCodeHint': l.productsCodeHint,
         'productsCodeError': l.productsCodeError,
         'productsBarcodeLabel': l.productsBarcodeLabel,
         'productsBarcodeHint': l.productsBarcodeHint,

@@ -14,6 +14,26 @@ List<int> _pemToDer(String pem) {
   return base64Decode(b64);
 }
 
+DateTime? _extractNotAfter(List<int> der) {
+  final times = <DateTime>[];
+  for (var i = 0; i < der.length - 15; i++) {
+    if (der[i] == 0x17 && der[i + 1] == 13) {
+      final str = ascii.decode(der.sublist(i + 2, i + 2 + 13));
+      if (str.endsWith('Z')) {
+        final year = int.parse(str.substring(0, 2));
+        final fullYear = year >= 50 ? 1900 + year : 2000 + year;
+        final month = int.parse(str.substring(2, 4));
+        final day = int.parse(str.substring(4, 6));
+        final hour = int.parse(str.substring(6, 8));
+        final minute = int.parse(str.substring(8, 10));
+        final second = int.parse(str.substring(10, 12));
+        times.add(DateTime.utc(fullYear, month, day, hour, minute, second));
+      }
+    }
+  }
+  return times.length >= 2 ? times[1] : null;
+}
+
 void main() {
   // Auditoria 2026-08 (V2): o pin embutido é a ANCORA do SecurityContext —
   // se o PEM for corrompido (ou alguém o trocar sem atualizar o teste), o
@@ -41,4 +61,30 @@ void main() {
     expect(client, isNotNull);
     client.close();
   });
+
+  test(
+    'WE1 expira no futuro com folga mínima de 180 dias (health check local)',
+    () {
+      final der = _pemToDer(we1IntermediatePem);
+      final notAfter = _extractNotAfter(der);
+      expect(
+        notAfter,
+        isNotNull,
+        reason: 'Não foi possível extrair a data de expiração do DER',
+      );
+
+      // Validação estrita da data de expiração (2029-02-20)
+      expect(notAfter!.year, 2029);
+      expect(notAfter.month, 2);
+      expect(notAfter.day, 20);
+
+      final daysRemaining = notAfter.difference(DateTime.now()).inDays;
+      expect(
+        daysRemaining,
+        greaterThan(180),
+        reason:
+            'Certificado pinado expira em $daysRemaining dias (< 180 dias)! Necessário rotacionar.',
+      );
+    },
+  );
 }

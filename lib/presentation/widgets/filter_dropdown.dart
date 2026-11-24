@@ -72,7 +72,7 @@ class FilterDropdown<T> extends StatelessWidget {
                 Flexible(
                   child: Text(
                     labelOf(option),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.onSurface,

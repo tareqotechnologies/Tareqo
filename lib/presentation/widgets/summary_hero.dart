@@ -225,11 +225,14 @@ class DeltaPill extends StatelessWidget {
             Icon(icon, size: 12, color: color),
             const SizedBox(width: 3),
             Flexible(
-              child: Text(
-                text,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTypography.eyebrow(color),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  text,
+                  maxLines: 1,
+                  style: AppTypography.eyebrow(color),
+                ),
               ),
             ),
           ],

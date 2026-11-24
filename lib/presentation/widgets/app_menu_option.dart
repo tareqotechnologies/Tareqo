@@ -104,7 +104,7 @@ class AppMenuOption<T> extends StatelessWidget {
                 Flexible(
                   child: Text(
                     option.label,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface,

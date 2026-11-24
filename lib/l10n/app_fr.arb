@@ -426,6 +426,10 @@
   "productsFilterAll": "Tous",
   "productsSearchHint": "Rechercher un produit...",
   "productsLoadError": "Impossible de charger les produits.",
+  "productsCatalogSection": "Catalogue",
+  "@productsCatalogSection": {
+    "description": "Libellé plat de la section liste de produits au PDV et aux achats"
+  },
   "productsEmptyTitle": "Aucun produit enregistré",
   "productsEmptySubtitle": "Touchez \"Nouveau produit\" pour commencer.",
   "productsAddNew": "Nouveau produit",
@@ -461,8 +465,6 @@
   "productsFilterInactive": "Inactifs",
   "productsTypeLabel": "Type de produit",
   "productsCategoryLabel": "Catégorie",
-  "productsCategoryHint": "Ex. : Boissons, Boulangerie, Nettoyage",
-  "productsCategorySuggestions": "Catégories déjà utilisées",
   "productsCategoryError": "Catégorie invalide : 60 caractères maximum.",
   "productsFilterCategory": "Catégorie",
   "productsFilterCategoryAll": "Toutes",
@@ -633,6 +635,10 @@
   "purchasesSupplierLabel": "Fournisseur",
   "purchasesNoProductsTitle": "Aucun produit à acheter",
   "purchasesNoProductsSubtitle": "Enregistrez des produits pour faire des achats.",
+  "purchasesItemsSection": "Articles",
+  "@purchasesItemsSection": {
+    "description": "Libellé plat de la section liste d'articles dans la fiche nouvel achat"
+  },
   "purchasesNoPurchasableTitle": "Aucun produit achetable",
   "purchasesNoPurchasableSubtitle": "Les produits fabriqués et composés viennent de la production interne. Seules les matières premières, la revente et les emballages s'achètent.",
   "purchasesConfirm": "Confirmer l'achat",
@@ -1125,7 +1131,6 @@
   "adminPlanRequested": "Demandé",
   "adminPlanCurrent": "Actuel",
   "productsCodeLabel": "Code-barres (PLU)",
-  "productsCodeHint": "Balances étiqueteuses (ex. : 12345)",
   "productsCodeError": "Code invalide : utilisez jusqu'à 5 chiffres.",
   "productsBarcodeLabel": "Code-barres",
   "productsBarcodeHint": "EAN, UPC, Code 128 ou le contenu du QR",

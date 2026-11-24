@@ -28,6 +28,7 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/barcode_scan_sheet.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/money_live_preview.dart';
+import '../../widgets/premium_decor.dart';
 import '../../widgets/product_image.dart';
 import '../../../core/observability/crash_reporting.dart';
 
@@ -86,148 +87,76 @@ class _ProductPhotoPicker extends StatelessWidget {
             ),
           )
         : ProductImage(imagePath: imagePath, size: 76, iconSize: 30);
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        // Mesma superfície de grupo do [SheetSection] (o formulário inteiro
-        // fala a mesma língua).
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-        borderRadius: AppRadius.lgAll,
-      ),
-      child: Row(
-        children: [
-          // Preview
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(
-                color: scheme.outlineVariant.withValues(alpha: 0.5),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            // Preview
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: AppRadius.mdAll,
+                border: Border.all(color: PremiumDecor.hairline(scheme)),
+              ),
+              child: preview,
+            ),
+            const SizedBox(width: AppSpacing.md),
+            // Título + apoio
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    hasImage ? l10n.productsPhotoTitle : l10n.productsPhotoAdd,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: scheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.micro),
+                  Text(
+                    hasImage
+                        ? l10n.productsPhotoChangeHint
+                        : l10n.productsPhotoOptionalHint,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: preview,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          // Labels + botões
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  hasImage ? l10n.productsPhotoTitle : l10n.productsPhotoAdd,
-                  style: AppTypography.labelLarge.copyWith(
-                    color: scheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.micro),
-                Text(
-                  hasImage
-                      ? l10n.productsPhotoChangeHint
-                      : l10n.productsPhotoOptionalHint,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _PhotoActionButton(
-                      icon: Icons.photo_camera_outlined,
-                      tooltip: l10n.productsPhotoTake,
-                      onTap: onTakePhoto,
-                      isPrimary: true,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    _PhotoActionButton(
-                      icon: Icons.photo_library_outlined,
-                      tooltip: l10n.productsPhotoGallery,
-                      onTap: onPickGallery,
-                    ),
-                    if (hasImage) ...[
-                      const SizedBox(width: AppSpacing.xs),
-                      _PhotoActionButton(
-                        icon: Icons.delete_outline,
-                        tooltip: l10n.productsPhotoRemove,
-                        onTap: () async {
-                          // O diálogo bloqueia toques acidentais: sem a
-                          // confirmação explícita, a foto fica intacta.
-                          if (await _confirmRemove(context) &&
-                              context.mounted) {
-                            onRemove();
-                          }
-                        },
-                        isDestructive: true,
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Botão de ação minimalista para o seletor de foto.
-class _PhotoActionButton extends StatelessWidget {
-  const _PhotoActionButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-    this.isDestructive = false,
-    this.isPrimary = false,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-  final bool isDestructive;
-
-  /// Ação principal (câmera): preenchimento tinta com glifo Void — mesma
-  /// regra de contraste das demais superfícies cheias da marca (6.2:1).
-  final bool isPrimary;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final color = isPrimary
-        ? scheme.onPrimary
-        : isDestructive
-        ? scheme.error
-        : scheme.onSurfaceVariant;
-
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          // Alvo de toque do design system (48dp) — a fileira de ações da
-          // foto não pode ficar abaixo do mínimo de acessibilidade.
-          width: AppSizes.touchTarget,
-          height: AppSizes.touchTarget,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isPrimary
-                ? scheme.primary
-                : isDestructive
-                ? scheme.error.withValues(alpha: 0.08)
-                : scheme.surface,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            border: Border.all(
-              color: isPrimary
-                  ? scheme.primary
-                  : isDestructive
-                  ? scheme.error.withValues(alpha: 0.2)
-                  : scheme.outlineVariant.withValues(alpha: 0.5),
-            ),
-          ),
-          child: Icon(icon, size: AppSizes.iconMd, color: color),
+          ],
         ),
-      ),
+        const SizedBox(height: AppSpacing.xs),
+        // Ações como botões textuais — o rótulo já explica a ação, sem
+        // depender de tooltip ou de decifrar ícones.
+        Wrap(
+          spacing: AppSpacing.xs,
+          runSpacing: AppSpacing.xs,
+          children: [
+            TextButton(
+              onPressed: onTakePhoto,
+              child: Text(l10n.productsPhotoTake),
+            ),
+            TextButton(
+              onPressed: onPickGallery,
+              child: Text(l10n.productsPhotoGallery),
+            ),
+            if (hasImage)
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: scheme.error),
+                onPressed: () async {
+                  // O diálogo bloqueia toques acidentais: sem a
+                  // confirmação explícita, a foto fica intacta.
+                  if (await _confirmRemove(context) && context.mounted) {
+                    onRemove();
+                  }
+                },
+                child: Text(l10n.productsPhotoRemove),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -246,8 +175,8 @@ class _CompactSwitch extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
-  /// `true` quando o switch já está dentro de uma [SheetSection] — evita
-  /// caixa dentro de caixa (a superfície do grupo já é o fundo).
+  /// `true` quando o switch já está dentro de uma [SheetSection] — o grupo
+  /// já dá o contexto; uma caixa extra só somaria ruído.
   final bool embedded;
 
   @override
@@ -348,7 +277,6 @@ class _StockSection extends StatelessWidget {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           label: l10n.productsStockQuantity,
           helperText: stockHelperText,
-          prefixIcon: Icons.warehouse_outlined,
           validator: stockValidator,
         ),
         if (expiryField != null) ...[
@@ -584,7 +512,7 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
       onSubmit: _submit,
       isSubmitting: _isSubmitting,
       children: [
-        // FOTO — preview + câmera/galeria no topo (mesma superfície de grupo).
+        // FOTO — preview + câmera/galeria no topo, sem caixa de fundo.
         _ProductPhotoPicker(
           bytes: _imageBytes,
           imagePath: '',
@@ -592,16 +520,13 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
           onPickGallery: () => _pickPhoto(ImageSource.gallery),
           onRemove: () => setState(() => _imageBytes = null),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         ProductIdentitySection(
           nameController: _nameController,
           descriptionController: _descriptionController,
           codeController: _codeController,
           barcodeController: _barcodeController,
           categoryController: _categoryController,
-          categorySuggestions: productCategoriesOf(
-            ref.watch(productsProvider).value,
-          ),
           type: _type,
           onTypeChanged: (value) =>
               setState(() => _type = value ?? ProductType.resale),
@@ -615,12 +540,12 @@ class _AddProductSheetState extends ConsumerState<AddProductSheet> {
             }
           },
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         ProductPricingFields(
           purchaseController: _purchasePriceController,
           saleController: _salePriceController,
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         _StockSection(
           stockController: _stockController,
           stockHelperText: _vendaPorFracao
@@ -996,7 +921,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
       onSubmit: _submit,
       isSubmitting: _isSubmitting,
       children: [
-        // FOTO — preview + câmera/galeria no topo (mesma superfície de grupo).
+        // FOTO — preview + câmera/galeria no topo, sem caixa de fundo.
         _ProductPhotoPicker(
           bytes: _imageBytes,
           imagePath: _imagePath,
@@ -1004,16 +929,13 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
           onPickGallery: () => _pickPhoto(ImageSource.gallery),
           onRemove: _removePhoto,
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         ProductIdentitySection(
           nameController: _nameController,
           descriptionController: _descriptionController,
           codeController: _codeController,
           barcodeController: _barcodeController,
           categoryController: _categoryController,
-          categorySuggestions: productCategoriesOf(
-            ref.watch(productsProvider).value,
-          ),
           type: _type,
           onTypeChanged: (value) =>
               setState(() => _type = value ?? ProductType.resale),
@@ -1027,12 +949,12 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
             }
           },
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         ProductPricingFields(
           purchaseController: _purchasePriceController,
           saleController: _salePriceController,
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         _StockSection(
           stockController: _stockController,
           stockHelperText: _vendaPorFracao
@@ -1059,7 +981,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
           }),
           onUnitChanged: (value) => setState(() => _unitLabel = value ?? 'kg'),
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         _ProductBarcodesSection(
           items: _barcodes,
           isLoading: _barcodesLoading,
@@ -1069,7 +991,7 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
           onDelete: _removeBarcode,
           onRetry: _loadBarcodes,
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.lg),
         // STATUS — inativo some do PDV e das compras; o estoque é
         // preservado e a reativação devolve a venda.
         SheetSection(
@@ -1206,7 +1128,6 @@ class ProductIdentitySection extends StatelessWidget {
     required this.codeController,
     required this.barcodeController,
     this.categoryController,
-    this.categorySuggestions = const [],
     required this.type,
     required this.onTypeChanged,
     this.onScanBarcode,
@@ -1218,10 +1139,8 @@ class ProductIdentitySection extends StatelessWidget {
   final TextEditingController barcodeController;
 
   /// Categoria (opcional) — texto LIVRE usado para agrupar/filtrar o
-  /// catálogo. [categorySuggestions] traz as categorias já usadas na loja
-  /// para preencher com um toque (evita "Bebidas" vs "bebidas").
+  /// catálogo (ver lista de Produtos → filtro por categoria).
   final TextEditingController? categoryController;
-  final List<String> categorySuggestions;
 
   final ProductType type;
   final ValueChanged<ProductType?> onTypeChanged;
@@ -1241,7 +1160,6 @@ class ProductIdentitySection extends StatelessWidget {
           controller: nameController,
           textInputAction: TextInputAction.next,
           label: l10n.loginNameLabel,
-          prefixIcon: Icons.inventory_2_outlined,
           // Validação: campo obrigatório; erro aparece abaixo do campo
           validator: (value) => (value == null || value.trim().isEmpty)
               ? l10n.productsNameError
@@ -1252,7 +1170,6 @@ class ProductIdentitySection extends StatelessWidget {
           controller: descriptionController,
           textInputAction: TextInputAction.next,
           label: l10n.productsDescriptionLabel,
-          prefixIcon: Icons.notes_outlined,
         ),
         const SizedBox(height: AppSpacing.sm),
         // W11: código de barras/PLU — usado pelas balanças etiquetadoras
@@ -1263,8 +1180,6 @@ class ProductIdentitySection extends StatelessWidget {
           keyboardType: TextInputType.number,
           maxLength: 5,
           label: l10n.productsCodeLabel,
-          helperText: l10n.productsCodeHint,
-          prefixIcon: Icons.qr_code_2_outlined,
           // Validação: apenas 1-5 dígitos; erro abaixo do campo
           validator: (value) {
             final digits = value?.trim() ?? '';
@@ -1288,8 +1203,6 @@ class ProductIdentitySection extends StatelessWidget {
           textInputAction: TextInputAction.next,
           keyboardType: TextInputType.text,
           label: l10n.productsBarcodeLabel,
-          helperText: l10n.productsBarcodeHint,
-          prefixIcon: Icons.qr_code,
           suffixIcon: onScanBarcode == null
               ? null
               : IconButton(
@@ -1310,40 +1223,16 @@ class ProductIdentitySection extends StatelessWidget {
           controller: categoryController,
           textInputAction: TextInputAction.next,
           label: l10n.productsCategoryLabel,
-          helperText: l10n.productsCategoryHint,
-          prefixIcon: Icons.sell_outlined,
           validator: (value) => (value?.trim().length ?? 0) > 60
               ? l10n.productsCategoryError
               : null,
         ),
-        if (categoryController != null && categorySuggestions.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.xxs),
-          Text(
-            l10n.productsCategorySuggestions,
-            style: AppTypography.labelSmall.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxs),
-          Wrap(
-            spacing: AppSpacing.xxs,
-            runSpacing: AppSpacing.xxs,
-            children: [
-              for (final category in categorySuggestions)
-                ActionChip(
-                  label: Text(category),
-                  onPressed: () => categoryController!.text = category,
-                ),
-            ],
-          ),
-        ],
         const SizedBox(height: AppSpacing.sm),
         // Fase 1: tipo estrutural do produto (matéria-prima, revenda,
         // produzido, composto, embalagem).
         AppPickerField<ProductType>(
           value: type,
           label: l10n.productsTypeLabel,
-          prefixIcon: Icons.category_outlined,
           items: [
             for (final t in ProductType.values)
               DropdownMenuItem(value: t, child: Text(t.label)),
@@ -1456,7 +1345,6 @@ class ProductWeightFields extends StatelessWidget {
           AppPickerField<String>(
             value: unitLabel,
             label: l10n.productsUnitLabel,
-            prefixIcon: Icons.scale_outlined,
             items: [
               for (final unit in const ['kg', 'g', 'l', 'ml'])
                 DropdownMenuItem(value: unit, child: Text(unit)),
@@ -1537,7 +1425,7 @@ class _ProductBarcodesSection extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.xs),
               child: Material(
-                color: scheme.surface.withValues(alpha: 0.35),
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
                 borderRadius: AppRadius.mdAll,
                 child: InkWell(
                   borderRadius: AppRadius.mdAll,

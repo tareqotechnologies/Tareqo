@@ -31,7 +31,7 @@ class SectionHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 // Título de secção = 18/w600. O peso já vem da escala;
                 // nada de semibold inline.
@@ -41,7 +41,7 @@ class SectionHeader extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle!,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,

@@ -11,11 +11,11 @@ import '../../../domain/entities/purchase.dart';
 import '../../controllers/products_providers.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/detail_row.dart';
+import '../../widgets/form_section.dart';
 import '../../widgets/payment_filter.dart'
     show PaymentMethodAccent, PaymentMethodIcon;
 import '../../widgets/premium_decor.dart';
 import '../../widgets/product_image.dart';
-import '../../widgets/section_header.dart';
 import '../../widgets/smart_amount.dart';
 import '../../widgets/status_chip.dart';
 
@@ -79,35 +79,24 @@ class _PurchaseDetailSheet extends ConsumerWidget {
           const SizedBox(height: AppSpacing.lg),
 
           // ── Dados da compra ──
-          Container(
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: PremiumDecor.hairline(scheme)),
-            ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.xs,
-            ),
-            child: Column(
-              children: [
-                DetailRow(
-                  icon: Icons.local_shipping_outlined,
-                  label: l10n.purchaseDetailSupplier,
-                  value: purchase.supplierName,
-                ),
-                DetailRow(
-                  icon: Icons.event_outlined,
-                  label: l10n.purchaseDetailDate,
-                  value: Formatters.dateTime(purchase.dateTime),
-                ),
-                DetailRow(
-                  icon: Icons.payment_outlined,
-                  label: l10n.purchaseDetailPayment,
-                  value: purchase.paymentMethod.labelFor(l10n),
-                ),
-              ],
-            ),
+          // Linhas planas sobre a superfície da sheet: sem cartão em volta —
+          // só os fios entre as linhas, como no detalhe da venda.
+          DetailRow(
+            icon: Icons.local_shipping_outlined,
+            label: l10n.purchaseDetailSupplier,
+            value: purchase.supplierName,
+          ),
+          Divider(height: 1, color: PremiumDecor.hairline(scheme)),
+          DetailRow(
+            icon: Icons.event_outlined,
+            label: l10n.purchaseDetailDate,
+            value: Formatters.dateTime(purchase.dateTime),
+          ),
+          Divider(height: 1, color: PremiumDecor.hairline(scheme)),
+          DetailRow(
+            icon: Icons.payment_outlined,
+            label: l10n.purchaseDetailPayment,
+            value: purchase.paymentMethod.labelFor(l10n),
           ),
           const SizedBox(height: AppSpacing.lg),
 
@@ -127,32 +116,25 @@ class _PurchaseDetailSheet extends ConsumerWidget {
           const SizedBox(height: AppSpacing.lg),
 
           // ── Itens (com validade do lote FIFO de cada item) ──
-          SectionHeader(title: l10n.saleDetailItems),
-          const SizedBox(height: AppSpacing.sm),
-          Container(
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: PremiumDecor.hairline(scheme)),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                for (var i = 0; i < purchase.items.length; i++) ...[
-                  if (i > 0)
-                    Divider(
-                      height: 1,
-                      indent: AppSpacing.md,
-                      endIndent: AppSpacing.md,
-                      color: PremiumDecor.hairline(scheme),
-                    ),
-                  _PurchaseItemRow(
-                    item: purchase.items[i],
-                    productsAsync: ref.watch(productsProvider),
+          // Seção plana: rótulo + régua e as linhas directas na superfície.
+          FormSection(
+            icon: Icons.receipt_long_outlined,
+            title: l10n.saleDetailItems,
+            children: [
+              for (var i = 0; i < purchase.items.length; i++) ...[
+                if (i > 0)
+                  Divider(
+                    height: 1,
+                    indent: AppSpacing.md,
+                    endIndent: AppSpacing.md,
+                    color: PremiumDecor.hairline(scheme),
                   ),
-                ],
+                _PurchaseItemRow(
+                  item: purchase.items[i],
+                  productsAsync: ref.watch(productsProvider),
+                ),
               ],
-            ),
+            ],
           ),
           const SizedBox(height: AppSpacing.md),
 

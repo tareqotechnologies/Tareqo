@@ -237,7 +237,7 @@ class AppListTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelLarge,
                 ),
@@ -245,9 +245,9 @@ class AppListTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle!,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelSmall,
+                    style: AppTypography.bodySmall,
                   ),
                 ],
               ],

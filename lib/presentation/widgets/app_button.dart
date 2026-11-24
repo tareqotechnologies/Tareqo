@@ -112,18 +112,32 @@ class _AppButtonState extends State<AppButton>
       // Flexible no rótulo: numa Row, filho sem flex recebe largura
       // ilimitada no eixo principal e estoura com texto longo (fr a 360dp
       // ou escala de texto 2.0). Com Flexible o rótulo quebra em 2 linhas
-      // em vez de vazar do botão.
+      // em vez de vazar — sem encolher a fonte (legibilidade primeiro).
       content = Row(
         mainAxisSize: widget.expanded ? MainAxisSize.max : MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           widget.icon!,
           const SizedBox(width: AppSpacing.xs),
-          Flexible(child: Text(widget.label, textAlign: TextAlign.center)),
+          Flexible(
+            child: Text(
+              widget.label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       );
     } else {
-      content = Text(widget.label);
+      // Sem ícone o rótulo recebe a largura do próprio botão: quebra em até
+      // 2 linhas antes de recorrer a reticências.
+      content = Text(
+        widget.label,
+        textAlign: TextAlign.center,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      );
     }
 
     final Widget button;

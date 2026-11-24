@@ -426,6 +426,10 @@
   "productsFilterAll": "All",
   "productsSearchHint": "Search product...",
   "productsLoadError": "Could not load the products.",
+  "productsCatalogSection": "Catalog",
+  "@productsCatalogSection": {
+    "description": "Flat section label above the product list in POS and purchases"
+  },
   "productsEmptyTitle": "No products yet",
   "productsEmptySubtitle": "Tap \"New product\" to get started.",
   "productsAddNew": "New product",
@@ -461,8 +465,6 @@
   "productsFilterInactive": "Inactive",
   "productsTypeLabel": "Product type",
   "productsCategoryLabel": "Category",
-  "productsCategoryHint": "E.g. Drinks, Bakery, Cleaning",
-  "productsCategorySuggestions": "Categories already in use",
   "productsCategoryError": "Invalid category: 60 characters maximum.",
   "productsFilterCategory": "Category",
   "productsFilterCategoryAll": "All",
@@ -633,6 +635,10 @@
   "purchasesSupplierLabel": "Supplier",
   "purchasesNoProductsTitle": "No products to buy",
   "purchasesNoProductsSubtitle": "Register products to record purchases.",
+  "purchasesItemsSection": "Items",
+  "@purchasesItemsSection": {
+    "description": "Flat section label above the item list in the new purchase sheet"
+  },
   "purchasesNoPurchasableTitle": "No purchasable products",
   "purchasesNoPurchasableSubtitle": "Manufactured and composite products come from internal production. Only raw materials, resale and packaging items are bought.",
   "purchasesConfirm": "Confirm purchase",
@@ -1125,7 +1131,6 @@
   "adminPlanRequested": "Requested",
   "adminPlanCurrent": "Current",
   "productsCodeLabel": "Barcode (PLU)",
-  "productsCodeHint": "Label scales (e.g. 12345)",
   "productsCodeError": "Invalid code: use up to 5 digits.",
   "productsBarcodeLabel": "Barcode",
   "productsBarcodeHint": "EAN, UPC, Code 128 or the QR content",

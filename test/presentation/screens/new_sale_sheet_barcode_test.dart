@@ -242,6 +242,14 @@ void main() {
     await tester.tap(find.text('Sem categoria'));
     await tester.pumpAndSettle();
     expect(find.text('Arroz'), findsOneWidget); // Carrinho permanece.
+    // O catálogo é uma lista preguiçosa: no viewport de teste (600dp) a
+    // linha do Leite fica abaixo da dobra — rola até ela para ler o texto.
+    await tester.dragUntilVisible(
+      find.text('Leite'),
+      find.byType(CustomScrollView),
+      const Offset(0, -80),
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Leite'), findsOneWidget);
     expect(find.text('Água'), findsNothing);
     await tester.tap(find.text('Confirmar venda'));

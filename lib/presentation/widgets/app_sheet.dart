@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_tokens.dart';
 import '../../core/theme/app_typography.dart';
 import '../widgets/app_button.dart';
+import 'form_section.dart';
 import 'premium_decor.dart';
 
 /// Abre uma bottom sheet V4 com animação suave e suporte fullscreen.
@@ -253,70 +254,20 @@ class SheetFormError extends StatelessWidget {
 
 /// Seção agrupada dentro de uma sheet — o grupo de campos do formulário.
 ///
-/// Uma única superfície neutra (o tint quente do tema a 45%), cantos 18 e
-/// **sem borda**: a hierarquia vem do agrupamento, do espaçamento e do
-/// rótulo — não de uma caixa dentro da caixa. O ícone do rótulo é discreto
-/// (`onSurfaceVariant`); o acento fica reservado para a ação principal da
-/// sheet.
+/// Alias de [FormSection]: a seção plana (rótulo curto + régua `hairline`,
+/// campos directos sobre a superfície, sem cartão de fundo). O nome fica
+/// para os formulários em bottom sheet; telas fora de sheet usam
+/// [FormSection] directamente — mesma aparência, um só código.
 ///
 /// Use [icon] + [title] para o rótulo da seção (opcional) e coloque os
 /// campos do formulário como [children].
-class SheetSection extends StatelessWidget {
+class SheetSection extends FormSection {
   const SheetSection({
     super.key,
-    this.icon,
-    this.title,
-    required this.children,
+    super.icon,
+    super.title,
+    required super.children,
   });
-
-  final IconData? icon;
-  final String? title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.45),
-        borderRadius: AppRadius.lgAll,
-      ),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (title != null) ...[
-            Row(
-              children: [
-                if (icon != null) ...[
-                  Icon(
-                    icon,
-                    size: AppSizes.iconSm,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                ],
-                Expanded(
-                  child: Text(
-                    title!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTypography.labelMedium.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          ...children,
-        ],
-      ),
-    );
-  }
 }
 
 /// Cabeçalho UNIFICADO das sheets — fechar à esquerda, título (e subtítulo

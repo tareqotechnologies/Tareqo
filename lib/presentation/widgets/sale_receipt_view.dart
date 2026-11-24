@@ -61,7 +61,9 @@ class SaleReceiptView extends StatelessWidget {
             Text(
               storeName!.toUpperCase(),
               textAlign: TextAlign.center,
-              style: _headerStyle.copyWith(fontSize: 16),
+              style: _headerStyle.copyWith(
+                fontSize: AppTypography.titleMediumSize,
+              ),
             ),
             if (storeAddress != null && storeAddress!.trim().isNotEmpty) ...[
               const SizedBox(height: AppSpacing.micro),
@@ -111,7 +113,7 @@ class SaleReceiptView extends StatelessWidget {
                 Formatters.currency(sale.totalAmountCents),
                 style: _bodyStyle.copyWith(
                   fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontSize: AppTypography.titleMediumSize,
                 ),
               ),
             ],

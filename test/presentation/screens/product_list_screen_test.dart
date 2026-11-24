@@ -752,9 +752,7 @@ void main() {
       expect(repository.products.single.barcode, '7891000315507');
     });
 
-    testWidgets('cadastro guarda a categoria e a sugestão preenche o campo', (
-      tester,
-    ) async {
+    testWidgets('cadastro guarda a categoria digitada', (tester) async {
       usePortraitViewport(tester);
       final repository = _InMemoryProductRepository();
       await tester.pumpWidget(
@@ -794,15 +792,10 @@ void main() {
         '10',
       );
 
-      // A categoria existente aparece como sugestão e preenche o campo.
-      final suggestion = find.descendant(
-        of: find.byType(AddProductSheet),
-        matching: find.text('Bebidas'),
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Categoria'),
+        'Bebidas',
       );
-      await tester.ensureVisible(suggestion);
-      await tester.pumpAndSettle();
-      await tester.tap(suggestion);
-      await tester.pumpAndSettle();
 
       final submit = find.descendant(
         of: find.byType(AddProductSheet),
@@ -1191,33 +1184,37 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('toque na lixeira NÃO remove a foto sem confirmar', (
+    final removeButton = find.widgetWithText(TextButton, 'Remover fotografia');
+
+    testWidgets('toque em remover NÃO apaga a foto sem confirmar', (
       tester,
     ) async {
       await openEditSheet(tester);
 
-      // Anti-flicker: a lixeira só entra na árvore se há foto (i.i.).
-      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+      // Anti-flicker: a ação só entra na árvore se há foto (i.i.).
+      expect(removeButton, findsOneWidget);
 
       // Um toque NÃO pode remover — o diálogo de confirmação aparece.
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.tap(removeButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('Remover fotografia'), findsOneWidget);
+      expect(find.textContaining('Apagar a foto do produto?'), findsOneWidget);
       expect(find.text('Guardar alterações'), findsOneWidget);
     });
 
     testWidgets('cancelar mantém a foto intacta', (tester) async {
       await openEditSheet(tester);
 
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.tap(removeButton);
       await tester.pumpAndSettle();
       // Cancela (TextButton do confirm dialog).
       await tester.tap(find.text('Cancelar'));
       await tester.pumpAndSettle();
 
-      // A foto continua no preview (não removida) e o sheet segue aberto.
-      expect(find.text('Remover fotografia'), findsNothing);
+      // O diálogo fechou, a ação de remover continua e o sheet segue aberto
+      // — a foto não foi removida.
+      expect(find.textContaining('Apagar a foto do produto?'), findsNothing);
+      expect(removeButton, findsOneWidget);
       expect(find.text('Guardar alterações'), findsOneWidget);
     });
   });

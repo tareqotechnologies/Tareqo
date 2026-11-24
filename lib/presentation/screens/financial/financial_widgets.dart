@@ -72,7 +72,7 @@ class TransactionCard extends StatelessWidget {
                   children: [
                     Text(
                       transaction.category,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       // Linha de lista = 14/w500 (título da linha).
                       style: theme.textTheme.titleSmall?.copyWith(
@@ -182,7 +182,7 @@ class DateSectionHeader extends StatelessWidget {
             flex: 3,
             child: Text(
               label,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: AppTypography.eyebrow(scheme.onSurfaceVariant),
             ),

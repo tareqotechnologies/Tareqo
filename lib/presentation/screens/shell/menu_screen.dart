@@ -282,7 +282,7 @@ class _MenuTile extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelMedium?.copyWith(
                 color: scheme.onSurface,
@@ -347,7 +347,7 @@ class _SignOutButton extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: scheme.onSurfaceVariant,

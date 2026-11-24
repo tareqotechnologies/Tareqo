@@ -151,12 +151,15 @@ class _CollapsedSummary extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelLarge.copyWith(
-                    color: theme.colorScheme.onSurface,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ),

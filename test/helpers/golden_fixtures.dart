@@ -4,15 +4,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'store_context.dart';
 import 'test_app.dart';
 
+import 'dart:async';
+
+import 'package:tareqo/domain/entities/app_user.dart';
+import 'package:tareqo/domain/entities/auth_event.dart';
 import 'package:tareqo/domain/entities/customer.dart';
 import 'package:tareqo/domain/entities/debt.dart';
 import 'package:tareqo/domain/entities/cash_closing.dart';
 import 'package:tareqo/domain/entities/financial_transaction.dart';
+import 'package:tareqo/domain/entities/plan.dart';
 import 'package:tareqo/domain/entities/product.dart';
 import 'package:tareqo/domain/entities/purchase.dart';
 import 'package:tareqo/domain/entities/sale.dart';
 import 'package:tareqo/domain/entities/sale_item.dart';
 import 'package:tareqo/domain/entities/sale_lot_consumption.dart';
+import 'package:tareqo/domain/entities/tenant.dart';
+import 'package:tareqo/domain/repositories/i_auth_repository.dart';
 import 'package:tareqo/domain/repositories/i_cash_closing_processor.dart';
 import 'package:tareqo/domain/repositories/i_cash_closing_summary_repository.dart';
 import 'package:tareqo/domain/repositories/i_cash_flow_repository.dart';
@@ -35,15 +42,19 @@ import 'package:tareqo/domain/usecases/get_cash_flow_use_case.dart';
 import 'package:tareqo/domain/usecases/get_customers_use_case.dart';
 import 'package:tareqo/domain/usecases/get_dashboard_kpis_use_case.dart';
 import 'package:tareqo/domain/usecases/get_pending_debts_use_case.dart';
+import 'package:tareqo/domain/usecases/get_plans_use_case.dart';
 import 'package:tareqo/domain/usecases/get_settled_debts_use_case.dart';
 import 'package:tareqo/domain/usecases/get_purchases_use_case.dart';
 import 'package:tareqo/domain/usecases/get_products_use_case.dart';
 import 'package:tareqo/domain/usecases/mark_transaction_as_paid_use_case.dart';
 import 'package:tareqo/domain/usecases/process_sale_use_case.dart';
+import 'package:tareqo/domain/usecases/request_tenant_access_use_case.dart';
 import 'package:tareqo/domain/usecases/settle_debt_use_case.dart';
 import 'package:tareqo/domain/usecases/update_product_stock_use_case.dart';
 import 'package:tareqo/domain/usecases/update_product_use_case.dart';
 import 'package:tareqo/domain/usecases/update_customer_use_case.dart';
+import 'package:tareqo/presentation/controllers/account_providers.dart';
+import 'package:tareqo/presentation/controllers/auth_providers.dart';
 import 'package:tareqo/presentation/controllers/customers_providers.dart';
 import 'package:tareqo/presentation/controllers/dashboard_providers.dart';
 import 'package:tareqo/presentation/controllers/debts_providers.dart';
@@ -51,6 +62,8 @@ import 'package:tareqo/presentation/controllers/finance_providers.dart';
 import 'package:tareqo/presentation/controllers/products_providers.dart';
 import 'package:tareqo/presentation/controllers/purchases_providers.dart';
 import 'package:tareqo/presentation/controllers/sales_providers.dart';
+import 'package:tareqo/presentation/screens/account/tenant_onboarding_screen.dart';
+import 'package:tareqo/presentation/screens/auth/set_new_password_screen.dart';
 import 'package:tareqo/presentation/screens/credit/debts_screen.dart';
 import 'package:tareqo/presentation/screens/customers/customers_screen.dart';
 import 'package:tareqo/presentation/screens/dashboard/dashboard_screen.dart';
@@ -703,6 +716,130 @@ Widget financialGoldenApp({ThemeData? theme, Locale? locale}) {
       theme: theme,
       locale: locale ?? const Locale('pt'),
       home: const FinancialScreen(),
+    ),
+  );
+}
+
+/// ─── Formulários de conta/autenticação ──────────────────────────────────
+
+/// Planos fixos do onboarding (dois degraus bastam para o golden mostrar
+/// selecção e preço sem depender do catálogo real).
+class _GoldenGetPlansUseCase implements GetPlansUseCase {
+  const _GoldenGetPlansUseCase();
+
+  @override
+  Future<List<Plan>> call() async => const [
+    Plan(
+      id: 'pl2',
+      name: 'Profissional',
+      description: 'Para negócios em crescimento',
+      priceMonthlyCents: 19990,
+      maxStores: 3,
+      maxEmployees: 10,
+    ),
+    Plan(
+      id: 'pl3',
+      name: 'Empresarial',
+      description: 'Para redes e equipas maiores',
+      priceMonthlyCents: 39990,
+      maxStores: 10,
+      maxEmployees: 50,
+    ),
+  ];
+}
+
+/// Solicitação sem efeito — o golden nunca submete o formulário.
+class _GoldenRequestTenantAccess implements RequestTenantAccessUseCase {
+  const _GoldenRequestTenantAccess();
+
+  @override
+  Future<Tenant> call({
+    required String ownerUserId,
+    required String businessName,
+    required String planId,
+    required String currencyCode,
+    required String language,
+  }) async => Tenant(
+    id: 'tn1',
+    ownerUserId: ownerUserId,
+    businessName: businessName,
+    planId: planId,
+    status: TenantStatus.pending,
+    createdAt: kGoldenNow,
+    currencyCode: currencyCode,
+    language: language,
+  );
+}
+
+/// Onboarding do dono pronto para golden — formulário FLAT directo na
+/// página (sem cartão), com planos fixos.
+Widget onboardingGoldenApp({ThemeData? theme, Locale? locale}) {
+  return ProviderScope(
+    overrides: [
+      getPlansUseCaseProvider.overrideWithValue(const _GoldenGetPlansUseCase()),
+      requestTenantAccessUseCaseProvider.overrideWithValue(
+        const _GoldenRequestTenantAccess(),
+      ),
+    ],
+    child: testApp(
+      theme: theme,
+      locale: locale ?? const Locale('pt'),
+      home: const TenantOnboardingScreen(
+        user: AppUser(id: '1', email: 'dono@loja.com'),
+      ),
+    ),
+  );
+}
+
+/// Auth sem efeito — a tela só toca no provider no submit/sair.
+class _GoldenAuthRepository implements IAuthRepository {
+  final _controller = StreamController<AppUser?>.broadcast();
+
+  @override
+  Future<AppUser> signUp({
+    required String email,
+    required String password,
+    String? fullName,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<AppUser> signIn({
+    required String email,
+    required String password,
+  }) async => throw UnimplementedError();
+
+  @override
+  Future<void> signOut() async {}
+
+  @override
+  Future<void> resetPassword({required String email}) async {}
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {}
+
+  @override
+  Future<void> setNewPassword({required String newPassword}) async {}
+
+  @override
+  Stream<AppUser?> get authStateChanges => _controller.stream;
+
+  @override
+  Stream<AuthEvent> get authEvents => const Stream.empty();
+}
+
+/// Definir nova senha pronto para golden.
+Widget setNewPasswordGoldenApp({ThemeData? theme, Locale? locale}) {
+  return ProviderScope(
+    overrides: [
+      authRepositoryProvider.overrideWithValue(_GoldenAuthRepository()),
+    ],
+    child: testApp(
+      theme: theme,
+      locale: locale ?? const Locale('pt'),
+      home: const SetNewPasswordScreen(),
     ),
   );
 }

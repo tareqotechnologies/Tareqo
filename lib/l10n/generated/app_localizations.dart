@@ -1768,6 +1768,12 @@ abstract class AppLocalizations {
   /// **'Não foi possível carregar os produtos.'**
   String get productsLoadError;
 
+  /// Rótulo plano da secção da lista de produtos no PDV e nas compras
+  ///
+  /// In pt, this message translates to:
+  /// **'Catálogo'**
+  String get productsCatalogSection;
+
   /// No description provided for @productsEmptyTitle.
   ///
   /// In pt, this message translates to:
@@ -1977,18 +1983,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Categoria'**
   String get productsCategoryLabel;
-
-  /// No description provided for @productsCategoryHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Ex.: Bebidas, Padaria, Limpeza'**
-  String get productsCategoryHint;
-
-  /// No description provided for @productsCategorySuggestions.
-  ///
-  /// In pt, this message translates to:
-  /// **'Categorias já usadas'**
-  String get productsCategorySuggestions;
 
   /// No description provided for @productsCategoryError.
   ///
@@ -2559,6 +2553,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Cadastre produtos para registar compras.'**
   String get purchasesNoProductsSubtitle;
+
+  /// Rótulo plano da secção da lista de itens na sheet de nova compra
+  ///
+  /// In pt, this message translates to:
+  /// **'Itens'**
+  String get purchasesItemsSection;
 
   /// No description provided for @purchasesNoPurchasableTitle.
   ///
@@ -4041,12 +4041,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Código de barras (PLU)'**
   String get productsCodeLabel;
-
-  /// No description provided for @productsCodeHint.
-  ///
-  /// In pt, this message translates to:
-  /// **'Balanças etiquetadoras (ex.: 12345)'**
-  String get productsCodeHint;
 
   /// No description provided for @productsCodeError.
   ///

@@ -37,8 +37,10 @@ import '../../widgets/app_text_field.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/barcode_scan_sheet.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/form_section.dart';
 import '../../widgets/payment_method_picker.dart';
 import '../../widgets/premium_decor.dart';
+import '../../widgets/smart_amount.dart';
 import '../../widgets/product_image.dart';
 import '../../widgets/product_type_badge.dart';
 import '../../widgets/search_field.dart';
@@ -752,6 +754,27 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                         ),
                       ),
                     ),
+                  // Catálogo: rótulo plano (régua fina) em vez de um cartão —
+                  // a lista lê-se como continuação da superfície do PDV, e
+                  // os cartões ficam só para as linhas de produto.
+                  if (filtered.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          hPad,
+                          AppSpacing.sm,
+                          hPad,
+                          0,
+                        ),
+                        child: focusDim(
+                          FormSection(
+                            icon: Icons.inventory_2_outlined,
+                            title: l10n.productsCatalogSection,
+                            children: const [],
+                          ),
+                        ),
+                      ),
+                    ),
                   if (filtered.isEmpty)
                     // SliverFillRemaining: o estado vazio ocupa o espaço
                     // restante e fica centralizado — SEMPRE construído (não
@@ -789,9 +812,11 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
                     // respiro que faltava (antes as linhas encostavam umas às
                     // outras e liam-se como um bloco único).
                     SliverPadding(
+                      // O respiro acima das linhas vem do próprio FormSection
+                      // (8 após a régua): sem padding superior duplicado.
                       padding: EdgeInsets.fromLTRB(
                         hPad,
-                        AppSpacing.sm,
+                        0,
                         hPad,
                         AppSpacing.lg,
                       ),
@@ -1228,7 +1253,7 @@ class _CartPill extends StatelessWidget {
               children: [
                 Text(
                   product.name,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelLarge.copyWith(
                     color: scheme.onSurface,
@@ -1263,12 +1288,12 @@ class _CartPill extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Text(
-            Formatters.currency(
-              Quantity.lineTotal(quantity, product.salePriceCents),
-            ),
-            textAlign: TextAlign.right,
+          // Total da linha — [SmartAmount] encolhe sem truncar (componente
+          // único de renderização de dinheiro).
+          SmartAmount(
+            cents: Quantity.lineTotal(quantity, product.salePriceCents),
             style: AppTypography.amountInRow(scheme.onSurface),
+            alignment: Alignment.centerRight,
           ),
         ],
       ),
@@ -1417,21 +1442,26 @@ class _Footer extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.sm),
               // Total em tinta (AA nos dois temas); o azul fica para a
-              // ação de confirmar. É o número que fecha a venda.
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    l10n.commonTotal,
-                    style: AppTypography.eyebrow(scheme.onSurfaceVariant),
-                  ),
-                  const SizedBox(height: AppSpacing.micro),
-                  Text(
-                    Formatters.currency(totalCents),
-                    style: AppTypography.heroAmount(scheme.onSurface),
-                  ),
-                ],
+              // ação de confirmar. É o número que fecha a venda — em
+              // `SmartAmount` (como no carrinho de compras) para valores
+              // grandes encolherem em vez de estourar a linha.
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.commonTotal,
+                      style: AppTypography.eyebrow(scheme.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: AppSpacing.micro),
+                    SmartAmount(
+                      cents: totalCents,
+                      alignment: Alignment.centerRight,
+                      style: AppTypography.heroAmount(scheme.onSurface),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

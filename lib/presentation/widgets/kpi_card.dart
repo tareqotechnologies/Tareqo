@@ -81,17 +81,20 @@ class KpiCard extends StatelessWidget {
             label,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            // Rótulo do indicador ligeiramente menor que a nota padrão (13 → 12)
-            // para o rótulo não competir com o valor do card (pedido de UI).
-            style: AppTypography.labelSmall,
+            // Rótulo do indicador padronizado em bodySmall (12/400).
+            style: AppTypography.bodySmall.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
           if (caption != null) ...[
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.xxs),
             Text(
               caption!,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: AppTypography.labelSmall,
+              style: AppTypography.labelSmall.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ],

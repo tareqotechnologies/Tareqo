@@ -426,6 +426,10 @@
   "productsFilterAll": "Todos",
   "productsSearchHint": "Pesquisar produto...",
   "productsLoadError": "Não foi possível carregar os produtos.",
+  "productsCatalogSection": "Catálogo",
+  "@productsCatalogSection": {
+    "description": "Rótulo plano da secção da lista de produtos no PDV e nas compras"
+  },
   "productsEmptyTitle": "Nenhum produto cadastrado",
   "productsEmptySubtitle": "Toque em \"Novo produto\" para começar.",
   "productsAddNew": "Novo produto",
@@ -461,8 +465,6 @@
   "productsFilterInactive": "Inactivos",
   "productsTypeLabel": "Tipo de produto",
   "productsCategoryLabel": "Categoria",
-  "productsCategoryHint": "Ex.: Bebidas, Padaria, Limpeza",
-  "productsCategorySuggestions": "Categorias já usadas",
   "productsCategoryError": "Categoria inválida: máximo de 60 caracteres.",
   "productsFilterCategory": "Categoria",
   "productsFilterCategoryAll": "Todas",
@@ -633,6 +635,10 @@
   "purchasesSupplierLabel": "Fornecedor",
   "purchasesNoProductsTitle": "Nenhum produto para comprar",
   "purchasesNoProductsSubtitle": "Cadastre produtos para registar compras.",
+  "purchasesItemsSection": "Itens",
+  "@purchasesItemsSection": {
+    "description": "Rótulo plano da secção da lista de itens na sheet de nova compra"
+  },
   "purchasesNoPurchasableTitle": "Nenhum produto comprável",
   "purchasesNoPurchasableSubtitle": "Produtos produzidos e compostos vêm da produção interna. Apenas matéria-prima, revenda e embalagem entram por compra.",
   "purchasesConfirm": "Confirmar compra",
@@ -1125,7 +1131,6 @@
   "adminPlanRequested": "Solicitado",
   "adminPlanCurrent": "Atual",
   "productsCodeLabel": "Código de barras (PLU)",
-  "productsCodeHint": "Balanças etiquetadoras (ex.: 12345)",
   "productsCodeError": "Código inválido: use até 5 dígitos.",
   "productsBarcodeLabel": "Código de barras",
   "productsBarcodeHint": "EAN, UPC, Code 128 ou o conteúdo do QR",

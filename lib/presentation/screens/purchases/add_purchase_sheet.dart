@@ -25,6 +25,7 @@ import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/dialogs.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/form_section.dart';
 import '../../widgets/payment_method_picker.dart';
 import '../../widgets/product_type_badge.dart' show productTypeLabel;
 import '../../widgets/search_field.dart';
@@ -304,6 +305,10 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.xl,
+              // Sem respiro extra aqui: o rodapé cresce quando o seletor de
+              // pagamento expande e, em janela baixa, 16px a mais estouram
+              // a sheet (o Expanded do catálogo encolhe primeiro, mas não
+              // abaixo de zero).
               0,
               AppSpacing.xl,
               AppSpacing.xs,
@@ -379,24 +384,40 @@ class _AddPurchaseSheetState extends ConsumerState<AddPurchaseSheet> {
                   );
                 }
 
+                // Rótulo plano (régua fina) como PRIMEIRO item da lista: rola
+                // com o catálogo e, por não ser altura fixa, não aperta a
+                // sheet quando o rodapé cresce (seletor de pagamento aberto).
                 return ListView.separated(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.xl,
                   ),
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, _) =>
-                      const SizedBox(height: AppSpacing.xs),
-                  itemBuilder: (context, index) => _CartProductRow(
-                    product: filtered[index],
-                    quantity: _cart[filtered[index].id] ?? 0,
-                    expiry: _expiryByProduct[filtered[index].id],
-                    onAdd: () => _add(filtered[index]),
-                    onAddFraction: () => _addFraction(filtered[index]),
-                    onRemove: () => _remove(filtered[index]),
-                    onEdit: () => _editFraction(filtered[index]),
-                    onPickExpiry: () => _pickExpiry(filtered[index]),
-                    onClearExpiry: () => _clearExpiry(filtered[index]),
-                  ),
+                  itemCount: filtered.length + 1,
+                  // Sem respiro extra entre o rótulo e a primeira linha: o
+                  // FormSection já deixa 8 após a régua.
+                  separatorBuilder: (_, index) => index == 0
+                      ? const SizedBox.shrink()
+                      : const SizedBox(height: AppSpacing.xs),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return FormSection(
+                        icon: Icons.shopping_basket_outlined,
+                        title: l10n.purchasesItemsSection,
+                        children: const [],
+                      );
+                    }
+                    final product = filtered[index - 1];
+                    return _CartProductRow(
+                      product: product,
+                      quantity: _cart[product.id] ?? 0,
+                      expiry: _expiryByProduct[product.id],
+                      onAdd: () => _add(product),
+                      onAddFraction: () => _addFraction(product),
+                      onRemove: () => _remove(product),
+                      onEdit: () => _editFraction(product),
+                      onPickExpiry: () => _pickExpiry(product),
+                      onClearExpiry: () => _clearExpiry(product),
+                    );
+                  },
                 );
               },
             ),

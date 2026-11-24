@@ -954,6 +954,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsLoadError => 'Could not load the products.';
 
   @override
+  String get productsCatalogSection => 'Catalog';
+
+  @override
   String get productsEmptyTitle => 'No products yet';
 
   @override
@@ -1058,12 +1061,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productsCategoryLabel => 'Category';
-
-  @override
-  String get productsCategoryHint => 'E.g. Drinks, Bakery, Cleaning';
-
-  @override
-  String get productsCategorySuggestions => 'Categories already in use';
 
   @override
   String get productsCategoryError =>
@@ -1410,6 +1407,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get purchasesNoProductsSubtitle =>
       'Register products to record purchases.';
+
+  @override
+  String get purchasesItemsSection => 'Items';
 
   @override
   String get purchasesNoPurchasableTitle => 'No purchasable products';
@@ -2264,9 +2264,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get productsCodeLabel => 'Barcode (PLU)';
-
-  @override
-  String get productsCodeHint => 'Label scales (e.g. 12345)';
 
   @override
   String get productsCodeError => 'Invalid code: use up to 5 digits.';

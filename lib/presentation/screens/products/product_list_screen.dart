@@ -1050,7 +1050,7 @@ class _ProductRow extends StatelessWidget {
                     children: [
                       Text(
                         product.name,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         // Rótulo de linha em 14/500: a hierarquia vem da
                         // cor, não do peso.

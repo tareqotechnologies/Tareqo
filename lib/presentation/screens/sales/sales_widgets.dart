@@ -209,7 +209,7 @@ class _SummaryRow extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelLarge.copyWith(
                     color: theme.colorScheme.onSurface,
@@ -218,9 +218,9 @@ class _SummaryRow extends StatelessWidget {
                 const SizedBox(height: AppSpacing.micro),
                 Text(
                   details,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelSmall.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),

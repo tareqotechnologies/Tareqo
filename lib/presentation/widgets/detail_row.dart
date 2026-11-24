@@ -8,8 +8,10 @@ import '../../../core/theme/app_typography.dart';
 /// Consolida as variantes privadas `_DetailRow` que estavam copiadas
 /// nesses arquivos. O rótulo fica em coluna fixa ([labelWidth]) para os
 /// valores alinharem em lista; o valor quebra em quantas linhas precisar
-/// ([maxLines] null = sem truncamento — dados de contato/endereço nunca
-/// são escondidos). [valueColor] colore o valor (ex.: verde de entrada,
+/// ([maxLines] null = sem truncamento na variante padrão — dados de
+/// contato/endereço nunca são escondidos; a variante [DetailRow.inline]
+/// limita a 2 linhas por padrão e aceita [maxLines] para mudar).
+/// [valueColor] colore o valor (ex.: verde de entrada,
 /// vermelho de saída); [icon] opcional à esquerda.
 class DetailRow extends StatelessWidget {
   const DetailRow({
@@ -75,7 +77,7 @@ class DetailRow extends StatelessWidget {
               style: AppTypography.labelMedium.copyWith(
                 color: scheme.onSurface,
               ),
-              maxLines: 1,
+              maxLines: maxLines ?? 2,
               overflow: TextOverflow.ellipsis,
             ),
           ),

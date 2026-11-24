@@ -50,7 +50,7 @@ class StoreSwitcher extends ConsumerWidget {
     // anuncia contexto em vez de um texto solto sem papel.
     final pill = Container(
       key: StoreSwitcher.pillKey,
-      constraints: const BoxConstraints(maxWidth: 160),
+      constraints: const BoxConstraints(maxWidth: 220),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xs,
         vertical: AppSpacing.xs,
@@ -111,7 +111,7 @@ class StoreSwitcher extends ConsumerWidget {
       // tinha — o AppMenuOption não impõe limite próprio.
       child: ConstrainedBox(
         key: StoreSwitcher.pillKey,
-        constraints: const BoxConstraints(maxWidth: 160),
+        constraints: const BoxConstraints(maxWidth: 220),
         child: AppMenuOption<String>(
           label: activeName,
           tooltip: l10n.storeSwitcherTooltip,

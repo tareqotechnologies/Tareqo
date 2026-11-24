@@ -39,7 +39,8 @@ Usar SEMPRE o componente do design system; não recriar variantes por tela.
 | `AppCard` | `app_card.dart` | Card base (`elevated`, raios) |
 | `SheetHeader` | `lib/presentation/widgets/app_sheet.dart` | ÚNICO cabeçalho de sheet (fechar à esquerda, título centrado, ação à direita). O antigo `AppSheetHeader` foi absorvido |
 | `showAppSheet` | idem | Toda bottom sheet passa por aqui (padding do teclado incluso) |
-| `SheetSection` | idem | Grupo de formulário dentro de sheet |
+| `SheetSection` | idem | Grupo de formulário dentro de sheet (alias de `FormSection`) |
+| `FormSection` | `form_section.dart` | Grupo de formulário PLANO (rótulo + régua, sem cartão) — sheets e telas |
 | `FilterDropdown` | `filter_dropdown.dart` | Chip de filtro (período/pagamento) — compartilhado Vendas/Compras |
 | `EmptyState` / `ErrorView` | `empty_state.dart` / `error_view.dart` | Estados vazio e erro com retry |
 | `Skeleton` / `ListSkeleton` | `skeleton.dart` | Loading — respeita `disableAnimations` |

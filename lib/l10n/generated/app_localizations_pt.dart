@@ -966,6 +966,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsLoadError => 'Não foi possível carregar os produtos.';
 
   @override
+  String get productsCatalogSection => 'Catálogo';
+
+  @override
   String get productsEmptyTitle => 'Nenhum produto cadastrado';
 
   @override
@@ -1073,12 +1076,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productsCategoryLabel => 'Categoria';
-
-  @override
-  String get productsCategoryHint => 'Ex.: Bebidas, Padaria, Limpeza';
-
-  @override
-  String get productsCategorySuggestions => 'Categorias já usadas';
 
   @override
   String get productsCategoryError =>
@@ -1430,6 +1427,9 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get purchasesNoProductsSubtitle =>
       'Cadastre produtos para registar compras.';
+
+  @override
+  String get purchasesItemsSection => 'Itens';
 
   @override
   String get purchasesNoPurchasableTitle => 'Nenhum produto comprável';
@@ -2303,9 +2303,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get productsCodeLabel => 'Código de barras (PLU)';
-
-  @override
-  String get productsCodeHint => 'Balanças etiquetadoras (ex.: 12345)';
 
   @override
   String get productsCodeError => 'Código inválido: use até 5 dígitos.';

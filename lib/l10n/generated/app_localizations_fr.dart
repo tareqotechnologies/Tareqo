@@ -966,6 +966,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsLoadError => 'Impossible de charger les produits.';
 
   @override
+  String get productsCatalogSection => 'Catalogue';
+
+  @override
   String get productsEmptyTitle => 'Aucun produit enregistré';
 
   @override
@@ -1072,12 +1075,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productsCategoryLabel => 'Catégorie';
-
-  @override
-  String get productsCategoryHint => 'Ex. : Boissons, Boulangerie, Nettoyage';
-
-  @override
-  String get productsCategorySuggestions => 'Catégories déjà utilisées';
 
   @override
   String get productsCategoryError =>
@@ -1432,6 +1429,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get purchasesNoProductsSubtitle =>
       'Enregistrez des produits pour faire des achats.';
+
+  @override
+  String get purchasesItemsSection => 'Articles';
 
   @override
   String get purchasesNoPurchasableTitle => 'Aucun produit achetable';
@@ -2307,9 +2307,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get productsCodeLabel => 'Code-barres (PLU)';
-
-  @override
-  String get productsCodeHint => 'Balances étiqueteuses (ex. : 12345)';
 
   @override
   String get productsCodeError =>

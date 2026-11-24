@@ -16,6 +16,7 @@ import '../../widgets/app_button.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_page.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/form_section.dart';
 import '../../../core/observability/crash_reporting.dart';
 
 /// Onboarding do dono: escolhe o plano, o nome do negócio, a **moeda** e o
@@ -154,140 +155,138 @@ class _TenantOnboardingScreenState
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                // Card premium (estilo Apple): cantos 20 + superfície
-                // elevada — o formulário flutua sobre o fundo.
-                AppCard(
-                  elevated: true,
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(AppRadius.xl),
-                  ),
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        AppTextField(
-                          controller: _businessController,
-                          textInputAction: TextInputAction.next,
-                          label: l10n.onboardingBusinessLabel,
-                          prefixIcon: Icons.business_outlined,
-                          validator: (value) =>
-                              (value == null || value.trim().isEmpty)
-                              ? l10n.onboardingBusinessError
-                              : null,
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          l10n.onboardingLanguageLabel,
-                          style: theme.textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            _ChoiceChip(
-                              label: l10n.languagePortuguese,
-                              icon: Icons.language,
-                              selected: _language == 'pt',
-                              onSelected: (_) =>
-                                  setState(() => _language = 'pt'),
-                            ),
-                            _ChoiceChip(
-                              label: l10n.languageEnglish,
-                              icon: Icons.translate,
-                              selected: _language == 'en',
-                              onSelected: (_) =>
-                                  setState(() => _language = 'en'),
-                            ),
-                            _ChoiceChip(
-                              label: l10n.languageFrench,
-                              icon: Icons.translate,
-                              selected: _language == 'fr',
-                              onSelected: (_) =>
-                                  setState(() => _language = 'fr'),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          l10n.onboardingCurrencyLabel,
-                          style: theme.textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            for (final code in AppSettings.supportedCurrencies)
-                              _ChoiceChip(
-                                label: _currencyLabel(l10n, code),
-                                icon: Icons.attach_money,
-                                selected: _currencyCode == code,
-                                onSelected: (_) =>
-                                    setState(() => _currencyCode = code),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          l10n.onboardingPlanLabel,
-                          style: theme.textTheme.titleSmall,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        plansAsync.when(
-                          loading: () => const Padding(
-                            padding: EdgeInsets.all(AppSpacing.md),
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                          error: (error, _) => Text(
-                            l10n.onboardingPlansError,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
-                            ),
-                          ),
-                          data: (plans) => Column(
+                // Formulário FLAT: campos directos sobre o fundo da página,
+                // com seções planas — o mesmo tratamento das sheets, sem
+                // cartão a envolver o formulário.
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppTextField(
+                        controller: _businessController,
+                        textInputAction: TextInputAction.next,
+                        label: l10n.onboardingBusinessLabel,
+                        prefixIcon: Icons.business_outlined,
+                        validator: (value) =>
+                            (value == null || value.trim().isEmpty)
+                            ? l10n.onboardingBusinessError
+                            : null,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      FormSection(
+                        icon: Icons.language,
+                        title: l10n.onboardingLanguageLabel,
+                        children: [
+                          Wrap(
+                            spacing: 8,
                             children: [
-                              for (final plan in plans) ...[
-                                _PlanCard(
-                                  plan: plan,
-                                  currencyCode: _currencyCode,
-                                  language: _language,
-                                  selected: _selectedPlan?.id == plan.id,
-                                  onTap: () =>
-                                      setState(() => _selectedPlan = plan),
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                              ],
+                              _ChoiceChip(
+                                label: l10n.languagePortuguese,
+                                icon: Icons.language,
+                                selected: _language == 'pt',
+                                onSelected: (_) =>
+                                    setState(() => _language = 'pt'),
+                              ),
+                              _ChoiceChip(
+                                label: l10n.languageEnglish,
+                                icon: Icons.translate,
+                                selected: _language == 'en',
+                                onSelected: (_) =>
+                                    setState(() => _language = 'en'),
+                              ),
+                              _ChoiceChip(
+                                label: l10n.languageFrench,
+                                icon: Icons.translate,
+                                selected: _language == 'fr',
+                                onSelected: (_) =>
+                                    setState(() => _language = 'fr'),
+                              ),
                             ],
                           ),
-                        ),
-                        if (_formError != null) ...[
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            _formError!,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      FormSection(
+                        icon: Icons.attach_money,
+                        title: l10n.onboardingCurrencyLabel,
+                        children: [
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              for (final code
+                                  in AppSettings.supportedCurrencies)
+                                _ChoiceChip(
+                                  label: _currencyLabel(l10n, code),
+                                  icon: Icons.attach_money,
+                                  selected: _currencyCode == code,
+                                  onSelected: (_) =>
+                                      setState(() => _currencyCode = code),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      FormSection(
+                        icon: Icons.workspace_premium_outlined,
+                        title: l10n.onboardingPlanLabel,
+                        children: [
+                          plansAsync.when(
+                            loading: () => const Padding(
+                              padding: EdgeInsets.all(AppSpacing.md),
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                            error: (error, _) => Text(
+                              l10n.onboardingPlansError,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.error,
+                              ),
+                            ),
+                            data: (plans) => Column(
+                              children: [
+                                for (final plan in plans) ...[
+                                  _PlanCard(
+                                    plan: plan,
+                                    currencyCode: _currencyCode,
+                                    language: _language,
+                                    selected: _selectedPlan?.id == plan.id,
+                                    onTap: () =>
+                                        setState(() => _selectedPlan = plan),
+                                  ),
+                                  const SizedBox(height: AppSpacing.sm),
+                                ],
+                              ],
                             ),
                           ),
                         ],
-                        const SizedBox(height: AppSpacing.md),
-                        AppButton.primary(
-                          onPressed: _isSubmitting ? null : _submit,
-                          icon: _isSubmitting
-                              ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.send_outlined),
-                          label: l10n.onboardingSubmit,
+                      ),
+                      if (_formError != null) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          _formError!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
                         ),
                       ],
-                    ),
+                      const SizedBox(height: AppSpacing.md),
+                      AppButton.primary(
+                        onPressed: _isSubmitting ? null : _submit,
+                        icon: _isSubmitting
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.send_outlined),
+                        label: l10n.onboardingSubmit,
+                      ),
+                    ],
                   ),
                 ),
               ],

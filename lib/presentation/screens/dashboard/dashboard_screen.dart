@@ -687,8 +687,8 @@ class _HeroMetric extends StatelessWidget {
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            // Rótulo secundário discreto — mesmo degrau dos metadados.
-            style: AppTypography.labelSmall.copyWith(
+            // Rótulo secundário padronizado em bodySmall (12/400).
+            style: AppTypography.bodySmall.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
@@ -706,12 +706,15 @@ class _HeroMetric extends StatelessWidget {
           ),
           if (subtext != null) ...[
             const SizedBox(height: AppSpacing.micro),
-            Text(
-              subtext!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.labelSmall.copyWith(
-                color: subtextColor ?? scheme.onSurfaceVariant,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                subtext!,
+                maxLines: 1,
+                style: AppTypography.labelSmall.copyWith(
+                  color: subtextColor ?? scheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
@@ -1136,7 +1139,7 @@ class _ActivityRow extends StatelessWidget {
               children: [
                 Text(
                   item.title,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.labelLarge.copyWith(
                     color: scheme.onSurface,
@@ -1145,9 +1148,9 @@ class _ActivityRow extends StatelessWidget {
                 const SizedBox(height: AppSpacing.micro),
                 Text(
                   item.details,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.labelSmall.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: scheme.onSurfaceVariant,
                   ),
                 ),
@@ -1185,19 +1188,22 @@ class _ActivityRow extends StatelessWidget {
                           ),
                         ),
                       )
-                    : Text(
-                        item.amount ?? item.badge!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style:
-                            (item.amount != null
-                                    ? AppTypography.labelLarge
-                                    : AppTypography.labelMedium)
-                                .copyWith(
-                                  color: item.amount != null
-                                      ? amountFg
-                                      : item.badgeColor,
-                                ),
+                    : FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          item.amount ?? item.badge!,
+                          maxLines: 1,
+                          style:
+                              (item.amount != null
+                                      ? AppTypography.labelLarge
+                                      : AppTypography.labelMedium)
+                                  .copyWith(
+                                    color: item.amount != null
+                                        ? amountFg
+                                        : item.badgeColor,
+                                  ),
+                        ),
                       ),
               ),
             ),

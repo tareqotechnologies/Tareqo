@@ -10,7 +10,6 @@ import '../../../core/utils/password_policy.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../controllers/auth_providers.dart';
 import '../../widgets/app_button.dart';
-import '../../widgets/app_card.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
 import 'mfa_verification_sheet.dart';
@@ -243,97 +242,90 @@ class _SetNewPasswordScreenState extends ConsumerState<SetNewPasswordScreen> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                // Card premium (estilo Apple): cantos 20 + superfície
-                // elevada — mesmo padrão do login e do onboarding.
-                AppCard(
-                  elevated: true,
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(AppRadius.xl),
-                  ),
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        AppTextField(
-                          controller: _newController,
-                          obscureText: _obscureNew,
-                          textInputAction: TextInputAction.next,
-                          autofillHints: const [AutofillHints.newPassword],
-                          label: l10n.changePasswordNewLabel,
-                          prefixIcon: Icons.lock_reset_outlined,
-                          suffixIcon: IconButton(
-                            tooltip: _obscureNew
-                                ? l10n.loginShowPassword
-                                : l10n.loginHidePassword,
-                            icon: Icon(
-                              _obscureNew
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                            ),
-                            onPressed: () =>
-                                setState(() => _obscureNew = !_obscureNew),
+                // Formulário FLAT: campos directos sobre o fundo da página
+                // (mesmo tratamento das sheets) — sem cartão a envolver.
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppTextField(
+                        controller: _newController,
+                        obscureText: _obscureNew,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.newPassword],
+                        label: l10n.changePasswordNewLabel,
+                        prefixIcon: Icons.lock_reset_outlined,
+                        suffixIcon: IconButton(
+                          tooltip: _obscureNew
+                              ? l10n.loginShowPassword
+                              : l10n.loginHidePassword,
+                          icon: Icon(
+                            _obscureNew
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                           ),
-                          validator: (value) {
-                            final issue = passwordIssue(
-                              value ?? '',
-                              requireStrong: true,
-                            );
-                            return switch (issue) {
-                              PasswordIssue.tooShort => l10n.loginPasswordError,
-                              PasswordIssue.weak => l10n.loginWeakPasswordError,
-                              null => null,
-                            };
-                          },
+                          onPressed: () =>
+                              setState(() => _obscureNew = !_obscureNew),
                         ),
-                        const SizedBox(height: 16),
-                        AppTextField(
-                          controller: _confirmController,
-                          obscureText: _obscureConfirm,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => _submit(),
-                          autofillHints: const [AutofillHints.newPassword],
-                          label: l10n.changePasswordConfirmLabel,
-                          prefixIcon: Icons.lock_outline,
-                          suffixIcon: IconButton(
-                            tooltip: _obscureConfirm
-                                ? l10n.loginShowPassword
-                                : l10n.loginHidePassword,
-                            icon: Icon(
-                              _obscureConfirm
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                            ),
-                            onPressed: () => setState(
-                              () => _obscureConfirm = !_obscureConfirm,
-                            ),
+                        validator: (value) {
+                          final issue = passwordIssue(
+                            value ?? '',
+                            requireStrong: true,
+                          );
+                          return switch (issue) {
+                            PasswordIssue.tooShort => l10n.loginPasswordError,
+                            PasswordIssue.weak => l10n.loginWeakPasswordError,
+                            null => null,
+                          };
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      AppTextField(
+                        controller: _confirmController,
+                        obscureText: _obscureConfirm,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _submit(),
+                        autofillHints: const [AutofillHints.newPassword],
+                        label: l10n.changePasswordConfirmLabel,
+                        prefixIcon: Icons.lock_outline,
+                        suffixIcon: IconButton(
+                          tooltip: _obscureConfirm
+                              ? l10n.loginShowPassword
+                              : l10n.loginHidePassword,
+                          icon: Icon(
+                            _obscureConfirm
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
                           ),
-                          validator: (value) {
-                            if (value != _newController.text) {
-                              return l10n.loginConfirmError;
-                            }
-                            return null;
-                          },
+                          onPressed: () => setState(
+                            () => _obscureConfirm = !_obscureConfirm,
+                          ),
                         ),
-                        const SizedBox(height: 24),
-                        AppButton.primary(
-                          onPressed: _isSubmitting ? null : _submit,
-                          icon: _isSubmitting
-                              ? SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: scheme.onPrimary,
-                                  ),
-                                )
-                              : null,
-                          label: l10n.setNewPasswordSubmit,
-                        ),
-                      ],
-                    ),
+                        validator: (value) {
+                          if (value != _newController.text) {
+                            return l10n.loginConfirmError;
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      AppButton.primary(
+                        onPressed: _isSubmitting ? null : _submit,
+                        icon: _isSubmitting
+                            ? SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: scheme.onPrimary,
+                                ),
+                              )
+                            : null,
+                        label: l10n.setNewPasswordSubmit,
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
