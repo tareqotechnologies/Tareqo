@@ -3,6 +3,11 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.7.1+39] — 2026-11-24
+
+### Corrigido
+- Abertura por deep link de autenticação (`tareqo://callback`) deixa de mostrar "Rota não encontrada"; o callback é processado normalmente.
+
 ## [2.7.0+38] — 2026-11-24
 
 ### Adicionado

@@ -41,6 +41,14 @@ class TareqoApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const AuthGate(),
+      // Cold start por deep link (ex.: `tareqo://callback?code=…`): o Flutter
+      // passa a URI completa como rota inicial. Sem isto, o Navigator tenta
+      // resolver `tareqo://callback?code=…` como rota nomeada e mostra
+      // "Rota não encontrada". Ignoramos a rota inicial e deixamos o
+      // [DeepLinkHandler] tratar o link (cold start + warm start).
+      onGenerateInitialRoutes: (initialRoute) => <Route<dynamic>>[
+        MaterialPageRoute<dynamic>(builder: (_) => const AuthGate()),
+      ],
       // U-09: rotas nomeadas para telas empurradas (Menu/Dashboard/
       // Marketplace/Suporte/…). As secções do shell continuam em
       // IndexedStack via `goTo(AppSection)` — sem rota.
