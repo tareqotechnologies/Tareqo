@@ -1166,6 +1166,58 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productsSectionStatus => 'Status';
 
   @override
+  String get productsSectionBarcodes => 'Códigos de embalagem';
+
+  @override
+  String get productsBarcodesHint =>
+      'Caixa, fardo ou pacote. O stock continua a ser descontado em unidades.';
+
+  @override
+  String get productsBarcodesAdd => 'Adicionar embalagem';
+
+  @override
+  String get productsBarcodesEmpty =>
+      'Nenhuma embalagem cadastrada. O código principal continua a valer como unidade.';
+
+  @override
+  String get productsBarcodeDialogAdd => 'Nova embalagem';
+
+  @override
+  String get productsBarcodeDialogEdit => 'Editar embalagem';
+
+  @override
+  String get productsBarcodeFactorLabel => 'Unidades por embalagem';
+
+  @override
+  String get productsBarcodeFactorHint =>
+      'Ex.: 30 para uma caixa, 180 para um fardo.';
+
+  @override
+  String get productsBarcodeDescriptionHint => 'Ex.: Caixa 30 un';
+
+  @override
+  String get productsBarcodeCodeError => 'Informe o código de barras.';
+
+  @override
+  String get productsBarcodeFactorError =>
+      'Use um número inteiro maior que zero.';
+
+  @override
+  String get productsBarcodeDuplicate =>
+      'Este código já está cadastrado para o produto.';
+
+  @override
+  String get productsBarcodeDelete => 'Remover embalagem';
+
+  @override
+  String get productsBarcodesLoadError =>
+      'Não foi possível carregar as embalagens.';
+
+  @override
+  String get productsEditSavedBarcodesError =>
+      'Produto atualizado, mas não foi possível guardar as embalagens.';
+
+  @override
   String get productsPhotoTake => 'Tirar fotografia';
 
   @override

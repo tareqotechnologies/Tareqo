@@ -2122,6 +2122,96 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get productsSectionStatus;
 
+  /// No description provided for @productsSectionBarcodes.
+  ///
+  /// In pt, this message translates to:
+  /// **'Códigos de embalagem'**
+  String get productsSectionBarcodes;
+
+  /// No description provided for @productsBarcodesHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Caixa, fardo ou pacote. O stock continua a ser descontado em unidades.'**
+  String get productsBarcodesHint;
+
+  /// No description provided for @productsBarcodesAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar embalagem'**
+  String get productsBarcodesAdd;
+
+  /// No description provided for @productsBarcodesEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma embalagem cadastrada. O código principal continua a valer como unidade.'**
+  String get productsBarcodesEmpty;
+
+  /// No description provided for @productsBarcodeDialogAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova embalagem'**
+  String get productsBarcodeDialogAdd;
+
+  /// No description provided for @productsBarcodeDialogEdit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar embalagem'**
+  String get productsBarcodeDialogEdit;
+
+  /// No description provided for @productsBarcodeFactorLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Unidades por embalagem'**
+  String get productsBarcodeFactorLabel;
+
+  /// No description provided for @productsBarcodeFactorHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: 30 para uma caixa, 180 para um fardo.'**
+  String get productsBarcodeFactorHint;
+
+  /// No description provided for @productsBarcodeDescriptionHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex.: Caixa 30 un'**
+  String get productsBarcodeDescriptionHint;
+
+  /// No description provided for @productsBarcodeCodeError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o código de barras.'**
+  String get productsBarcodeCodeError;
+
+  /// No description provided for @productsBarcodeFactorError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Use um número inteiro maior que zero.'**
+  String get productsBarcodeFactorError;
+
+  /// No description provided for @productsBarcodeDuplicate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este código já está cadastrado para o produto.'**
+  String get productsBarcodeDuplicate;
+
+  /// No description provided for @productsBarcodeDelete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover embalagem'**
+  String get productsBarcodeDelete;
+
+  /// No description provided for @productsBarcodesLoadError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar as embalagens.'**
+  String get productsBarcodesLoadError;
+
+  /// No description provided for @productsEditSavedBarcodesError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto atualizado, mas não foi possível guardar as embalagens.'**
+  String get productsEditSavedBarcodesError;
+
   /// No description provided for @productsPhotoTake.
   ///
   /// In pt, this message translates to:

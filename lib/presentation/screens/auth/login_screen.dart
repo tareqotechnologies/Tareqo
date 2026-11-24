@@ -545,7 +545,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       onSubmitted: onSubmitted,
-      scrollPadding: const EdgeInsets.only(bottom: 120),
+      scrollPadding: const EdgeInsets.only(
+        bottom: AppSpacing.keyboardScrollClearance,
+      ),
       // Texto digitado = bodyLarge (16) — o mesmo do corpo dos formulários.
       style: AppTypography.bodyLarge.copyWith(color: palette.textPrimary),
       cursorColor: palette.accent,

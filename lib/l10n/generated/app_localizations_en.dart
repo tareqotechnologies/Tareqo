@@ -1151,6 +1151,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productsSectionStatus => 'Status';
 
   @override
+  String get productsSectionBarcodes => 'Packaging barcodes';
+
+  @override
+  String get productsBarcodesHint =>
+      'Case, bundle or pack. Stock is always deducted in units.';
+
+  @override
+  String get productsBarcodesAdd => 'Add packaging';
+
+  @override
+  String get productsBarcodesEmpty =>
+      'No packaging codes yet. The main barcode still counts as one unit.';
+
+  @override
+  String get productsBarcodeDialogAdd => 'New packaging';
+
+  @override
+  String get productsBarcodeDialogEdit => 'Edit packaging';
+
+  @override
+  String get productsBarcodeFactorLabel => 'Units per package';
+
+  @override
+  String get productsBarcodeFactorHint =>
+      'e.g. 30 for a case, 180 for a bundle.';
+
+  @override
+  String get productsBarcodeDescriptionHint => 'e.g. Case of 30';
+
+  @override
+  String get productsBarcodeCodeError => 'Enter the barcode.';
+
+  @override
+  String get productsBarcodeFactorError =>
+      'Use a whole number greater than zero.';
+
+  @override
+  String get productsBarcodeDuplicate =>
+      'This code is already registered for the product.';
+
+  @override
+  String get productsBarcodeDelete => 'Remove packaging';
+
+  @override
+  String get productsBarcodesLoadError => 'Could not load packaging codes.';
+
+  @override
+  String get productsEditSavedBarcodesError =>
+      'Product updated, but the packaging codes could not be saved.';
+
+  @override
   String get productsPhotoTake => 'Take photo';
 
   @override

@@ -21,6 +21,8 @@ import '../../data/datasources/local/debt_local_data_source.dart';
 import '../../data/datasources/local/debt_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/financial_transaction_local_data_source.dart';
 import '../../data/datasources/local/financial_transaction_sqlite_data_source_impl.dart';
+import '../../data/datasources/local/product_barcode_local_data_source.dart';
+import '../../data/datasources/local/product_barcode_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/product_local_data_source.dart';
 import '../../data/datasources/local/product_sqlite_data_source_impl.dart';
 import '../../data/datasources/local/production_local_data_source.dart';
@@ -85,6 +87,9 @@ abstract final class AppDatabase {
       ..registerLazySingleton<IUnitOfWork>(() => SqliteUnitOfWork(db))
       ..registerLazySingleton<ProductLocalDataSource>(
         () => ProductSqliteDataSourceImpl(db),
+      )
+      ..registerLazySingleton<ProductBarcodeLocalDataSource>(
+        () => ProductBarcodeSqliteDataSourceImpl(db),
       )
       ..registerLazySingleton<SaleLocalDataSource>(
         () => SaleSqliteDataSourceImpl(db),
@@ -154,7 +159,7 @@ abstract final class AppDatabase {
   static void initialize(Database db) => _migrate(db);
 
   /// Versão atual do schema (`PRAGMA user_version`).
-  static const int currentSchemaVersion = 10;
+  static const int currentSchemaVersion = 11;
 
   /// Migrações versionadas, em ordem crescente de versão.
   ///
@@ -212,6 +217,11 @@ abstract final class AppDatabase {
       version: 10,
       description: 'categorização do produto — products.category',
       up: _schemaV10,
+    ),
+    const _Migration(
+      version: 11,
+      description: 'múltiplos códigos de barras/embalagens — product_barcodes',
+      up: _schemaV11,
     ),
   ];
 
@@ -1050,6 +1060,72 @@ CREATE INDEX IF NOT EXISTS idx_production_order_items_order
     if (!names.contains('category')) {
       db.execute('ALTER TABLE products ADD COLUMN category TEXT');
     }
+  }
+
+  /// v11 — Múltiplos códigos de barras/embalagens por produto.
+  ///
+  /// Tabela ADITIVA: `products.barcode` continua a ser o código principal
+  /// legado e o fallback do POS. O fator é guardado em UNIDADES da
+  /// embalagem (1 = unidade, 30 = caixa, 180 = fardo) e convertido para
+  /// milésimos apenas no momento da leitura — o stock e as vendas continuam
+  /// a trabalhar na menor unidade.
+  ///
+  /// A FK composta `(product_id, store_id)` impede ligar um código de uma
+  /// loja a um produto de outra. O índice em `products(id, store_id)` é
+  /// necessário para essa FK (o `id` já é PK e continua único).
+  static void _schemaV11(Database db) {
+    db.execute(
+      'CREATE UNIQUE INDEX IF NOT EXISTS uq_products_id_store '
+      'ON products (id, store_id)',
+    );
+    db.execute('''
+CREATE TABLE IF NOT EXISTS product_barcodes (
+ id TEXT PRIMARY KEY,
+ store_id TEXT NOT NULL DEFAULT 'st1',
+ product_id TEXT NOT NULL,
+ barcode TEXT NOT NULL,
+ qty_factor INTEGER NOT NULL DEFAULT 1
+   CHECK (qty_factor > 0 AND qty_factor <= 1000000),
+ description TEXT NOT NULL DEFAULT '',
+ is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+ created_at INTEGER NOT NULL,
+ updated_at INTEGER,
+ UNIQUE (store_id, barcode),
+ FOREIGN KEY (product_id, store_id)
+   REFERENCES products (id, store_id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_product_barcodes_product
+ ON product_barcodes (store_id, product_id);
+''');
+
+    // Backfill do código principal legado como fator 1. Em caso de
+    // duplicados legados, preserva um por (loja, barcode); os restantes
+    // continuam a resolver pelo fallback `products.barcode`.
+    db.execute('''
+INSERT OR IGNORE INTO product_barcodes (
+ id, store_id, product_id, barcode, qty_factor,
+ description, is_active, created_at
+)
+SELECT
+ 'pb_' || lower(hex(randomblob(16))),
+ p.store_id,
+ p.id,
+ trim(p.barcode),
+ 1,
+ 'Código principal (legado)',
+ p.is_active,
+ CAST(strftime('%s', 'now') AS INTEGER) * 1000
+FROM products p
+WHERE p.barcode IS NOT NULL
+ AND trim(p.barcode) <> ''
+ AND p.id = (
+   SELECT p2.id FROM products p2
+   WHERE p2.store_id = p.store_id
+     AND trim(p2.barcode) = trim(p.barcode)
+   ORDER BY p2.id
+   LIMIT 1
+ );
+''');
   }
 
   /// v5 — Gestão de funcionários (add-on `ao_employee_mgmt`).

@@ -141,10 +141,7 @@ class _CashClosingSheetState extends ConsumerState<CashClosingSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SheetHeader(
-              title: l10n.cashClosingTitle,
-              showBottomBorder: false,
-            ),
+            SheetHeader(title: l10n.cashClosingTitle, showBottomBorder: false),
             summaryAsync.when(
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.huge),

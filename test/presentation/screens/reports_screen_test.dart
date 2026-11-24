@@ -164,10 +164,11 @@ void main() {
     await tester.pumpWidget(_buildApp(_FakeGetSalesReportUseCase(_report())));
     await tester.pumpAndSettle();
 
-    // KPIs do relatório.
-    expect(find.text('Receita'), findsOneWidget);
+    // KPIs do relatório + cartão de comparação (repete os rótulos).
+    expect(find.text('Comparação com o período anterior'), findsOneWidget);
+    expect(find.text('Receita'), findsNWidgets(2));
     expect(find.text('R\$ 54,00'), findsAtLeastNWidgets(1));
-    expect(find.text('Lucro bruto'), findsOneWidget);
+    expect(find.text('Lucro bruto'), findsNWidgets(2));
     expect(find.text('R\$ 18,00'), findsOneWidget);
     expect(find.text('Margem'), findsOneWidget);
     expect(find.text('33.3%'), findsOneWidget);
@@ -186,6 +187,9 @@ void main() {
     // é o rótulo do período (SegmentedButton) — usa findsWidgets; a linha
     // diária agora é "Ontem · <dia>" (leitura comparativa da série).
     expect(find.text('Hoje'), findsWidgets);
+    // O cartão de comparação empurrou a série para fora do viewport lazy.
+    await tester.drag(find.byType(ListView), const Offset(0, -400));
+    await tester.pumpAndSettle();
     expect(find.textContaining('Ontem · '), findsOneWidget);
     expect(find.text('R\$ 20,00'), findsOneWidget);
     expect(find.text('R\$ 34,00'), findsOneWidget);
@@ -339,9 +343,9 @@ void main() {
     await tester.pumpWidget(_buildApp(_FakeGetSalesReportUseCase(_report())));
     await tester.pumpAndSettle();
 
-    // Retrato: os três KPIs e o seletor de período visíveis.
-    expect(find.text('Receita'), findsOneWidget);
-    expect(find.text('Lucro bruto'), findsOneWidget);
+    // Retrato: os três KPIs (+ comparação) e o seletor visíveis.
+    expect(find.text('Receita'), findsNWidgets(2));
+    expect(find.text('Lucro bruto'), findsNWidgets(2));
     expect(find.text('Margem'), findsOneWidget);
     expect(find.byType(SegmentedButton<ReportPeriod>), findsOneWidget);
     expect(find.text('Este mês'), findsOneWidget);
@@ -352,8 +356,8 @@ void main() {
 
     // Sem overflow; KPIs e seletor seguem presentes após o giro.
     expect(tester.takeException(), isNull);
-    expect(find.text('Receita'), findsOneWidget);
-    expect(find.text('Lucro bruto'), findsOneWidget);
+    expect(find.text('Receita'), findsNWidgets(2));
+    expect(find.text('Lucro bruto'), findsNWidgets(2));
     expect(find.text('R\$ 54,00'), findsOneWidget);
     expect(find.byType(SegmentedButton<ReportPeriod>), findsOneWidget);
 

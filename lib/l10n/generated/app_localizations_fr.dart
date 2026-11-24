@@ -1166,6 +1166,58 @@ class AppLocalizationsFr extends AppLocalizations {
   String get productsSectionStatus => 'Statut';
 
   @override
+  String get productsSectionBarcodes => 'Codes d\'emballage';
+
+  @override
+  String get productsBarcodesHint =>
+      'Carton, lot ou paquet. Le stock est toujours déduit en unités.';
+
+  @override
+  String get productsBarcodesAdd => 'Ajouter un emballage';
+
+  @override
+  String get productsBarcodesEmpty =>
+      'Aucun code d\'emballage. Le code principal compte toujours comme une unité.';
+
+  @override
+  String get productsBarcodeDialogAdd => 'Nouvel emballage';
+
+  @override
+  String get productsBarcodeDialogEdit => 'Modifier l\'emballage';
+
+  @override
+  String get productsBarcodeFactorLabel => 'Unités par emballage';
+
+  @override
+  String get productsBarcodeFactorHint =>
+      'Ex. : 30 pour un carton, 180 pour un lot.';
+
+  @override
+  String get productsBarcodeDescriptionHint => 'Ex. : Carton de 30';
+
+  @override
+  String get productsBarcodeCodeError => 'Saisissez le code-barres.';
+
+  @override
+  String get productsBarcodeFactorError =>
+      'Utilisez un nombre entier supérieur à zéro.';
+
+  @override
+  String get productsBarcodeDuplicate =>
+      'Ce code est déjà enregistré pour le produit.';
+
+  @override
+  String get productsBarcodeDelete => 'Retirer l\'emballage';
+
+  @override
+  String get productsBarcodesLoadError =>
+      'Impossible de charger les codes d\'emballage.';
+
+  @override
+  String get productsEditSavedBarcodesError =>
+      'Produit mis à jour, mais les codes d\'emballage n\'ont pas pu être enregistrés.';
+
+  @override
   String get productsPhotoTake => 'Prendre une photo';
 
   @override

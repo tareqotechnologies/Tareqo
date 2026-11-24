@@ -19,6 +19,7 @@ import '../../../core/utils/product_categories.dart';
 import '../../widgets/product_category_filter.dart';
 import '../../../core/utils/scale_barcode.dart';
 import '../../../domain/entities/product.dart';
+import '../../../domain/entities/product_barcode.dart';
 import '../../../domain/entities/sale.dart';
 import '../../../domain/entities/sale_item.dart';
 import '../../../domain/usecases/process_sale_use_case.dart';
@@ -92,6 +93,24 @@ String _digitsKey(String value) {
   return digits.isEmpty ? '' : ScaleBarcode.lookupKey(digits);
 }
 
+/// Resolve uma embalagem pelo mesmo contrato de normalização do código
+/// principal: igualdade textual sem caixa/espaços e, como segunda passagem,
+/// os dígitos embutidos (QR com URL, zeros à esquerda).
+ProductBarcode? _resolveBarcodeRow(Iterable<ProductBarcode> rows, String raw) {
+  final scannedKey = _codeKey(raw);
+  if (scannedKey.isEmpty) return null;
+  for (final row in rows) {
+    if (row.normalizedCode == scannedKey) return row;
+  }
+
+  final scannedDigits = _digitsKey(raw);
+  if (scannedDigits.isEmpty) return null;
+  for (final row in rows) {
+    if (_digitsKey(row.barcode) == scannedDigits) return row;
+  }
+  return null;
+}
+
 /// Carrinho de nova venda: seleciona produtos, define quantidades
 /// (inteiras ou por peso, com decimais), lê códigos de barras (balanças
 /// etiquetadoras 20PPPPPWWWWW, PLUs e QR/EAN do produto), escolhe a forma de
@@ -119,6 +138,24 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
 
   /// Catálogo por id — evita busca O(n) a cada interação do carrinho.
   Map<String, Product> _productsById = const {};
+
+  /// Loja ativa para carregar os códigos de embalagem.
+  String? get _activeStoreId {
+    final user = ref.read(authStateProvider).value;
+    return user == null ? null : ref.read(activeStoreIdProvider(user.id));
+  }
+
+  /// Carrega os códigos de embalagem sem impedir a venda se a leitura
+  /// falhar: o código principal legado continua a funcionar como fallback.
+  Future<List<ProductBarcode>> _loadBarcodes() async {
+    final storeId = _activeStoreId;
+    if (storeId == null) return const [];
+    try {
+      return await ref.read(productBarcodesProvider(storeId).future);
+    } catch (_) {
+      return const [];
+    }
+  }
 
   // Padrão: M-Pesa (dinheiro móvel dominante em Moçambique).
   PaymentMethod _paymentMethod = PaymentMethod.mPesa;
@@ -339,9 +376,22 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       }
     }
 
-    // 2) Código simples (barcode EAN/UPC/QR, PLU ou id) — adiciona
-    // 1 unidade. Casa também com a chave numérica normalizada.
-    final product = _resolveScannedProduct(products, scanned);
+    // 2) Código simples (barcode EAN/UPC/QR, PLU ou id) — o código
+    // principal legado tem fator 1. Códigos de embalagem (caixa/fardo) vêm
+    // da tabela aditiva e são convertidos para a unidade base ANTES de
+    // entrar no carrinho.
+    var product = _resolveScannedProduct(products, scanned);
+    var qtyFactor = 1;
+    if (product == null) {
+      final rows = (await _loadBarcodes())
+          .where((row) => row.isActive)
+          .toList();
+      final row = _resolveBarcodeRow(rows, scanned);
+      if (row != null) {
+        qtyFactor = row.qtyFactor;
+        product = products.where((p) => p.id == row.productId).firstOrNull;
+      }
+    }
     if (product == null) {
       // Texto de QR sem dígitos (ex.: URL/aviso) não é tentativa de código:
       // sai em silêncio. Um código de balança legítimo cujo PLU não casa com
@@ -351,12 +401,13 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
       return;
     }
     final current = _cart[product.id] ?? 0;
-    if (current >= product.stockQuantity) {
-      setState(() => _barcodeError = l10n.salesStockLimit(product.name));
+    final quantityToAdd = qtyFactor * Quantity.milliFactor;
+    if (current + quantityToAdd > product.stockQuantity) {
+      setState(() => _barcodeError = l10n.salesStockLimit(product!.name));
       return;
     }
     setState(() {
-      _cart[product.id] = current + Quantity.milliFactor;
+      _cart[product!.id] = current + quantityToAdd;
       _barcodeController.clear();
       _barcodeError = null;
     });
@@ -380,10 +431,13 @@ class _NewSaleSheetState extends ConsumerState<NewSaleSheet> {
     // matéria-prima/embalagem (que não são vendidas no balcão).
     final active = (ref.read(productsProvider).value ?? const <Product>[])
         .where((product) => product.isActive && product.type.isSellable);
+    final rows = (await _loadBarcodes()).where((row) => row.isActive).toList();
     // Resolve ANTES de delegar: se o texto não casa com nenhum produto
-    // (nem por id, PLU ou barcode — inclusive QR alfanumérico), é busca por
-    // nome — sai sem tocar nada.
-    final resolves = _resolveScannedProduct(active, scanned) != null;
+    // (nem por id, PLU, barcode legado ou embalagem — inclusive QR
+    // alfanumérico), é busca por nome — sai sem tocar nada.
+    final resolves =
+        _resolveScannedProduct(active, scanned) != null ||
+        _resolveBarcodeRow(rows, scanned) != null;
     if (!resolves) return;
 
     await _handleBarcode(scanned);

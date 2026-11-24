@@ -16,10 +16,12 @@ import '../../../core/utils/money.dart';
 import '../../../core/utils/quantity.dart';
 import '../../../core/utils/product_categories.dart';
 import '../../../domain/entities/product.dart';
+import '../../../domain/entities/product_barcode.dart';
 import '../../../domain/usecases/add_product_use_case.dart';
 import '../../controllers/account_providers.dart';
 import '../../controllers/auth_providers.dart';
 import '../../controllers/products_providers.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/app_picker_field.dart';
 import '../../widgets/app_sheet.dart';
 import '../../widgets/app_text_field.dart';
@@ -687,6 +689,13 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
   // Fase 1: tipo estrutural (pré-preenchido com o tipo atual do produto).
   late ProductType _type = widget.product.type;
 
+  // Códigos de embalagem (caixa/fardo) do produto. A lista ORIGINAL guarda
+  // o que já está persistido para o save calcular o diff (add/update/delete).
+  List<ProductBarcode> _barcodes = const [];
+  List<ProductBarcode> _originalBarcodes = const [];
+  bool _barcodesLoading = true;
+  String? _barcodesError;
+
   // Foto do produto: bytes da foto NOVA escolhida, referência ATUAL
   // persistida e referência de uma foto REMOVIDA (apagada no submit).
   Uint8List? _imageBytes;
@@ -725,6 +734,75 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
     _vendaPorFracao = _product.vendaPorFracao;
     _unitLabel = _product.vendaPorFracao ? _product.unitLabel : 'un';
     _isActive = _product.isActive;
+    _loadBarcodes();
+  }
+
+  Future<void> _loadBarcodes() async {
+    final useCase = ref.read(getProductBarcodesUseCaseProvider);
+    if (useCase == null) {
+      if (mounted) setState(() => _barcodesLoading = false);
+      return;
+    }
+    try {
+      final rows = await useCase(
+        storeId: _product.storeId,
+        productId: _product.id,
+      );
+      if (!mounted) return;
+      setState(() {
+        _barcodes = rows;
+        _originalBarcodes = rows;
+        _barcodesLoading = false;
+        _barcodesError = null;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _barcodesLoading = false;
+        _barcodesError = context.l10n.productsBarcodesLoadError;
+      });
+    }
+  }
+
+  Future<void> _addBarcode() async {
+    final result = await showDialog<ProductBarcode>(
+      context: context,
+      builder: (_) => _ProductBarcodeDialog(
+        existing: _barcodes,
+        primaryBarcode: _product.barcode,
+      ),
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      _barcodes = [
+        ..._barcodes,
+        result.copyWith(storeId: _product.storeId, productId: _product.id),
+      ];
+    });
+  }
+
+  Future<void> _editBarcode(ProductBarcode current) async {
+    final result = await showDialog<ProductBarcode>(
+      context: context,
+      builder: (_) => _ProductBarcodeDialog(
+        existing: _barcodes.where((item) => item.id != current.id).toList(),
+        primaryBarcode: _product.barcode,
+        initial: current,
+      ),
+    );
+    if (result == null || !mounted) return;
+    setState(() {
+      _barcodes = [
+        for (final item in _barcodes)
+          if (item.id == current.id) result else item,
+      ];
+    });
+  }
+
+  void _removeBarcode(ProductBarcode barcode) {
+    setState(() {
+      _barcodes = _barcodes.where((item) => item.id != barcode.id).toList();
+    });
   }
 
   @override
@@ -849,12 +927,40 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
         );
       }
 
+      // 3) Embalagens (caixa/fardo) — o produto já existe, então a FK da
+      // tabela aditiva é válida. Uma falha aqui não desfaz os dados do
+      // produto; avisamos no snackbar para o utilizador tentar de novo.
+      var barcodesFailed = false;
+      final saveBarcodes = ref.read(saveProductBarcodesUseCaseProvider);
+      if (saveBarcodes != null) {
+        try {
+          final saved = await saveBarcodes(
+            productId: _product.id,
+            storeId: _product.storeId,
+            original: _originalBarcodes,
+            desired: _barcodes,
+          );
+          _barcodes = saved;
+          _originalBarcodes = saved;
+          ref.invalidate(productBarcodesProvider(_product.storeId));
+        } catch (error, stackTrace) {
+          barcodesFailed = true;
+          CrashReporting.capture(
+            error,
+            stackTrace,
+            hint: 'Erro ao guardar embalagens do produto',
+          );
+        }
+      }
+
       if (!mounted) return;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            photoFailed
+            barcodesFailed
+                ? l10n.productsEditSavedBarcodesError
+                : photoFailed
                 ? l10n.productsEditSavedNoPhoto
                 : l10n.productsEditSaved,
           ),
@@ -952,6 +1058,16 @@ class _EditProductSheetState extends ConsumerState<EditProductSheet> {
             _unitLabel = value ? 'kg' : 'un';
           }),
           onUnitChanged: (value) => setState(() => _unitLabel = value ?? 'kg'),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        _ProductBarcodesSection(
+          items: _barcodes,
+          isLoading: _barcodesLoading,
+          error: _barcodesError,
+          onAdd: _barcodesLoading ? null : _addBarcode,
+          onEdit: _editBarcode,
+          onDelete: _removeBarcode,
+          onRetry: _loadBarcodes,
         ),
         const SizedBox(height: AppSpacing.md),
         // STATUS — inativo some do PDV e das compras; o estoque é
@@ -1348,6 +1464,284 @@ class ProductWeightFields extends StatelessWidget {
             onChanged: onUnitChanged,
           ),
         ],
+      ],
+    );
+  }
+}
+
+/// Secção de códigos de embalagem na edição do produto.
+///
+/// O código principal (unidade) continua no campo `products.barcode`; esta
+/// lista guarda caixas/fardos/pacotes com o respetivo fator.
+class _ProductBarcodesSection extends StatelessWidget {
+  const _ProductBarcodesSection({
+    required this.items,
+    required this.isLoading,
+    required this.error,
+    required this.onAdd,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onRetry,
+  });
+
+  final List<ProductBarcode> items;
+  final bool isLoading;
+  final String? error;
+  final VoidCallback? onAdd;
+  final ValueChanged<ProductBarcode> onEdit;
+  final ValueChanged<ProductBarcode> onDelete;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final scheme = Theme.of(context).colorScheme;
+
+    return SheetSection(
+      icon: Icons.qr_code_2_outlined,
+      title: l10n.productsSectionBarcodes,
+      children: [
+        Text(
+          l10n.productsBarcodesHint,
+          style: AppTypography.bodySmall.copyWith(
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+        if (isLoading) ...[
+          const SizedBox(height: AppSpacing.sm),
+          const LinearProgressIndicator(),
+        ] else if (error != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  error!,
+                  style: AppTypography.bodySmall.copyWith(color: scheme.error),
+                ),
+              ),
+              TextButton(onPressed: onRetry, child: Text(l10n.commonRetry)),
+            ],
+          ),
+        ] else if (items.isEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            l10n.productsBarcodesEmpty,
+            style: AppTypography.bodySmall.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ] else ...[
+          const SizedBox(height: AppSpacing.xs),
+          for (final item in items)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xs),
+              child: Material(
+                color: scheme.surface.withValues(alpha: 0.35),
+                borderRadius: AppRadius.mdAll,
+                child: InkWell(
+                  borderRadius: AppRadius.mdAll,
+                  onTap: () => onEdit(item),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: AppSizes.iconSm,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                item.description.isEmpty
+                                    ? item.barcode
+                                    : item.description,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.labelLarge.copyWith(
+                                  color: scheme.onSurface,
+                                ),
+                              ),
+                              Text(
+                                '${item.qtyFactor} ${l10n.commonUnits} · '
+                                '${item.barcode}'
+                                '${item.isActive ? '' : ' · ${l10n.productsInactive}'}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: l10n.productsBarcodeDelete,
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () => onDelete(item),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+        const SizedBox(height: AppSpacing.sm),
+        AppButton.secondary(
+          label: l10n.productsBarcodesAdd,
+          icon: const Icon(Icons.add),
+          expanded: true,
+          onPressed: onAdd,
+        ),
+      ],
+    );
+  }
+}
+
+/// Diálogo de criação/edição de uma embalagem.
+///
+/// Devolve uma [ProductBarcode] com id vazio quando é nova; o caso de uso
+/// gera o id no save. O código principal é validado contra duplicados para
+/// não criar ambiguidade no scanner.
+class _ProductBarcodeDialog extends StatefulWidget {
+  const _ProductBarcodeDialog({
+    required this.existing,
+    required this.primaryBarcode,
+    this.initial,
+  });
+
+  final List<ProductBarcode> existing;
+  final String primaryBarcode;
+  final ProductBarcode? initial;
+
+  @override
+  State<_ProductBarcodeDialog> createState() => _ProductBarcodeDialogState();
+}
+
+class _ProductBarcodeDialogState extends State<_ProductBarcodeDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _barcodeController;
+  late final TextEditingController _factorController;
+  late final TextEditingController _descriptionController;
+
+  @override
+  void initState() {
+    super.initState();
+    _barcodeController = TextEditingController(
+      text: widget.initial?.barcode ?? '',
+    );
+    _factorController = TextEditingController(
+      text: widget.initial?.qtyFactor.toString() ?? '1',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.initial?.description ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _barcodeController.dispose();
+    _factorController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
+    Navigator.of(context).pop(
+      ProductBarcode(
+        id: widget.initial?.id ?? '',
+        storeId: widget.initial?.storeId ?? '',
+        productId: widget.initial?.productId ?? '',
+        barcode: _barcodeController.text.trim(),
+        qtyFactor: int.parse(_factorController.text.trim()),
+        description: _descriptionController.text.trim(),
+        isActive: widget.initial?.isActive ?? true,
+      ),
+    );
+  }
+
+  String _normalize(String value) =>
+      value.replaceAll(RegExp(r'\s+'), '').toLowerCase();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final isEditing = widget.initial != null;
+    return AlertDialog(
+      title: Text(
+        isEditing
+            ? l10n.productsBarcodeDialogEdit
+            : l10n.productsBarcodeDialogAdd,
+      ),
+      content: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppTextField(
+                controller: _barcodeController,
+                label: l10n.productsBarcodeLabel,
+                helperText: l10n.productsBarcodeHint,
+                prefixIcon: Icons.qr_code,
+                validator: (value) {
+                  final code = value?.trim() ?? '';
+                  if (code.isEmpty) return l10n.productsBarcodeCodeError;
+                  if (code.length > 512) return l10n.productsBarcodeError;
+                  final key = _normalize(code);
+                  final duplicate = widget.existing.any(
+                    (item) => item.normalizedCode == key,
+                  );
+                  final collidesWithPrimary =
+                      widget.primaryBarcode.isNotEmpty &&
+                      _normalize(widget.primaryBarcode) == key &&
+                      widget.initial?.normalizedCode != key;
+                  return duplicate || collidesWithPrimary
+                      ? l10n.productsBarcodeDuplicate
+                      : null;
+                },
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppTextField(
+                controller: _factorController,
+                keyboardType: TextInputType.number,
+                label: l10n.productsBarcodeFactorLabel,
+                helperText: l10n.productsBarcodeFactorHint,
+                prefixIcon: Icons.numbers,
+                validator: (value) {
+                  final factor = int.tryParse(value?.trim() ?? '');
+                  return factor == null || factor <= 0 || factor > 1000000
+                      ? l10n.productsBarcodeFactorError
+                      : null;
+                },
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppTextField(
+                controller: _descriptionController,
+                label: l10n.productsDescriptionLabel,
+                helperText: l10n.productsBarcodeDescriptionHint,
+                prefixIcon: Icons.notes_outlined,
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.commonCancel),
+        ),
+        AppButton.primary(label: l10n.commonSave, onPressed: _submit),
       ],
     );
   }

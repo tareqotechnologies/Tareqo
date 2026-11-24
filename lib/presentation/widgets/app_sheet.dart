@@ -370,9 +370,7 @@ class SheetHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         border: showBottomBorder
-            ? Border(
-                bottom: BorderSide(color: PremiumDecor.hairline(scheme)),
-              )
+            ? Border(bottom: BorderSide(color: PremiumDecor.hairline(scheme)))
             : null,
       ),
       child: Row(

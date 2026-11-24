@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/di/service_locator.dart';
 import '../../domain/entities/product.dart';
+import '../../domain/entities/product_barcode.dart';
 import '../../domain/repositories/i_product_image_store.dart';
 import '../../domain/usecases/add_product_use_case.dart';
 import '../../domain/usecases/get_products_use_case.dart';
+import '../../domain/usecases/product_barcode_use_cases.dart';
 import '../../domain/usecases/update_product_use_case.dart';
 import 'account_providers.dart';
 import 'auth_providers.dart';
@@ -23,6 +25,31 @@ final addProductUseCaseProvider = Provider<AddProductUseCase>(
 final updateProductUseCaseProvider = Provider<UpdateProductUseCase>(
   (ref) => ServiceLocator.instance<UpdateProductUseCase>(),
 );
+
+/// Casos de uso de embalagens. Nullable para testes que montam o PDV sem
+/// inicializar o ServiceLocator (fallback: sem códigos adicionais).
+final getProductBarcodesUseCaseProvider = Provider<GetProductBarcodesUseCase?>(
+  (ref) => ServiceLocator.instance.isRegistered<GetProductBarcodesUseCase>()
+      ? ServiceLocator.instance<GetProductBarcodesUseCase>()
+      : null,
+);
+
+final saveProductBarcodesUseCaseProvider =
+    Provider<SaveProductBarcodesUseCase?>(
+      (ref) =>
+          ServiceLocator.instance.isRegistered<SaveProductBarcodesUseCase>()
+          ? ServiceLocator.instance<SaveProductBarcodesUseCase>()
+          : null,
+    );
+
+/// Códigos de barras/embalagens da loja — usado pelo PDV para resolver
+/// caixa/fardo sem carregar produtos diferentes.
+final productBarcodesProvider =
+    FutureProvider.family<List<ProductBarcode>, String>((ref, storeId) async {
+      final useCase = ref.watch(getProductBarcodesUseCaseProvider);
+      if (useCase == null) return const [];
+      return useCase(storeId: storeId);
+    });
 
 /// Ponte para o armazenamento de FOTOS de produto (Supabase Storage no
 /// SaaS, arquivo local no SQLite, no-op na memória/web). As sheets de

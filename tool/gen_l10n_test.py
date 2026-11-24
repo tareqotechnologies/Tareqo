@@ -8,13 +8,25 @@ Para cada locale (pt/en/fr) emite:
 
 O teste compara os valores com os ARBs lidos em RUNTIME (dart:io), então o
 teste continua válido quando as traduções mudam sem regeneração.
+
+O ficheiro é formatado com `dart format` no fim; o executável `dart` tem de
+estar no PATH (o mesmo requisito dos comandos Flutter do projeto).
 """
 import json
 import re
+import shutil
+import subprocess
 import sys
 
 SRC = 'lib/l10n/generated/app_localizations.dart'
 OUT = 'test/l10n/app_localizations_sweep_test.dart'
+
+DART = shutil.which('dart')
+if DART is None:
+    sys.exit(
+        '`dart` não encontrado no PATH; adicione o SDK do Flutter ao PATH '
+        'antes de gerar o teste l10n.'
+    )
 
 src = open(SRC, encoding='utf-8').read()
 abstract = re.search(
@@ -207,4 +219,5 @@ for suffix, loc in LOCALES:
 
 P('}\n')
 w.close()
+subprocess.run([DART, 'format', OUT], check=True)
 print('written', OUT)

@@ -3,6 +3,17 @@
 Todas as mudanças relevantes do TAREQO ERP são registradas aqui.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) — SemVer desde o 1.1.0 (o 1.0.0+1 foi o primeiro release distribuído).
 
+## [2.7.0+38] — 2026-11-24
+
+### Adicionado
+- Múltiplos códigos de barras por produto (caixa, pacote, fardo), com factor de conversão para a unidade base.
+- Leitura do código da embalagem no PDV, com conversão da quantidade e validação do stock disponível.
+- Gestão de embalagens na edição do produto: código, factor, descrição e estado activo.
+- Migração SQLite v11 com backfill do código legado e migração Supabase `product_barcodes` (PARTE 39).
+
+### Notas
+- `products.barcode` mantém-se como código principal; o stock continua registado na menor unidade.
+
 ## [2.6.6+37] — 2026-11-17
 
 ### Melhorado

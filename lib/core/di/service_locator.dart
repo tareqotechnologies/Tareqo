@@ -32,6 +32,8 @@ import '../../data/datasources/local/invoice_local_data_source_impl.dart';
 import '../../data/datasources/local/invoice_notification_local_data_source.dart';
 import '../../data/datasources/local/invoice_notification_local_data_source_impl.dart';
 import '../../data/datasources/remote/supabase_invoice_notification_data_source.dart';
+import '../../data/datasources/local/product_barcode_local_data_source.dart';
+import '../../data/datasources/local/product_barcode_local_data_source_impl.dart';
 import '../../data/datasources/local/product_local_data_source.dart';
 import '../../data/datasources/local/production_local_data_source.dart';
 import '../../data/datasources/local/product_local_data_source_impl.dart';
@@ -61,6 +63,7 @@ import '../../data/datasources/remote/supabase_financial_transaction_data_source
 import '../../data/datasources/remote/supabase_plan_data_source.dart';
 import '../../data/datasources/remote/supabase_plan_request_data_source.dart';
 import '../../data/datasources/remote/supabase_invoice_data_source.dart';
+import '../../data/datasources/remote/supabase_product_barcode_data_source.dart';
 import '../../data/datasources/remote/supabase_product_data_source.dart';
 import '../../data/datasources/remote/supabase_production_data_source.dart';
 import '../../data/datasources/remote/supabase_purchase_data_source.dart';
@@ -86,6 +89,7 @@ import '../../data/repositories/plan_request_repository_impl.dart';
 import '../../data/repositories/invoice_repository_impl.dart';
 import '../../data/repositories/invoice_notification_repository_impl.dart';
 
+import '../../data/repositories/product_barcode_repository_impl.dart';
 import '../../data/repositories/product_repository_impl.dart';
 import '../../data/repositories/production_repository_impl.dart';
 import '../../data/repositories/purchase_repository_impl.dart';
@@ -135,6 +139,7 @@ import '../../domain/repositories/i_plan_repository.dart';
 import '../../domain/repositories/i_plan_request_repository.dart';
 import '../../domain/repositories/i_invoice_repository.dart';
 import '../../domain/repositories/i_invoice_notification_repository.dart';
+import '../../domain/repositories/i_product_barcode_repository.dart';
 import '../../domain/repositories/i_product_repository.dart';
 import '../../domain/repositories/i_production_processor.dart';
 import '../../domain/repositories/i_production_repository.dart';
@@ -193,6 +198,7 @@ import '../../domain/usecases/get_settled_debts_use_case.dart';
 import '../../domain/usecases/get_stores_use_case.dart';
 import '../../domain/usecases/get_stock_lots_use_case.dart';
 import '../../domain/usecases/get_products_use_case.dart';
+import '../../domain/usecases/product_barcode_use_cases.dart';
 import '../../domain/usecases/fifo_stock_use_case.dart';
 import '../../domain/usecases/mark_transaction_as_paid_use_case.dart';
 import '../../domain/usecases/cancel_sale_use_case.dart';
@@ -472,6 +478,9 @@ final class ServiceLocator {
       ..registerLazySingleton<ProductLocalDataSource>(
         () => const ProductSupabaseDataSourceImpl(),
       )
+      ..registerLazySingleton<ProductBarcodeLocalDataSource>(
+        () => const ProductBarcodeSupabaseDataSourceImpl(),
+      )
       // Produção (Fase 2): fichas técnicas e histórico por REST; a ORDEM de
       // produção delega à RPC atómica `process_production`.
       ..registerLazySingleton<ProductionLocalDataSource>(
@@ -654,6 +663,9 @@ final class ServiceLocator {
       ..registerLazySingleton<ProductLocalDataSource>(
         () => ProductLocalDataSourceImpl(),
       )
+      ..registerLazySingleton<ProductBarcodeLocalDataSource>(
+        () => ProductBarcodeLocalDataSourceImpl(),
+      )
       ..registerLazySingleton<SaleLocalDataSource>(
         () => SaleLocalDataSourceImpl(),
       )
@@ -727,6 +739,11 @@ final class ServiceLocator {
     instance
       ..registerLazySingleton<IProductRepository>(
         () => ProductRepositoryImpl(instance<ProductLocalDataSource>()),
+      )
+      ..registerLazySingleton<IProductBarcodeRepository>(
+        () => ProductBarcodeRepositoryImpl(
+          instance<ProductBarcodeLocalDataSource>(),
+        ),
       )
       ..registerLazySingleton<ISaleRepository>(
         () => SaleRepositoryImpl(instance<SaleLocalDataSource>()),
@@ -895,6 +912,12 @@ final class ServiceLocator {
       )
       ..registerLazySingleton<GetProductsUseCase>(
         () => GetProductsUseCase(instance<IProductRepository>()),
+      )
+      ..registerLazySingleton<GetProductBarcodesUseCase>(
+        () => GetProductBarcodesUseCase(instance<IProductBarcodeRepository>()),
+      )
+      ..registerLazySingleton<SaveProductBarcodesUseCase>(
+        () => SaveProductBarcodesUseCase(instance<IProductBarcodeRepository>()),
       )
       ..registerLazySingleton<AddProductUseCase>(
         () => AddProductUseCase(

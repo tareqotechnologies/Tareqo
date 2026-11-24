@@ -140,9 +140,11 @@ void main() {
       expect(find.text('25'), findsOneWidget);
       expect(find.text('Óleo 1L'), findsOneWidget);
       expect(find.textContaining('1,75'), findsOneWidget);
-      // A janela pedida começa no início do mês (período padrão "Este Mês").
+      // Duas janelas: período atual + período anterior da comparação.
       final now = DateTime.now();
-      expect(fake.windows.single.start, DateTime(now.year, now.month));
+      expect(fake.windows, hasLength(2));
+      expect(fake.windows.first.start, DateTime(now.year, now.month));
+      expect(fake.windows.last.start, DateTime(now.year, now.month - 1));
     },
   );
 
@@ -197,9 +199,11 @@ void main() {
       expect(find.text('R\$ 1.500,00'), findsNWidgets(2)); // receita
       expect(find.text('R\$ 450,00'), findsNWidgets(2)); // despesa
       expect(find.text('R\$ 1.050,00'), findsOneWidget); // líquido
-      // A janela pedida começa no início do mês (período padrão "Este Mês").
+      // Duas janelas: período atual + período anterior da comparação.
       final now = DateTime.now();
-      expect(fake.windows.single.start, DateTime(now.year, now.month));
+      expect(fake.windows, hasLength(2));
+      expect(fake.windows.first.start, DateTime(now.year, now.month));
+      expect(fake.windows.last.start, DateTime(now.year, now.month - 1));
     },
   );
 
@@ -293,10 +297,12 @@ void main() {
     await tester.tap(find.text('Hoje').last);
     await tester.pumpAndSettle();
 
-    // A janela "Hoje" tem início no dia corrente (00:00 local).
+    // A troca regista duas janelas: "Hoje" (atual) e ontem (comparação).
     final now = DateTime.now();
-    final todayWindow = fake.windows.last;
-    expect(todayWindow.start, DateTime(now.year, now.month, now.day));
+    final today = DateTime(now.year, now.month, now.day);
+    expect(fake.windows.length, firstCount + 2);
+    expect(fake.windows[fake.windows.length - 2].start, today);
+    expect(fake.windows.last.start, today.subtract(const Duration(days: 1)));
   });
 }
 

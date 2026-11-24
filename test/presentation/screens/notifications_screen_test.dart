@@ -163,7 +163,7 @@ void main() {
 
       expect(find.text('Sem notificações'), findsOneWidget);
       expect(
-        find.text('As notificações de facturas aparecerão aqui.'),
+        find.text('Avisos da conta e da loja aparecerão aqui.'),
         findsOneWidget,
       );
     });

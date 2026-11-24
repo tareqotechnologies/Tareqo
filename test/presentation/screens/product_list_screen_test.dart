@@ -949,8 +949,19 @@ void main() {
         '2.50',
       );
 
-      // O botão "Guardar alterações" fica no rodapé da sheet.
-      await tester.ensureVisible(find.text('Guardar alterações'));
+      // O botão "Guardar alterações" fica no rodapé da sheet; a secção de
+      // embalagens aumentou o conteúdo, então rolamos até ele antes do tap.
+      // O campo de preço ainda tem foco e o Scrollable mantém-no visível;
+      // sem largar o foco, o rodapé volta para fora do ecrã.
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      final sheetScroll = tester.state<ScrollableState>(
+        find.ancestor(
+          of: find.text('Guardar alterações'),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      sheetScroll.position.jumpTo(sheetScroll.position.maxScrollExtent);
       await tester.pumpAndSettle();
       await tester.tap(find.text('Guardar alterações'), warnIfMissed: false);
       await tester.pumpAndSettle();

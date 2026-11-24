@@ -39,6 +39,10 @@ void main() {
       // Dialog de ENTRADA (showInputDialog) — nunca destrutivo: o campo de
       // texto precisa do AlertDialog para o layout das ações.
       'presentation/widgets/input_dialog.dart': 1,
+      // Dialog de ENTRADA de embalagens (código + fator + descrição) na
+      // edição do produto — não destrutivo; três campos não cabem no
+      // showInputDialog de um campo só.
+      'presentation/screens/products/product_form_sheets.dart': 1,
     };
 
     final problems = <String>[];

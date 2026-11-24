@@ -20,10 +20,10 @@ import 'package:tareqo/l10n/generated/app_localizations_en.dart';
 import 'package:tareqo/l10n/generated/app_localizations_fr.dart';
 import 'package:tareqo/l10n/generated/app_localizations_pt.dart';
 
-/// Total de membros do catálogo: 1195 (1059 getters + 136 métodos).
-const int kTotalMembers = 1195;
-const int kTotalGetters = 1059;
-const int kTotalMethods = 136;
+/// Total de membros do catálogo: 1225 (1081 getters + 144 métodos).
+const int kTotalMembers = 1225;
+const int kTotalGetters = 1081;
+const int kTotalMethods = 144;
 const Set<String> kMethodNames = <String>{
   'onboardingPlanDetails',
   'onboardingSuccess',
@@ -60,6 +60,7 @@ const Set<String> kMethodNames = <String>{
   'purchasesRegistered',
   'purchasesProductNotFound',
   'purchasesStockLabel',
+  'reportsComparisonValue',
   'reportsRevenueLabel',
   'financialReceivePendingBody',
   'financialPayPendingBody',
@@ -107,6 +108,13 @@ const Set<String> kMethodNames = <String>{
   'adminGrowthUp',
   'adminGrowthDown',
   'adminInvoiceCancelConfirm',
+  'notificationOutOfStockTitle',
+  'notificationLowStockTitle',
+  'notificationLowStockBody',
+  'notificationExpiryExpiredTitle',
+  'notificationExpiryExpiredBody',
+  'notificationExpirySoonTitle',
+  'notificationExpirySoonBody',
   'notificationSinceDaysAgo',
   'notificationBodyInvoiceGenerated',
   'notificationBodyInvoiceDueSoon',
@@ -542,6 +550,21 @@ void main() {
         'productsSectionPricing': l.productsSectionPricing,
         'productsSectionStock': l.productsSectionStock,
         'productsSectionStatus': l.productsSectionStatus,
+        'productsSectionBarcodes': l.productsSectionBarcodes,
+        'productsBarcodesHint': l.productsBarcodesHint,
+        'productsBarcodesAdd': l.productsBarcodesAdd,
+        'productsBarcodesEmpty': l.productsBarcodesEmpty,
+        'productsBarcodeDialogAdd': l.productsBarcodeDialogAdd,
+        'productsBarcodeDialogEdit': l.productsBarcodeDialogEdit,
+        'productsBarcodeFactorLabel': l.productsBarcodeFactorLabel,
+        'productsBarcodeFactorHint': l.productsBarcodeFactorHint,
+        'productsBarcodeDescriptionHint': l.productsBarcodeDescriptionHint,
+        'productsBarcodeCodeError': l.productsBarcodeCodeError,
+        'productsBarcodeFactorError': l.productsBarcodeFactorError,
+        'productsBarcodeDuplicate': l.productsBarcodeDuplicate,
+        'productsBarcodeDelete': l.productsBarcodeDelete,
+        'productsBarcodesLoadError': l.productsBarcodesLoadError,
+        'productsEditSavedBarcodesError': l.productsEditSavedBarcodesError,
         'productsPhotoTake': l.productsPhotoTake,
         'productsPhotoGallery': l.productsPhotoGallery,
         'productsPhotoRemove': l.productsPhotoRemove,
@@ -602,6 +625,8 @@ void main() {
         'reportsLoadError': l.reportsLoadError,
         'reportsEmptyTitle': l.reportsEmptyTitle,
         'reportsEmptySubtitle': l.reportsEmptySubtitle,
+        'reportsComparisonHeading': l.reportsComparisonHeading,
+        'reportsComparisonNoBaseline': l.reportsComparisonNoBaseline,
         'reportsSalesPerDay': l.reportsSalesPerDay,
         'reportsExport': l.reportsExport,
         'reportsExportCsv': l.reportsExportCsv,
@@ -923,6 +948,11 @@ void main() {
         'notificationNoNotificationsHint': l.notificationNoNotificationsHint,
         'notificationTabAll': l.notificationTabAll,
         'notificationTabUnread': l.notificationTabUnread,
+        'notificationsTabAlerts': l.notificationsTabAlerts,
+        'notificationsNoActiveAlerts': l.notificationsNoActiveAlerts,
+        'notificationsAlertsLoadError': l.notificationsAlertsLoadError,
+        'notificationAlertLabel': l.notificationAlertLabel,
+        'notificationOutOfStockBody': l.notificationOutOfStockBody,
         'notificationTitle': l.notificationTitle,
         'menuNotifications': l.menuNotifications,
         'notificationYesterday': l.notificationYesterday,
@@ -1419,6 +1449,7 @@ void main() {
             (l) => l.purchasesStockLabel(1, 'X'),
             (l) => l.purchasesStockLabel(2, 'X'),
           ],
+          'reportsComparisonValue': [(l) => l.reportsComparisonValue('X', 'X')],
           'reportsRevenueLabel': [(l) => l.reportsRevenueLabel('X')],
           'financialReceivePendingBody': [
             (l) => l.financialReceivePendingBody('X'),
@@ -1539,6 +1570,27 @@ void main() {
           'adminGrowthDown': [(l) => l.adminGrowthDown('X')],
           'adminInvoiceCancelConfirm': [
             (l) => l.adminInvoiceCancelConfirm('X'),
+          ],
+          'notificationOutOfStockTitle': [
+            (l) => l.notificationOutOfStockTitle('X'),
+          ],
+          'notificationLowStockTitle': [
+            (l) => l.notificationLowStockTitle('X'),
+          ],
+          'notificationLowStockBody': [(l) => l.notificationLowStockBody('X')],
+          'notificationExpiryExpiredTitle': [
+            (l) => l.notificationExpiryExpiredTitle('X'),
+          ],
+          'notificationExpiryExpiredBody': [
+            (l) => l.notificationExpiryExpiredBody('X', 'X'),
+          ],
+          'notificationExpirySoonTitle': [
+            (l) => l.notificationExpirySoonTitle('X'),
+          ],
+          'notificationExpirySoonBody': [
+            (l) => l.notificationExpirySoonBody(0, 'X', 'X'),
+            (l) => l.notificationExpirySoonBody(1, 'X', 'X'),
+            (l) => l.notificationExpirySoonBody(2, 'X', 'X'),
           ],
           'notificationSinceDaysAgo': [
             (l) => l.notificationSinceDaysAgo(0),
@@ -2023,6 +2075,21 @@ void main() {
         'productsSectionPricing': l.productsSectionPricing,
         'productsSectionStock': l.productsSectionStock,
         'productsSectionStatus': l.productsSectionStatus,
+        'productsSectionBarcodes': l.productsSectionBarcodes,
+        'productsBarcodesHint': l.productsBarcodesHint,
+        'productsBarcodesAdd': l.productsBarcodesAdd,
+        'productsBarcodesEmpty': l.productsBarcodesEmpty,
+        'productsBarcodeDialogAdd': l.productsBarcodeDialogAdd,
+        'productsBarcodeDialogEdit': l.productsBarcodeDialogEdit,
+        'productsBarcodeFactorLabel': l.productsBarcodeFactorLabel,
+        'productsBarcodeFactorHint': l.productsBarcodeFactorHint,
+        'productsBarcodeDescriptionHint': l.productsBarcodeDescriptionHint,
+        'productsBarcodeCodeError': l.productsBarcodeCodeError,
+        'productsBarcodeFactorError': l.productsBarcodeFactorError,
+        'productsBarcodeDuplicate': l.productsBarcodeDuplicate,
+        'productsBarcodeDelete': l.productsBarcodeDelete,
+        'productsBarcodesLoadError': l.productsBarcodesLoadError,
+        'productsEditSavedBarcodesError': l.productsEditSavedBarcodesError,
         'productsPhotoTake': l.productsPhotoTake,
         'productsPhotoGallery': l.productsPhotoGallery,
         'productsPhotoRemove': l.productsPhotoRemove,
@@ -2083,6 +2150,8 @@ void main() {
         'reportsLoadError': l.reportsLoadError,
         'reportsEmptyTitle': l.reportsEmptyTitle,
         'reportsEmptySubtitle': l.reportsEmptySubtitle,
+        'reportsComparisonHeading': l.reportsComparisonHeading,
+        'reportsComparisonNoBaseline': l.reportsComparisonNoBaseline,
         'reportsSalesPerDay': l.reportsSalesPerDay,
         'reportsExport': l.reportsExport,
         'reportsExportCsv': l.reportsExportCsv,
@@ -2404,6 +2473,11 @@ void main() {
         'notificationNoNotificationsHint': l.notificationNoNotificationsHint,
         'notificationTabAll': l.notificationTabAll,
         'notificationTabUnread': l.notificationTabUnread,
+        'notificationsTabAlerts': l.notificationsTabAlerts,
+        'notificationsNoActiveAlerts': l.notificationsNoActiveAlerts,
+        'notificationsAlertsLoadError': l.notificationsAlertsLoadError,
+        'notificationAlertLabel': l.notificationAlertLabel,
+        'notificationOutOfStockBody': l.notificationOutOfStockBody,
         'notificationTitle': l.notificationTitle,
         'menuNotifications': l.menuNotifications,
         'notificationYesterday': l.notificationYesterday,
@@ -2900,6 +2974,7 @@ void main() {
             (l) => l.purchasesStockLabel(1, 'X'),
             (l) => l.purchasesStockLabel(2, 'X'),
           ],
+          'reportsComparisonValue': [(l) => l.reportsComparisonValue('X', 'X')],
           'reportsRevenueLabel': [(l) => l.reportsRevenueLabel('X')],
           'financialReceivePendingBody': [
             (l) => l.financialReceivePendingBody('X'),
@@ -3020,6 +3095,27 @@ void main() {
           'adminGrowthDown': [(l) => l.adminGrowthDown('X')],
           'adminInvoiceCancelConfirm': [
             (l) => l.adminInvoiceCancelConfirm('X'),
+          ],
+          'notificationOutOfStockTitle': [
+            (l) => l.notificationOutOfStockTitle('X'),
+          ],
+          'notificationLowStockTitle': [
+            (l) => l.notificationLowStockTitle('X'),
+          ],
+          'notificationLowStockBody': [(l) => l.notificationLowStockBody('X')],
+          'notificationExpiryExpiredTitle': [
+            (l) => l.notificationExpiryExpiredTitle('X'),
+          ],
+          'notificationExpiryExpiredBody': [
+            (l) => l.notificationExpiryExpiredBody('X', 'X'),
+          ],
+          'notificationExpirySoonTitle': [
+            (l) => l.notificationExpirySoonTitle('X'),
+          ],
+          'notificationExpirySoonBody': [
+            (l) => l.notificationExpirySoonBody(0, 'X', 'X'),
+            (l) => l.notificationExpirySoonBody(1, 'X', 'X'),
+            (l) => l.notificationExpirySoonBody(2, 'X', 'X'),
           ],
           'notificationSinceDaysAgo': [
             (l) => l.notificationSinceDaysAgo(0),
@@ -3504,6 +3600,21 @@ void main() {
         'productsSectionPricing': l.productsSectionPricing,
         'productsSectionStock': l.productsSectionStock,
         'productsSectionStatus': l.productsSectionStatus,
+        'productsSectionBarcodes': l.productsSectionBarcodes,
+        'productsBarcodesHint': l.productsBarcodesHint,
+        'productsBarcodesAdd': l.productsBarcodesAdd,
+        'productsBarcodesEmpty': l.productsBarcodesEmpty,
+        'productsBarcodeDialogAdd': l.productsBarcodeDialogAdd,
+        'productsBarcodeDialogEdit': l.productsBarcodeDialogEdit,
+        'productsBarcodeFactorLabel': l.productsBarcodeFactorLabel,
+        'productsBarcodeFactorHint': l.productsBarcodeFactorHint,
+        'productsBarcodeDescriptionHint': l.productsBarcodeDescriptionHint,
+        'productsBarcodeCodeError': l.productsBarcodeCodeError,
+        'productsBarcodeFactorError': l.productsBarcodeFactorError,
+        'productsBarcodeDuplicate': l.productsBarcodeDuplicate,
+        'productsBarcodeDelete': l.productsBarcodeDelete,
+        'productsBarcodesLoadError': l.productsBarcodesLoadError,
+        'productsEditSavedBarcodesError': l.productsEditSavedBarcodesError,
         'productsPhotoTake': l.productsPhotoTake,
         'productsPhotoGallery': l.productsPhotoGallery,
         'productsPhotoRemove': l.productsPhotoRemove,
@@ -3564,6 +3675,8 @@ void main() {
         'reportsLoadError': l.reportsLoadError,
         'reportsEmptyTitle': l.reportsEmptyTitle,
         'reportsEmptySubtitle': l.reportsEmptySubtitle,
+        'reportsComparisonHeading': l.reportsComparisonHeading,
+        'reportsComparisonNoBaseline': l.reportsComparisonNoBaseline,
         'reportsSalesPerDay': l.reportsSalesPerDay,
         'reportsExport': l.reportsExport,
         'reportsExportCsv': l.reportsExportCsv,
@@ -3885,6 +3998,11 @@ void main() {
         'notificationNoNotificationsHint': l.notificationNoNotificationsHint,
         'notificationTabAll': l.notificationTabAll,
         'notificationTabUnread': l.notificationTabUnread,
+        'notificationsTabAlerts': l.notificationsTabAlerts,
+        'notificationsNoActiveAlerts': l.notificationsNoActiveAlerts,
+        'notificationsAlertsLoadError': l.notificationsAlertsLoadError,
+        'notificationAlertLabel': l.notificationAlertLabel,
+        'notificationOutOfStockBody': l.notificationOutOfStockBody,
         'notificationTitle': l.notificationTitle,
         'menuNotifications': l.menuNotifications,
         'notificationYesterday': l.notificationYesterday,
@@ -4381,6 +4499,7 @@ void main() {
             (l) => l.purchasesStockLabel(1, 'X'),
             (l) => l.purchasesStockLabel(2, 'X'),
           ],
+          'reportsComparisonValue': [(l) => l.reportsComparisonValue('X', 'X')],
           'reportsRevenueLabel': [(l) => l.reportsRevenueLabel('X')],
           'financialReceivePendingBody': [
             (l) => l.financialReceivePendingBody('X'),
@@ -4501,6 +4620,27 @@ void main() {
           'adminGrowthDown': [(l) => l.adminGrowthDown('X')],
           'adminInvoiceCancelConfirm': [
             (l) => l.adminInvoiceCancelConfirm('X'),
+          ],
+          'notificationOutOfStockTitle': [
+            (l) => l.notificationOutOfStockTitle('X'),
+          ],
+          'notificationLowStockTitle': [
+            (l) => l.notificationLowStockTitle('X'),
+          ],
+          'notificationLowStockBody': [(l) => l.notificationLowStockBody('X')],
+          'notificationExpiryExpiredTitle': [
+            (l) => l.notificationExpiryExpiredTitle('X'),
+          ],
+          'notificationExpiryExpiredBody': [
+            (l) => l.notificationExpiryExpiredBody('X', 'X'),
+          ],
+          'notificationExpirySoonTitle': [
+            (l) => l.notificationExpirySoonTitle('X'),
+          ],
+          'notificationExpirySoonBody': [
+            (l) => l.notificationExpirySoonBody(0, 'X', 'X'),
+            (l) => l.notificationExpirySoonBody(1, 'X', 'X'),
+            (l) => l.notificationExpirySoonBody(2, 'X', 'X'),
           ],
           'notificationSinceDaysAgo': [
             (l) => l.notificationSinceDaysAgo(0),

@@ -43,6 +43,9 @@ abstract final class AppSpacing {
 
   /// Recuo inferior de listas/corpos com FAB sobreposto.
   static const double fabBottomClearance = 96;
+
+  /// Folga de scroll para o campo focado não ficar sob o teclado.
+  static const double keyboardScrollClearance = 120;
 }
 
 /// Raios de canto do design system Signature.
